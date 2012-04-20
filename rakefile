@@ -1,0 +1,349 @@
+# coding: utf-8
+
+ROOT = File.expand_path('.')
+WWW = File.join(ROOT, 'www')
+BLOG = File.join(ROOT, 'blog')
+SUPPORT = File.join(ROOT, 'support')
+TOTALFINDER = File.join(ROOT, 'totalfinder-web')
+TOTALTERMINAL = File.join(ROOT, 'totalterminal-web')
+ASEPSIS = File.join(ROOT, 'asepsis-web')
+VISOR = File.join(ROOT, 'visor')
+FIREQUERY = File.join(ROOT, 'firequery')
+FIRERAINBOW = File.join(ROOT, 'firerainbow')
+FIRELOGGER = File.join(ROOT, 'firelogger')
+DRYDROP = File.join(ROOT, 'drydrop')
+XREFRESH = File.join(ROOT, 'xrefresh')
+HINTS = File.join(ROOT, 'hints')
+RESTATIC = File.join(ROOT, 'restatic-web')
+
+begin
+  require 'term/ansicolor'
+  include Term::ANSIColor
+rescue LoadError
+  raise 'Run "gem install term-ansicolor"'
+end
+
+begin
+  require 'appscript'
+  include Appscript
+rescue LoadError
+  raise 'You must "sudo gem install rb-appscript"'
+end
+
+begin
+  require 'rmagick'
+  include Magick
+rescue LoadError
+  raise 'You must "sudo gem install rmagick"'
+end
+
+def file_color(text); yellow(text); end
+def dir_color(text); blue(text); end
+def cmd_color(text); green(text); end
+
+def sys(cmd)
+    puts blue("> "+cmd)
+    system(cmd)
+end
+
+def run_in_terminal(cmd, title, background=[0,0,0])
+    # see http://www.nach-vorne.de/2007/11/22/terminal-trick
+    # and http://onrails.org/articles/2007/11/28/scripting-the-leopard-terminal
+    # and http://blog.cbciweb.com/articles/2008/05/02/scripting-mac-terminal-using-ruby
+    begin
+      puts yellow("!> #{cmd}")
+      term = app('Terminal')
+      term.activate()
+      current_window = term.windows.first
+      old_tab = current_window.selected_tab.get()
+
+      tab = find_terminal_tab(background)
+      unless tab
+        app("System Events").application_processes["Terminal.app"].keystroke("t", :using => :command_down)
+        tab = current_window.tabs.last
+      end
+      term.do_script(cmd, :in => tab)
+      tab.background_color.set(background)
+      tab.title_displays_custom_title.set(true)
+      tab.custom_title.set(title)
+      current_window.selected_tab.set(old_tab)
+      sleep 0.1
+    rescue
+      die "OSX command failed"
+    end
+end
+
+def find_terminal_tab(color)
+  term = app('Terminal')
+  term.windows.get.each do |win|
+    begin
+      win.tabs.get.each do |tab|
+        return tab if color == tab.background_color.get()
+      end
+    rescue
+    end
+  end
+  nil
+end
+
+################################################################################
+
+$slaves = [BLOG, SUPPORT, WWW, VISOR, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
+$slaves2 = [SUPPORT, VISOR, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS]
+$slaves3 = [BLOG]
+
+desc "run da server"
+task :serve do
+    what = ENV["what"] || "www,blog,totalfinder,totalterminal,asepsis,visor,firequery,firerainbow,firelogger,drydrop,xrefresh,support,hints,restatic"
+    what = what.split(",")
+    
+    run_in_terminal("cd \"#{WWW}\" && jekyll --auto --server 4001 --url http://www.binaryage.org", "www", [0,10000,1]) if what.include?("www")
+    run_in_terminal("cd \"#{BLOG}\" && jekyll --auto --server 4013 --url http://blog.binaryage.org", "blog", [0,10000,2]) if what.include?("blog")
+    run_in_terminal("cd \"#{TOTALFINDER}\" && jekyll --auto --server 4003 --url http://totalfinder.binaryage.org", "totalfinder", [0,10000,3]) if what.include?("totalfinder")
+    run_in_terminal("cd \"#{VISOR}\" && jekyll --auto --server 4004 --url http://visor.binaryage.org", "visor", [0,10000,4]) if what.include?("visor")
+    run_in_terminal("cd \"#{FIREQUERY}\" && jekyll --auto --server 4005 --url http://firequery.binaryage.org", "firequery", [0,10000,5]) if what.include?("firequery")
+    run_in_terminal("cd \"#{FIRERAINBOW}\" && jekyll --auto --server 4006 --url http://firerainbow.binaryage.org", "firerainbow", [0,10000,6]) if what.include?("firerainbow")
+    run_in_terminal("cd \"#{FIRELOGGER}\" && jekyll --auto --server 4007 --url http://firelogger.binaryage.org", "firelogger", [0,10000,7]) if what.include?("firelogger")
+    run_in_terminal("cd \"#{DRYDROP}\" && jekyll --auto --server 4008 --url http://drydrop.binaryage.org", "drydrop", [0,10000,8]) if what.include?("drydrop")
+    run_in_terminal("cd \"#{XREFRESH}\" && jekyll --auto --server 4009 --url http://xrefresh.binaryage.org", "xrefresh", [0,10000,9]) if what.include?("xrefresh")
+    run_in_terminal("cd \"#{SUPPORT}\" && jekyll --auto --server 4010 --url http://support.binaryage.org", "support", [0,10000,10]) if what.include?("support")
+    run_in_terminal("cd \"#{TOTALTERMINAL}\" && jekyll --auto --server 4011 --url http://totalterminal.binaryage.org", "totalterminal", [3,10000,3]) if what.include?("totalterminal")
+    run_in_terminal("cd \"#{ASEPSIS}\" && jekyll --auto --server 4012 --url http://asepsis.binaryage.org", "asepsis", [3,10000,4]) if what.include?("asepsis")
+    run_in_terminal("cd \"#{HINTS}\" && jekyll --auto --server 4002 --url http://hints.binaryage.org", "hints", [3,10000,11]) if what.include?("hints")
+    run_in_terminal("cd \"#{RESTATIC}\" && jekyll --auto --server 4014 --url http://restatic.binaryage.org", "restatic", [3,10000,13]) if what.include?("restatic")
+    
+    run_in_terminal("cd \"#{TOTALFINDER}/shared/css\" && stylus -w site2.styl", "stylus", [10000,10000,3])
+#    run_in_terminal("xrefresh-server", "xrefresh", [10001,10000,3])
+    
+end
+
+desc "optimize png images"
+task :optimize do
+    Dir.glob(File.join(WWW, 'shared', "**", "*.png")) do |file|
+        puts file
+        `optipng −i1 −o7 "#{file}"`
+        break
+    end
+    Dir.glob(File.join(WWW, 'images', "**", "*.png")) do |file|
+        puts file
+        `optipng −i1 −o7 "#{file}"`
+        break
+    end
+end
+
+desc "symbolize layouts and shared"
+task :symbolize do
+    $slaves.each do |path|
+        #next unless path =~ /support/
+        puts path
+        layouts = File.join(path, "_layouts")
+        shared = File.join(path, "shared")
+        sys("rm -rf \"#{layouts}\"")
+        sys("rm -rf \"#{shared}\"")
+        sys("hlink \"#{TOTALFINDER}/_layouts\" \"#{layouts}\"")
+        sys("hlink \"#{TOTALFINDER}/shared\" \"#{shared}\"")
+    end
+end
+
+desc "desymbolize layouts and shared"
+task :desymbolize do
+    $slaves.each do |path|
+        #next unless path =~ /support/
+        puts path
+        layouts = File.join(path, "_layouts")
+        shared = File.join(path, "shared")
+        `rm -rf "#{layouts}"`
+        `rm -rf "#{shared}"`
+        `cp -r "#{TOTALFINDER}/_layouts" "#{path}"`
+        `cp -r "#{TOTALFINDER}/shared" "#{path}"`
+        # Dir.chdir(path) do
+        #     `git submodule update --init`
+        # end
+        # Dir.chdir(layouts) do
+        #     `git checkout master`
+        #     `git pull`
+        # end
+        # Dir.chdir(shared) do
+        #     `git checkout master`
+        #     `git pull`
+        # end
+    end
+end
+
+desc "dojit"
+task :dojit do
+    $slaves2.each do |path|
+        puts path
+        layouts = File.join(path, "_layouts")
+        shared = File.join(path, "shared")
+        # `rm -rf "#{layouts}"`
+        # `rm -rf "#{shared}"`
+        # `cp -r "#{WWW}/_layouts" "#{path}"`
+        # `cp -r "#{WWW}/shared" "#{path}"`
+        # Dir.chdir(layouts) do
+        #     `git checkout master`
+        #     `git pull`
+        # end
+        # Dir.chdir(shared) do
+        #     `git checkout master`
+        #     `git pull`
+        # end
+        Dir.chdir(path) do
+            `touch _force_github_pages_update_the_site`
+            `git add .`
+            `git commit -m "force github pages update the site"`
+            `git push`
+        end
+    end
+end
+
+desc "update layouts and shared"
+task :update do
+    $slaves.each do |path|
+        puts path
+        layouts = File.join(path, "_layouts")
+        shared = File.join(path, "shared")
+        Dir.chdir(layouts) do
+            `git pull`
+            `git checkout master`
+        end
+        Dir.chdir(shared) do
+            `git pull`
+            `git checkout master`
+        end
+        Dir.chdir(path) do
+            `git add .`
+            `git commit -m "play awesomeness"`
+        end
+    end
+end
+
+desc "merge melda"
+task :melda do
+    $slaves.each do |path|
+        puts path
+        Dir.chdir(path) do
+            `git pull melda gh-pages`
+        end
+    end
+end
+
+desc "push slaves"
+task :push do
+    $slaves.each do |path|
+        puts path
+        Dir.chdir(path) do
+            `git push origin`
+        end
+    end
+end
+
+desc "adhoc multiop"
+task :do do
+    $slaves.each do |path|
+        puts path
+        layouts = File.join(path, "_layouts")
+        shared = File.join(path, "shared")
+        Dir.chdir(layouts) do
+            `git pull`
+        end
+        Dir.chdir(shared) do
+            `git pull`
+        end
+        Dir.chdir(path) do
+            `git add .`
+            `git commit -m "meta keywords"`
+        end
+    end
+end
+
+desc "convert pngs to loseless jpgs"
+task :strip do
+    Dir.glob(File.join(WWW, 'shared', "img", "*.png")) do |file|
+        next unless file =~ /body-repeat/
+        puts file
+        image = ImageList.new(file)
+        image.strip!
+        image.write(file) #{ self.quality = 100; }
+    end
+end
+
+desc "convert pngs to loseless jpgs"
+task :print do
+    Dir.glob(File.join(WWW, 'shared', "img", "*.png")) do |file|
+        next unless file =~ /tabs-background/
+        puts file
+        
+        img = Magick::Image::read(file).first
+        puts "   Format: #{img.format}"
+        puts "   Geometry: #{img.columns}x#{img.rows}"
+        puts "   Class: " + case img.class_type
+                                when Magick::DirectClass
+                                    "DirectClass"
+                                when Magick::PseudoClass
+                                    "PseudoClass"
+                            end
+        puts "   Depth: #{img.depth} bits-per-pixel"
+        puts "   Colors: #{img.number_colors}"
+        puts "   Filesize: #{img.filesize}"
+        puts "   Resolution: #{img.x_resolution.to_i}x#{img.y_resolution.to_i} "+
+            "pixels/#{img.units == Magick::PixelsPerInchResolution ?
+            "inch" : "centimeter"}"
+        if img.properties.length > 0
+            puts "   Properties:"
+            img.properties { |name,value|
+                puts %Q|      #{name} = "#{value}"|
+            }
+        end
+    end
+end
+
+desc "convert icons to other formats"
+task :icons do
+    Dir.glob(File.join(WWW, 'shared', "img", "icons", "leechgate-512.png")) do |file|
+        puts file
+        image = ImageList.new(file)
+
+        file64 = file.gsub('512', '64')
+        image64 = image.resize(64, 64)
+        image64.write(file64)
+
+        file128 = file.gsub('512', '128')
+        image128 = image.resize(128, 128)
+        image128.write(file128)
+
+        file256 = file.gsub('512', '256')
+        image256 = image.resize(256, 256)
+        image256.write(file256)
+        
+        file512white = file.gsub('512', '512-white')
+        bg = Image.new(image.columns, image.rows) {
+            self.background_color = "white"
+        }
+        bg = bg.composite(image, CenterGravity, OverCompositeOp)
+        bg.write(file512white)
+
+        file256white = file.gsub('512', '256-white')
+        bg = Image.new(image.columns, image.rows) {
+            self.background_color = "white"
+        }
+        bg = bg.composite(image, CenterGravity, OverCompositeOp)
+        bg = bg.resize(256, 256)
+        bg.write(file256white)
+    end
+end
+
+desc "adhoc design flip"
+task :phase2 do
+    Dir.chdir(TOTALFINDER) do
+        Dir.glob("*2.md") do |file|
+            #puts file
+            x = file[0..-5] + ".md"
+            #puts x
+            sys("mv \"#{file}\" \"#{x}\"")
+        end
+        
+    end
+end
+
+task :default => :serve
