@@ -131,45 +131,6 @@ task :optimize do
     end
 end
 
-desc "symbolize layouts and shared"
-task :symbolize do
-    $slaves.each do |path|
-        #next unless path =~ /support/
-        puts path
-        layouts = File.join(path, "_layouts")
-        shared = File.join(path, "shared")
-        sys("rm -rf \"#{layouts}\"")
-        sys("rm -rf \"#{shared}\"")
-        sys("hlink \"#{TOTALFINDER}/_layouts\" \"#{layouts}\"")
-        sys("hlink \"#{TOTALFINDER}/shared\" \"#{shared}\"")
-    end
-end
-
-desc "desymbolize layouts and shared"
-task :desymbolize do
-    $slaves.each do |path|
-        #next unless path =~ /support/
-        puts path
-        layouts = File.join(path, "_layouts")
-        shared = File.join(path, "shared")
-        `rm -rf "#{layouts}"`
-        `rm -rf "#{shared}"`
-        `cp -r "#{TOTALFINDER}/_layouts" "#{path}"`
-        `cp -r "#{TOTALFINDER}/shared" "#{path}"`
-        # Dir.chdir(path) do
-        #     `git submodule update --init`
-        # end
-        # Dir.chdir(layouts) do
-        #     `git checkout master`
-        #     `git pull`
-        # end
-        # Dir.chdir(shared) do
-        #     `git checkout master`
-        #     `git pull`
-        # end
-    end
-end
-
 desc "dojit"
 task :dojit do
     $slaves2.each do |path|
@@ -214,16 +175,6 @@ task :update do
         Dir.chdir(path) do
             `git add .`
             `git commit -m "play awesomeness"`
-        end
-    end
-end
-
-desc "merge melda"
-task :melda do
-    $slaves.each do |path|
-        puts path
-        Dir.chdir(path) do
-            `git pull melda gh-pages`
         end
     end
 end
@@ -330,19 +281,6 @@ task :icons do
         bg = bg.composite(image, CenterGravity, OverCompositeOp)
         bg = bg.resize(256, 256)
         bg.write(file256white)
-    end
-end
-
-desc "adhoc design flip"
-task :phase2 do
-    Dir.chdir(TOTALFINDER) do
-        Dir.glob("*2.md") do |file|
-            #puts file
-            x = file[0..-5] + ".md"
-            #puts x
-            sys("mv \"#{file}\" \"#{x}\"")
-        end
-        
     end
 end
 
