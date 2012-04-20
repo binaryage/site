@@ -88,9 +88,33 @@ end
 
 ################################################################################
 
-$slaves = [BLOG, SUPPORT, WWW, VISOR, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
-$slaves2 = [SUPPORT, VISOR, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS]
-$slaves3 = [BLOG]
+$master = WWW
+
+$slaves = [BLOG, SUPPORT, VISOR, TOTALFINDER, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
+
+desc "init repositories - needs special care"
+task :init do
+  sys("git submodule update --init")
+  
+  # download _layouts and shared submodule into master repo
+  Dir.chdir($master) do
+    sys("git submodule update --init --recursive")
+  end
+  
+  # for each slave, "symlink" _layouts and shared submodule from master repo
+  $slaves.each do |slave|
+    puts slave
+    Dir.chdir(slave) do
+      sys("git submodule init")
+      #sys("git submodule update --init --recursive")
+    end
+    sys("rm -rf \"#{slave}/_layouts\"")
+    sys("./bin/workdir/git-new-workdir \"#{$master}/_layouts\" \"#{slave}/_layouts\"")
+    break
+  end
+  
+  
+end
 
 desc "run da server"
 task :serve do
@@ -133,7 +157,7 @@ end
 
 desc "dojit"
 task :dojit do
-    $slaves2.each do |path|
+    $slaves.each do |path|
         puts path
         layouts = File.join(path, "_layouts")
         shared = File.join(path, "shared")
