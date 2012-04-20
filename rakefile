@@ -89,7 +89,6 @@ end
 ################################################################################
 
 $master = WWW
-
 $slaves = [BLOG, SUPPORT, VISOR, TOTALFINDER, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 
 desc "init repositories - needs special care"
@@ -98,6 +97,7 @@ task :init do
   
   # download _layouts and shared submodule into master repo
   Dir.chdir($master) do
+    sys("git checkout gh-pages")
     sys("git submodule update --init --recursive")
   end
   
@@ -105,6 +105,7 @@ task :init do
   $slaves.each do |slave|
     puts slave
     Dir.chdir(slave) do
+      sys("git checkout gh-pages")
       sys("git submodule init")
     end
     ["_layouts", "shared"].each do |submodule|
@@ -135,8 +136,6 @@ task :serve do
     run_in_terminal("cd \"#{RESTATIC}\" && jekyll --auto --server 4014 --url http://restatic.binaryage.org", "restatic", [3,10000,13]) if what.include?("restatic")
     
     run_in_terminal("cd \"#{TOTALFINDER}/shared/css\" && stylus -w site2.styl", "stylus", [10000,10000,3])
-#    run_in_terminal("xrefresh-server", "xrefresh", [10001,10000,3])
-    
 end
 
 desc "optimize png images"
