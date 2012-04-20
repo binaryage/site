@@ -106,14 +106,12 @@ task :init do
     puts slave
     Dir.chdir(slave) do
       sys("git submodule init")
-      #sys("git submodule update --init --recursive")
     end
-    sys("rm -rf \"#{slave}/_layouts\"")
-    sys("./bin/workdir/git-new-workdir \"#{$master}/_layouts\" \"#{slave}/_layouts\"")
-    break
+    ["_layouts", "shared"].each do |submodule|
+      sys("rm -rf \"#{slave}/#{submodule}\"")
+      sys("./bin/hlink/hlink \"#{$master}/#{submodule}\" \"#{slave}/#{submodule}\"")
+    end
   end
-  
-  
 end
 
 desc "run da server"
