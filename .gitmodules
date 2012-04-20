@@ -37,3 +37,6 @@
 [submodule "restatic-web"]
 	path = restatic-web
 	url = git@github.com:binaryage/restatic-web.git
+[submodule "visor"]
+	path = visor
+	url = git@github.com:darwin/visor.git
