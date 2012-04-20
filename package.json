@@ -1,0 +1,13 @@
+{
+  "name": "binaryage-site",
+  "version": "0.8.0",
+  "description": "Umbrella project for binaryage subdomains.",
+  "author": "Antonin Hildebrand <antonin@binaryage.com>",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/binaryage/site.git"
+  },
+  "dependencies": {
+    "http-proxy": "~0.8.0"
+  }
+}
