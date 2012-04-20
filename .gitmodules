@@ -1,0 +1,39 @@
+[submodule "www"]
+	path = www
+	url = git@github.com:binaryage/www.git
+[submodule "blog"]
+	path = blog
+	url = git@github.com:binaryage/blog.git
+[submodule "support"]
+	path = support
+	url = git@github.com:binaryage/support.git
+[submodule "totalfinder-web"]
+	path = totalfinder-web
+	url = git@github.com:binaryage/totalfinder-web.git
+[submodule "totalterminal-web"]
+	path = totalterminal-web
+	url = git@github.com:binaryage/totalterminal-web.git
+[submodule "asepsis-web"]
+	path = asepsis-web
+	url = git@github.com:binaryage/asepsis-web.git
+[submodule "firequery"]
+	path = firequery
+	url = git@github.com:darwin/firequery.git
+[submodule "firelogger"]
+	path = firelogger
+	url = git@github.com:darwin/firelogger.git
+[submodule "firerainbow"]
+	path = firerainbow
+	url = git@github.com:darwin/firerainbow.git
+[submodule "drydrop"]
+	path = drydrop
+	url = git@github.com:darwin/drydrop.git
+[submodule "xrefresh"]
+	path = xrefresh
+	url = git@github.com:darwin/xrefresh.git
+[submodule "hints"]
+	path = hints
+	url = git@github.com:binaryage/hints.git
+[submodule "restatic-web"]
+	path = restatic-web
+	url = git@github.com:binaryage/restatic-web.git
