@@ -86,6 +86,11 @@ def find_terminal_tab(color)
   nil
 end
 
+def path_to_subdomain(path)
+  name = (path.split("/"))[-1] # get last component of the path
+  name.split("-")[0] # strips -web postfixes
+end
+
 ################################################################################
 
 $master = WWW
@@ -115,27 +120,39 @@ task :init do
   end
 end
 
+desc "prints info how to setup /etc/hosts"
+task :hosts do
+  puts "add this section into your /etc/hosts:"
+  puts
+  puts "#### binaryage.org test site ####"
+  list = [$master].concat $slaves
+  list.each do |path|
+    puts "127.0.0.1 #{path_to_subdomain(path)}.binaryage.org"
+  end
+  puts "#### binaryage.org test site ####"
+end
+
 desc "run da server"
 task :serve do
-    what = ENV["what"] || "www,blog,totalfinder,totalterminal,asepsis,visor,firequery,firerainbow,firelogger,drydrop,xrefresh,support,hints,restatic"
-    what = what.split(",")
+  what = ENV["what"] || "www,blog,totalfinder,totalterminal,asepsis,visor,firequery,firerainbow,firelogger,drydrop,xrefresh,support,hints,restatic"
+  what = what.split(",")
     
-    run_in_terminal("cd \"#{WWW}\" && jekyll --auto --server 4001 --url http://www.binaryage.org", "www", [0,10000,1]) if what.include?("www")
-    run_in_terminal("cd \"#{BLOG}\" && jekyll --auto --server 4013 --url http://blog.binaryage.org", "blog", [0,10000,2]) if what.include?("blog")
-    run_in_terminal("cd \"#{TOTALFINDER}\" && jekyll --auto --server 4003 --url http://totalfinder.binaryage.org", "totalfinder", [0,10000,3]) if what.include?("totalfinder")
-    run_in_terminal("cd \"#{VISOR}\" && jekyll --auto --server 4004 --url http://visor.binaryage.org", "visor", [0,10000,4]) if what.include?("visor")
-    run_in_terminal("cd \"#{FIREQUERY}\" && jekyll --auto --server 4005 --url http://firequery.binaryage.org", "firequery", [0,10000,5]) if what.include?("firequery")
-    run_in_terminal("cd \"#{FIRERAINBOW}\" && jekyll --auto --server 4006 --url http://firerainbow.binaryage.org", "firerainbow", [0,10000,6]) if what.include?("firerainbow")
-    run_in_terminal("cd \"#{FIRELOGGER}\" && jekyll --auto --server 4007 --url http://firelogger.binaryage.org", "firelogger", [0,10000,7]) if what.include?("firelogger")
-    run_in_terminal("cd \"#{DRYDROP}\" && jekyll --auto --server 4008 --url http://drydrop.binaryage.org", "drydrop", [0,10000,8]) if what.include?("drydrop")
-    run_in_terminal("cd \"#{XREFRESH}\" && jekyll --auto --server 4009 --url http://xrefresh.binaryage.org", "xrefresh", [0,10000,9]) if what.include?("xrefresh")
-    run_in_terminal("cd \"#{SUPPORT}\" && jekyll --auto --server 4010 --url http://support.binaryage.org", "support", [0,10000,10]) if what.include?("support")
-    run_in_terminal("cd \"#{TOTALTERMINAL}\" && jekyll --auto --server 4011 --url http://totalterminal.binaryage.org", "totalterminal", [3,10000,3]) if what.include?("totalterminal")
-    run_in_terminal("cd \"#{ASEPSIS}\" && jekyll --auto --server 4012 --url http://asepsis.binaryage.org", "asepsis", [3,10000,4]) if what.include?("asepsis")
-    run_in_terminal("cd \"#{HINTS}\" && jekyll --auto --server 4002 --url http://hints.binaryage.org", "hints", [3,10000,11]) if what.include?("hints")
-    run_in_terminal("cd \"#{RESTATIC}\" && jekyll --auto --server 4014 --url http://restatic.binaryage.org", "restatic", [3,10000,13]) if what.include?("restatic")
+  run_in_terminal("cd \"#{WWW}\" && jekyll --auto --server 4001 --url http://www.binaryage.org", "www", [0,10000,1]) if what.include?("www")
+  run_in_terminal("cd \"#{BLOG}\" && jekyll --auto --server 4013 --url http://blog.binaryage.org", "blog", [0,10000,2]) if what.include?("blog")
+  run_in_terminal("cd \"#{TOTALFINDER}\" && jekyll --auto --server 4003 --url http://totalfinder.binaryage.org", "totalfinder", [0,10000,3]) if what.include?("totalfinder")
+  run_in_terminal("cd \"#{VISOR}\" && jekyll --auto --server 4004 --url http://visor.binaryage.org", "visor", [0,10000,4]) if what.include?("visor")
+  run_in_terminal("cd \"#{FIREQUERY}\" && jekyll --auto --server 4005 --url http://firequery.binaryage.org", "firequery", [0,10000,5]) if what.include?("firequery")
+  run_in_terminal("cd \"#{FIRERAINBOW}\" && jekyll --auto --server 4006 --url http://firerainbow.binaryage.org", "firerainbow", [0,10000,6]) if what.include?("firerainbow")
+  run_in_terminal("cd \"#{FIRELOGGER}\" && jekyll --auto --server 4007 --url http://firelogger.binaryage.org", "firelogger", [0,10000,7]) if what.include?("firelogger")
+  run_in_terminal("cd \"#{DRYDROP}\" && jekyll --auto --server 4008 --url http://drydrop.binaryage.org", "drydrop", [0,10000,8]) if what.include?("drydrop")
+  run_in_terminal("cd \"#{XREFRESH}\" && jekyll --auto --server 4009 --url http://xrefresh.binaryage.org", "xrefresh", [0,10000,9]) if what.include?("xrefresh")
+  run_in_terminal("cd \"#{SUPPORT}\" && jekyll --auto --server 4010 --url http://support.binaryage.org", "support", [0,10000,10]) if what.include?("support")
+  run_in_terminal("cd \"#{TOTALTERMINAL}\" && jekyll --auto --server 4011 --url http://totalterminal.binaryage.org", "totalterminal", [3,10000,3]) if what.include?("totalterminal")
+  run_in_terminal("cd \"#{ASEPSIS}\" && jekyll --auto --server 4012 --url http://asepsis.binaryage.org", "asepsis", [3,10000,4]) if what.include?("asepsis")
+  run_in_terminal("cd \"#{HINTS}\" && jekyll --auto --server 4002 --url http://hints.binaryage.org", "hints", [3,10000,11]) if what.include?("hints")
+  run_in_terminal("cd \"#{RESTATIC}\" && jekyll --auto --server 4014 --url http://restatic.binaryage.org", "restatic", [3,10000,13]) if what.include?("restatic")
     
-    run_in_terminal("cd \"#{TOTALFINDER}/shared/css\" && stylus -w site2.styl", "stylus", [10000,10000,3])
+  run_in_terminal("cd \"#{TOTALFINDER}/shared/css\" && stylus -w site2.styl", "stylus", [10000,10000,3])
 end
 
 desc "optimize png images"
