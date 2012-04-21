@@ -4,12 +4,18 @@ This is an umbrella project to organize all sites *.binaryage.com.
 
   * local development server
   * maintenance utilities
-  * mass deplying
+  * mass deploying
   
 ### Prerequisities
 
-  * ruby, rake, rubygems
-  * node.js, npm
+  * [ruby](http://www.ruby-lang.org), rake, [rubygems](http://rubygems.org)
+  * [node.js](http://nodejs.org), [npm](http://npmjs.org)
+  
+**Recommended**:
+
+  * [brew](http://mxcl.github.com/homebrew)
+  * [rvm](http://beginrescueend.com)
+  * [nvm](https://github.com/creationix/nvm)
   
 ### Init steps
 
