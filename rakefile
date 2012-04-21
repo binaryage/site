@@ -3,6 +3,7 @@
 BASE_PORT = 4101
 MIN_NPM_VERSION = "1.1.18"
 MIN_GEM_VERSION = "1.8.23"
+LOCAL_DOMAIN = "binaryge.org"
 
 ROOT = File.expand_path('.')
 WWW = File.join(ROOT, 'www')
@@ -117,11 +118,11 @@ desc "prints info how to setup /etc/hosts"
 task :hosts do
   puts "add this section into your /etc/hosts:"
   puts
-  puts "#### binaryage.org test site ####"
+  puts "#### #{LOCAL_DOMAIN} test site ####"
   $all_domains.each do |domain|
-    puts "127.0.0.1 #{domain}.binaryage.org"
+    puts "127.0.0.1 #{domain}.#{LOCAL_DOMAIN}"
   end
-  puts "#### binaryage.org test site ####"
+  puts "#### #{LOCAL_DOMAIN} test site ####"
 end
 
 desc "generate proxy config"
@@ -136,13 +137,15 @@ task :proxy_config do
   
   $all_domains.each do |domain|
     port = port_for_domain(domain)
-    hash["router"]["#{domain}.binaryage.org"] = "127.0.0.1:#{port}"
+    hash["router"]["#{domain}.#{LOCAL_DOMAIN}"] = "127.0.0.1:#{port}"
   end
   puts JSON.pretty_generate(hash)
 end
 
 desc "run dev server"
 task :serve do
+  puts "note: make sure you have /etc/hosts properly configured, see> rake hosts"
+  
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
   # run stylus
@@ -153,7 +156,7 @@ task :serve do
   $all_domains.each do |domain|
     path = path_for_domain(domain)
     port = port_for_domain(domain)
-    sys("cd \"#{path}\" && jekyll --auto --server #{port} --url http://#{domain}.binaryage.org &") if what.include?(domain)
+    sys("cd \"#{path}\" && jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} &") if what.include?(domain)
   end
   sleep 8
 
@@ -168,7 +171,7 @@ task :serve do
     Process.kill('INT', -Process.getpgrp)    
     exit
   end
-  puts "=> www.binaryage.org, use CTRL^C to kill all"
+  puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
   sleep 
 end
 
