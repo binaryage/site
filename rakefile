@@ -204,7 +204,7 @@ task :push do
   $all.each do |path|
     puts path
     Dir.chdir(path) do
-      `git push origin`
+      `git push`
     end
   end
 end
@@ -216,7 +216,7 @@ task :do do
     puts path
     Dir.chdir(path) do
       `git add .`
-      `git commit -m "meta keywords"`
+      `git commit -m "update submodules"`
     end
   end
 end
