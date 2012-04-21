@@ -87,22 +87,27 @@ end
 desc "init repositories - needs special care"
 task :init => [:init_gem, :init_npm] do
   sys("git submodule update --init")
+
+  # cleanup subsubmodules
+  $slaves.each do |slave|
+    ["_layouts", "shared"].each do |submodule|
+      sys("rm -rf \"#{slave}/#{submodule}\"")
+    end
+  end
   
   # download _layouts and shared submodule into master repo
   Dir.chdir($master) do
+    sys("git checkout gh-pages")
     sys("git submodule update --init --recursive")
-    sys("git checkout master")
   end
   
   # for each slave, "symlink" _layouts and shared submodule from master repo
   $slaves.each do |slave|
-    puts slave
     Dir.chdir(slave) do
       sys("git checkout gh-pages")
       sys("git submodule init")
     end
     ["_layouts", "shared"].each do |submodule|
-      sys("rm -rf \"#{slave}/#{submodule}\"")
       sys("./.bin/hlink/hlink \"#{$master}/#{submodule}\" \"#{slave}/#{submodule}\"")
     end
   end
