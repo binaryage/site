@@ -197,7 +197,7 @@ task :update do
     puts path
     Dir.chdir(path) do
       `git add .`
-      `git commit -m "play awesomeness"`
+      `git commit -m "update submodules to latest version with Mark's changes"`
     end
   end
 end
