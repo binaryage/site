@@ -90,8 +90,8 @@ task :init => [:init_gem, :init_npm] do
   
   # download _layouts and shared submodule into master repo
   Dir.chdir($master) do
-    sys("git checkout gh-pages")
     sys("git submodule update --init --recursive")
+    sys("git checkout master")
   end
   
   # for each slave, "symlink" _layouts and shared submodule from master repo
