@@ -3,7 +3,7 @@
 BASE_PORT = 4101
 MIN_NPM_VERSION = "1.1.18"
 MIN_GEM_VERSION = "1.8.23"
-LOCAL_DOMAIN = "binaryge.org"
+LOCAL_DOMAIN = "binaryage.org"
 
 ROOT = File.expand_path('.')
 WWW = File.join(ROOT, 'www')
@@ -11,6 +11,7 @@ BLOG = File.join(ROOT, 'blog')
 SUPPORT = File.join(ROOT, 'support')
 TOTALFINDER = File.join(ROOT, 'totalfinder-web')
 TOTALTERMINAL = File.join(ROOT, 'totalterminal-web')
+TOTALSPACES = File.join(ROOT, 'totalspaces-web')
 ASEPSIS = File.join(ROOT, 'asepsis-web')
 VISOR = File.join(ROOT, 'visor')
 FIREQUERY = File.join(ROOT, 'firequery')
@@ -27,7 +28,7 @@ def subdomain(path)
 end
 
 $master = WWW # this repo will hold real submodules _layouts and shared, slaves will hard-link them
-$slaves = [BLOG, SUPPORT, VISOR, TOTALFINDER, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
+$slaves = [BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 $all = [$master].concat $slaves
 $all_domains = $all.collect {|x| subdomain(x)}
 
