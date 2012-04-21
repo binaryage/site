@@ -8,10 +8,10 @@ This is an umbrella project to organize all sites *.binaryage.com.
   
 ### Prerequisities
 
-  * [ruby](http://www.ruby-lang.org), rake, [rubygems](http://rubygems.org)
+  * [ruby](http://www.ruby-lang.org), [rake](http://rake.rubyforge.org), [rubygems](http://rubygems.org)
   * [node.js](http://nodejs.org), [npm](http://npmjs.org)
   
-**Recommended**:
+**Recommended** (optional):
 
   * [brew](http://mxcl.github.com/homebrew)
   * [rvm](http://beginrescueend.com)
@@ -27,6 +27,6 @@ This is an umbrella project to organize all sites *.binaryage.com.
 
   * make sure you have your /etc/hosts properly configured, see `rake hosts`
 
-To run the dev server:
+**To run the dev server**:
 
     rake
