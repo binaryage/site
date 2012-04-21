@@ -8,6 +8,7 @@
     "url": "http://github.com/binaryage/site.git"
   },
   "dependencies": {
-    "http-proxy": "~0.8.0"
+    "http-proxy": "~0.8.0",
+    "stylus": "~0.25.0"
   }
 }
