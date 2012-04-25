@@ -110,6 +110,7 @@ task :init => [:init_gem, :init_npm] do
       sys("git submodule init")
     end
     ["_layouts", "shared"].each do |submodule|
+      sys("rmdir \"#{slave}/#{submodule}\"") if File.directory?("#{slave}/#{submodule}")
       sys("./.bin/hlink/hlink \"#{$master}/#{submodule}\" \"#{slave}/#{submodule}\"")
     end
   end
