@@ -162,7 +162,7 @@ task :serve do
   sleep 8
 
   # run reverse proxy
-  sys("rake proxy_config > .proxy.config")
+  sys("rake -s proxy_config > .proxy.config")
   puts "Launching proxy server on port 80 (root needed)"
   sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config &")
   
