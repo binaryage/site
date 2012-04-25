@@ -30,3 +30,8 @@ This is an umbrella project to organize all sites *.binaryage.com.
 **To run the dev server**:
 
     rake
+	
+**To run the dev server only for few subsites**:
+
+    rake serve what=www,totalspaces,blog
+	

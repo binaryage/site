@@ -193,11 +193,11 @@ end
 
 desc "update layouts and shared"
 task :update do
-  $slaves.each do |path|
+  $all.each do |path|
     puts path
     Dir.chdir(path) do
       `git add .`
-      `git commit -m "update submodules to latest version with Mark's changes"`
+      `git commit -m "spring cleanup: renaming referecens to layouts"`
     end
   end
 end
@@ -269,7 +269,7 @@ desc "convert icons to other formats"
 task :icons do
   require_rmagick!
   
-  Dir.glob(File.join(WWW, 'shared', "img", "icons", "leechgate-512.png")) do |file|
+  Dir.glob(File.join(WWW, 'shared', "img", "icons", "totalspaces-512.png")) do |file|
     puts file
     image = ImageList.new(file)
 
