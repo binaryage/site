@@ -116,6 +116,37 @@ task :init => [:init_gem, :init_npm] do
   end
 end
 
+desc "reset to remote changes - this will destroy your local changes!!!"
+task :reset do
+  Dir.chdir($master) do
+    puts "in #{yellow($master)}"
+    sys("git checkout -f gh-pages")
+    sys("git reset --hard HEAD")
+    sys("git clean -fd")
+    sys("git pull")
+    ["_layouts", "shared"].each do |submodule|
+      submodule = File.join($master, submodule)
+      Dir.chdir(submodule) do
+        puts "in #{yellow(submodule)}"
+        sys("git checkout -f master")
+        sys("git reset --hard HEAD")
+        sys("git clean -fd")
+        sys("git pull")
+      end
+    end
+  end
+  $slaves.each do |slave|
+    Dir.chdir(slave) do
+      puts "in #{yellow(slave)}"
+      sys("git checkout -f gh-pages")
+      sys("git reset --hard HEAD")
+      sys("git clean -fd")
+      sys("git pull")
+    end
+    # _layouts and shared should by hard linked, so we got pull for free from master
+  end
+end
+
 desc "prints info how to setup /etc/hosts"
 task :hosts do
   puts "add this section into your /etc/hosts:"
@@ -180,7 +211,7 @@ end
 desc "force github pages update"
 task :force do
   $slaves.each do |path|
-    puts path
+    puts "in #{yellow(path)}"
     layouts = File.join(path, "_layouts")
     shared = File.join(path, "shared")
     Dir.chdir(path) do
@@ -192,35 +223,24 @@ task :force do
   end
 end
 
-desc "update layouts and shared"
-task :update do
-  $all.each do |path|
-    puts path
-    Dir.chdir(path) do
-      `git add .`
-      `git commit -m "spring cleanup: renaming referecens to layouts"`
-    end
-  end
-end
-
 desc "push all"
 task :push do
   $all.each do |path|
-    puts path
+    puts "in #{yellow(path)}"
     Dir.chdir(path) do
-      `git push`
+      sys("git push")
     end
   end
 end
 
-desc "adhoc multiop"
-task :do do
+desc "upgrade submodule pointers"
+task :upgrade do
   # better use: git submodule foreach 'cmds'
-  $slaves.each do |path|
-    puts path
+  $all.each do |path|
+    puts "in #{yellow(path)}"
     Dir.chdir(path) do
-      `git add .`
-      `git commit -m "update submodules"`
+      sys("git add .")
+      sys("git commit -m \"upgrade submodules\"")
     end
   end
 end
