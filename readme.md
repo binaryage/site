@@ -56,3 +56,10 @@ The idea is to have one repo with all sub-sites as separate repositories, each t
 ### Deployment
 
 Just push your changes to GitHub. [GitHub Pages](//pages.github.com) will do the deployment automatically. Don't forget to push submodules first if you have modified some shared stuff.
+
+### Update from remote
+
+If you want to get incrementally to remote state without doing `rake init`, you may reset your repo to remote state via `rake reset`. **This will destroy your local changes!!!**.
+
+Alternatively you may always use your git-fu to non-destructively pull from remotes (`git submodule` is your friend).
+
