@@ -18,19 +18,19 @@
 	url = git@github.com:binaryage/asepsis-web.git
 [submodule "firequery"]
 	path = firequery
-	url = git@github.com:darwin/firequery.git
+	url = git@github.com:binaryage/firequery.git
 [submodule "firelogger"]
 	path = firelogger
-	url = git@github.com:darwin/firelogger.git
+	url = git@github.com:binaryage/firelogger.git
 [submodule "firerainbow"]
 	path = firerainbow
-	url = git@github.com:darwin/firerainbow.git
+	url = git@github.com:binaryage/firerainbow.git
 [submodule "drydrop"]
 	path = drydrop
-	url = git@github.com:darwin/drydrop.git
+	url = git@github.com:binaryage/drydrop.git
 [submodule "xrefresh"]
 	path = xrefresh
-	url = git@github.com:darwin/xrefresh.git
+	url = git@github.com:binaryage/xrefresh.git
 [submodule "hints"]
 	path = hints
 	url = git@github.com:binaryage/hints.git
