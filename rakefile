@@ -208,6 +208,33 @@ task :serve do
   sleep 
 end
 
+def build_single_web(name)
+  path = path_for_domain(name)
+
+  # build stylus
+  Dir.chdir "#{path}/shared/css" do
+    sys("\"#{ROOT}/node_modules/.bin/stylus\" site2.styl")
+  end
+
+  # build jekyll
+  Dir.chdir path do
+    sys("jekyll --url http://#{name}.binaryage.com")
+  end
+  
+  # sync static site to destination
+  
+
+end
+
+desc "build site"
+task :build do
+  what = (ENV["what"] || $all_domains.join(",")).split(",")
+  
+  what.each do |web|
+    build_single_web(web)
+  end
+end
+
 desc "force github pages update"
 task :force do
   $slaves.each do |path|
