@@ -21,16 +21,23 @@ DRYDROP = File.join(ROOT, 'drydrop')
 XREFRESH = File.join(ROOT, 'xrefresh')
 HINTS = File.join(ROOT, 'hints')
 RESTATIC = File.join(ROOT, 'restatic-web')
+TESTWEB = File.join(ROOT, 'test-web')
+
+def extract_name(path)
+  name = (path.split("/"))[-1] # get last component of the path
+end
 
 def subdomain(path)
-  name = (path.split("/"))[-1] # get last component of the path
+  name = extract_name(path)
   name.split("-")[0] # strips -web postfixes
 end
 
+
 $master = WWW # this repo will hold real submodules _layouts and shared, slaves will hard-link them
-$slaves = [BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
+$slaves = [TESTWEB, BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 $all = [$master].concat $slaves
 $all_domains = $all.collect {|x| subdomain(x)}
+$all_names = $all.collect {|x| extract_name(x)}
 
 require 'json'
 
@@ -208,30 +215,30 @@ task :serve do
   sleep 
 end
 
-def build_single_web(name)
-  path = path_for_domain(name)
-
+def build_single_web(name, stage)
   # build stylus
-  Dir.chdir "#{path}/shared/css" do
+  Dir.chdir "#{name}/shared/css" do
     sys("\"#{ROOT}/node_modules/.bin/stylus\" site2.styl")
   end
+  
+  domain = subdomain(name)
 
   # build jekyll
-  Dir.chdir path do
-    sys("jekyll --url http://#{name}.binaryage.com")
+  Dir.chdir name do
+    sys("jekyll --url http://#{domain}.binaryage.com")
   end
   
-  # sync static site to destination
-  
-
+  # sync static site to stage
+  sys("cp -r \"#{name}/_site/\"* \"#{stage}/#{name}\"")
 end
 
 desc "build site"
 task :build do
   what = (ENV["what"] || $all_domains.join(",")).split(",")
+  stage = ENV["stage"] || File.join(ROOT, "stage")
   
   what.each do |web|
-    build_single_web(web)
+    build_single_web(web, stage)
   end
 end
 
