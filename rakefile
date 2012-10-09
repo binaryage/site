@@ -90,7 +90,7 @@ end
 desc "install gem dependencies"
 task :init_gem do
   die "install rubygems (>=v#{MIN_GEM_VERSION}, no sudo, consider rvm) => http://rubygems.org, http://beginrescueend.com" unless Gem::Version.new(`gem --version`) >= Gem::Version.new(MIN_GEM_VERSION)
-  sys("gem install term-ansicolor")
+  sys("bundle install")
 end
 
 desc "init repositories - needs special care"
