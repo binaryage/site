@@ -1,4 +1,13 @@
 # coding: utf-8
+require 'yaml'
+require 'json'
+
+begin
+  require 'term/ansicolor'
+  include Term::ANSIColor
+rescue LoadError
+  raise 'Run "gem install term-ansicolor"'
+end
 
 BASE_PORT = 4101
 MIN_NPM_VERSION = "1.1.18"
@@ -33,20 +42,11 @@ def subdomain(path)
 end
 
 
-$master = WWW # this repo will hold real submodules _layouts and shared, slaves will hard-link them
+$master = WWW # this repo will hold real submodule "base", slaves will hard-link them
 $slaves = [TESTWEB, BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 $all = [$master].concat $slaves
 $all_domains = $all.collect {|x| subdomain(x)}
 $all_names = $all.collect {|x| extract_name(x)}
-
-require 'json'
-
-begin
-  require 'term/ansicolor'
-  include Term::ANSIColor
-rescue LoadError
-  raise 'Run "gem install term-ansicolor"'
-end
 
 def file_color(text); yellow(text); end
 def dir_color(text); blue(text); end
@@ -97,26 +97,26 @@ desc "init repositories - needs special care"
 task :init => [:init_gem, :init_npm] do
   sys("git submodule update --init")
 
-  # cleanup subsubmodules
+  # cleanup submodules
   $slaves.each do |slave|
-    ["_layouts", "shared"].each do |submodule|
+    ["base"].each do |submodule|
       sys("rm -rf \"#{slave}/#{submodule}\"")
     end
   end
   
-  # download _layouts and shared submodule into master repo
+  # download submodules into master repo
   Dir.chdir($master) do
-    sys("git checkout gh-pages")
+    sys("git checkout source")
     sys("git submodule update --init --recursive")
   end
   
-  # for each slave, "symlink" _layouts and shared submodule from master repo
+  # for each slave, "symlink" submodules from master repo
   $slaves.each do |slave|
     Dir.chdir(slave) do
-      sys("git checkout gh-pages")
+      sys("git checkout source")
       sys("git submodule init")
     end
-    ["_layouts", "shared"].each do |submodule|
+    ["base"].each do |submodule|
       sys("rmdir \"#{slave}/#{submodule}\"") if File.directory?("#{slave}/#{submodule}")
       sys("./.bin/hlink/hlink \"#{$master}/#{submodule}\" \"#{slave}/#{submodule}\"")
     end
@@ -127,11 +127,11 @@ desc "reset to remote changes - this will destroy your local changes!!!"
 task :reset do
   Dir.chdir($master) do
     puts "in #{yellow($master)}"
-    sys("git checkout -f gh-pages")
+    sys("git checkout -f source")
     sys("git reset --hard HEAD")
     sys("git clean -fd")
     sys("git pull")
-    ["_layouts", "shared"].each do |submodule|
+    ["base"].each do |submodule|
       submodule = File.join($master, submodule)
       Dir.chdir(submodule) do
         puts "in #{yellow(submodule)}"
@@ -145,12 +145,12 @@ task :reset do
   $slaves.each do |slave|
     Dir.chdir(slave) do
       puts "in #{yellow(slave)}"
-      sys("git checkout -f gh-pages")
+      sys("git checkout -f source")
       sys("git reset --hard HEAD")
       sys("git clean -fd")
       sys("git pull")
     end
-    # _layouts and shared should by hard linked, so we got pull for free from master
+    # base should be hard linked, so we got pull for free from master
   end
 end
 
@@ -189,35 +189,52 @@ task :serve do
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
   # run stylus
-  sys("cd \"#{WWW}/shared/css\" && \"#{ROOT}/node_modules/.bin/stylus\" -w site2.styl &")
+  sys("cd \"#{WWW}/base/css\" && \"#{ROOT}/node_modules/.bin/stylus\" -w site2.styl &")
   sleep 2
 
   # run jekyll sites  
   $all_domains.each do |domain|
+    next unless what.include?(domain)
     path = path_for_domain(domain)
     port = port_for_domain(domain)
-    sys("cd \"#{path}\" && jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} &") if what.include?(domain)
+    Dir.chdir path do
+      patch_jekyll_config()
+      sys("jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} &")
+    end
   end
   sleep 8
 
   # run reverse proxy
   sys("rake -s proxy_config > .proxy.config")
   puts "Launching proxy server on port 80 (root needed)"
-  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config &")
+  puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
+  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config")
   
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
   trap("INT") do
-    Process.kill('INT', -Process.getpgrp)    
     exit
   end
-  puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
-  sleep 
+  Process.kill('INT', -Process.getpgrp)    
+end
+
+def patch_jekyll_config()
+  begin
+    config = YAML.load_file('_config.yml')
+  rescue => err
+    config = {}
+  end
+  
+  config["layouts"] = "base/layouts"
+
+  File.open('_config.yml', "w") do |f|
+      f.write(YAML.dump(config))
+  end  
 end
 
 def build_single_web(name, stage)
   # build stylus
-  Dir.chdir "#{name}/shared/css" do
+  Dir.chdir "#{name}/base/css" do
     sys("\"#{ROOT}/node_modules/.bin/stylus\" site2.styl")
   end
   
@@ -225,11 +242,12 @@ def build_single_web(name, stage)
 
   # build jekyll
   Dir.chdir name do
-    sys("jekyll --url http://#{domain}.binaryage.com")
+    patch_jekyll_config()
+    sys("jekyll \"#{stage}/_#{name}\"")
   end
   
   # sync static site to stage
-  sys("cp -r \"#{name}/_site/\"* \"#{stage}/#{name}\"")
+  sys("cp -r \"#{stage}/_#{name}\"/* \"#{stage}/#{name}\"")
 end
 
 desc "build site"
@@ -246,8 +264,6 @@ desc "force github pages update"
 task :force do
   $slaves.each do |path|
     puts "in #{yellow(path)}"
-    layouts = File.join(path, "_layouts")
-    shared = File.join(path, "shared")
     Dir.chdir(path) do
       `touch _force_github_pages_update_the_site`
       `git add .`
