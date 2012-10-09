@@ -233,7 +233,7 @@ def patch_jekyll_config()
   config["plugins"] = "../_plugins"
   config["stylus"] = {
     "compress" => true,
-    "path" => "./base/css/site2.styl"
+    "path" => "./base/css/site.styl"
   }
 
   File.open('_config.yml', "w") do |f|
@@ -242,11 +242,6 @@ def patch_jekyll_config()
 end
 
 def build_single_web(name, stage)
-  # build stylus
-  Dir.chdir "#{name}/base/css" do
-    sys("\"#{ROOT}/node_modules/.bin/stylus\" site2.styl")
-  end
-  
   domain = subdomain(name)
 
   # build jekyll
