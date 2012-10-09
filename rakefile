@@ -32,6 +32,8 @@ HINTS = File.join(ROOT, 'hints')
 RESTATIC = File.join(ROOT, 'restatic-web')
 TESTWEB = File.join(ROOT, 'test-web')
 
+TEMP_DIR = "/tmp/binaryage-site"
+
 def extract_name(path)
   name = (path.split("/"))[-1] # get last component of the path
 end
@@ -188,9 +190,9 @@ task :serve do
   
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
-  # run stylus
-  sys("cd \"#{WWW}/base/css\" && \"#{ROOT}/node_modules/.bin/stylus\" -w site2.styl &")
-  sleep 2
+  # # run stylus
+  # sys("cd \"#{WWW}/base/css\" && \"#{ROOT}/node_modules/.bin/stylus\" -w site2.styl &")
+  # sleep 2
 
   # run jekyll sites  
   $all_domains.each do |domain|
@@ -199,7 +201,9 @@ task :serve do
     port = port_for_domain(domain)
     Dir.chdir path do
       patch_jekyll_config()
-      sys("jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} &")
+      work_dir = File.join(TEMP_DIR, "serve", domain)
+      sys("mkdir -p \"#{work_dir}\"")
+      sys("jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} \"#{work_dir}\" &")
     end
   end
   sleep 8
@@ -226,6 +230,11 @@ def patch_jekyll_config()
   end
   
   config["layouts"] = "base/layouts"
+  config["plugins"] = "../_plugins"
+  config["stylus"] = {
+    "compress" => true,
+    "path" => "./base/css/site2.styl"
+  }
 
   File.open('_config.yml', "w") do |f|
       f.write(YAML.dump(config))
