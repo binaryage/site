@@ -43,3 +43,6 @@
 [submodule "totalspaces-web"]
 	path = totalspaces-web
 	url = git@github.com:binaryage/totalspaces-web.git
+[submodule "test-web"]
+	path = test-web
+	url = git@github.com:binaryage/test-web.git
