@@ -61,6 +61,13 @@ end
 
 def sys(cmd)
   puts blue("> "+cmd)
+  if not system(cmd) then
+    die "something went wrong"
+  end
+end
+
+def sys(cmd)
+  puts blue("> "+cmd)
   system(cmd)
 end
 
