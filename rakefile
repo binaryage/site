@@ -46,7 +46,9 @@ end
 
 $master = WWW # this repo will hold real submodule "base", slaves will hard-link them
 $slaves = [TESTWEB, BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
+$slavesx = [BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 $all = [$master].concat $slaves
+$allx = [$master].concat $slavesx
 $all_domains = $all.collect {|x| subdomain(x)}
 $all_names = $all.collect {|x| extract_name(x)}
 
@@ -88,6 +90,20 @@ def require_rmagick!
   end
 end
 
+# prevents git error message:
+# You can't push to git://github.com/darwin/site.git
+# Use git@github.com:darwin/site.git
+def get_writable_git_url()
+  `git remote show origin | grep "Fetch URL:"`.strip =~ /Fetch URL:\s*(.*)/
+
+  if $1.nil?
+    puts "unable to parse: #{res} (ouput from: git remote show origin | grep \"Fetch URL:\")"
+    exit 2
+  end
+  
+  $1.sub("git://", "git@").sub("github.com/", "github.com:")
+end
+
 ################################################################################
 
 desc "install npm dependencies"
@@ -106,16 +122,25 @@ desc "init repositories - needs special care"
 task :init => [:init_gem, :init_npm] do
   sys("git submodule update --init")
 
+  # fix push urls
+  $all.each do |repo|
+    Dir.chdir(repo) do
+      sys("git remote set-url --push origin #{get_writable_git_url()}")
+    end
+  end
+
   # cleanup submodules
   $slaves.each do |slave|
-    ["base"].each do |submodule|
-      sys("rm -rf \"#{slave}/#{submodule}\"")
-    end
+    sys("rm -rf \"#{slave}/base\"")
   end
   
   # download submodules into master repo
   Dir.chdir($master) do
-    sys("git submodule update --init --recursive")
+    sys("git submodule update --init")
+    # fix push url in submodule
+    Dir.chdir("base") do
+      sys("git remote set-url --push origin #{get_writable_git_url()}")
+    end
   end
   
   # for each slave, "symlink" submodules from master repo
@@ -123,10 +148,8 @@ task :init => [:init_gem, :init_npm] do
     Dir.chdir(slave) do
       sys("git submodule init")
     end
-    ["base"].each do |submodule|
-      sys("rmdir \"#{slave}/#{submodule}\"") if File.directory?("#{slave}/#{submodule}")
-      sys("./.bin/hlink/hlink \"#{$master}/#{submodule}\" \"#{slave}/#{submodule}\"")
-    end
+    sys("rmdir \"#{slave}/base\"") if File.directory?("#{slave}/base")
+    sys("./.bin/hlink/hlink \"#{$master}/base\" \"#{slave}/base\"")
   end
 end
 
@@ -269,32 +292,6 @@ task :build do
   end
 end
 
-def build_single_web(name)
-  # build stylus
-  Dir.chdir "#{name}/shared/css" do
-    sys("\"#{ROOT}/node_modules/.bin/stylus\" site2.styl")
-  end
-
-  # build jekyll
-  path = path_for_domain(name)
-  Dir.chdir path do
-    sys("jekyll --url http://#{domain}.binaryage.com")
-  end
-  
-  # sync static site to destination
-  
-
-end
-
-desc "build site"
-task :build do
-  what = (ENV["what"] || $all_domains.join(",")).split(",")
-  
-  what.each do |web|
-    build_single_web(web)
-  end
-end
-
 desc "force github pages update"
 task :force do
   $slaves.each do |path|
@@ -314,6 +311,21 @@ task :push do
     puts "in #{yellow(path)}"
     Dir.chdir(path) do
       sys("git push")
+    end
+  end
+end
+
+desc "rename source branch to web"
+task :source_to_web do
+  $allx.each do |path|
+    puts "in #{yellow(path)}"
+    Dir.chdir(path) do
+      sys("git checkout source")
+      sys("git branch web")
+      sys("git checkout web")
+      sys("git branch -D source")
+      sys("git push origin web")
+      sys("git push origin :source")
     end
   end
 end
