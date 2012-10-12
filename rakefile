@@ -118,6 +118,7 @@ end
 
 desc "init repositories - needs special care"
 task :init => [:init_gem, :init_npm] do
+  sys("git remote set-url --push origin #{get_writable_git_url()}")
   sys("git submodule update --init")
 
   # fix push urls
