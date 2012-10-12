@@ -315,21 +315,6 @@ task :push do
   end
 end
 
-desc "rename source branch to web"
-task :source_to_web do
-  $allx.each do |path|
-    puts "in #{yellow(path)}"
-    Dir.chdir(path) do
-      sys("git checkout source")
-      sys("git branch web")
-      sys("git checkout web")
-      sys("git branch -D source")
-      sys("git push origin web")
-      sys("git push origin :source")
-    end
-  end
-end
-
 desc "upgrade submodule pointers"
 task :upgrade do
   # better use: git submodule foreach 'cmds'
