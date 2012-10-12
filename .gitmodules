@@ -37,12 +37,12 @@
 [submodule "restatic-web"]
 	path = restatic-web
 	url = git://github.com/binaryage/restatic-web.git
-[submodule "visor"]
-	path = visor
-	url = git://github.com/darwin/visor.git
 [submodule "totalspaces-web"]
 	path = totalspaces-web
 	url = git://github.com/binaryage/totalspaces-web.git
 [submodule "test-web"]
 	path = test-web
 	url = git://github.com/binaryage/test-web.git
+[submodule "visor"]
+	path = visor
+	url = git@github.com:binaryage/visor.git
