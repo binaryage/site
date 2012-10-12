@@ -115,14 +115,12 @@ task :init => [:init_gem, :init_npm] do
   
   # download submodules into master repo
   Dir.chdir($master) do
-    sys("git checkout source")
     sys("git submodule update --init --recursive")
   end
   
   # for each slave, "symlink" submodules from master repo
   $slaves.each do |slave|
     Dir.chdir(slave) do
-      sys("git checkout source")
       sys("git submodule init")
     end
     ["base"].each do |submodule|
@@ -136,7 +134,7 @@ desc "reset to remote changes - this will destroy your local changes!!!"
 task :reset do
   Dir.chdir($master) do
     puts "in #{yellow($master)}"
-    sys("git checkout -f source")
+    sys("git checkout -f web")
     sys("git reset --hard HEAD")
     sys("git clean -fd")
     sys("git pull")
@@ -154,7 +152,7 @@ task :reset do
   $slaves.each do |slave|
     Dir.chdir(slave) do
       puts "in #{yellow(slave)}"
-      sys("git checkout -f source")
+      sys("git checkout -f web")
       sys("git reset --hard HEAD")
       sys("git clean -fd")
       sys("git pull")
