@@ -46,9 +46,7 @@ end
 
 $master = WWW # this repo will hold real submodule "base", slaves will hard-link them
 $slaves = [TESTWEB, BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
-$slavesx = [BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 $all = [$master].concat $slaves
-$allx = [$master].concat $slavesx
 $all_domains = $all.collect {|x| subdomain(x)}
 $all_names = $all.collect {|x| extract_name(x)}
 
@@ -218,10 +216,6 @@ task :serve do
   
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
-  # # run stylus
-  # sys("cd \"#{WWW}/base/css\" && \"#{ROOT}/node_modules/.bin/stylus\" -w site2.styl &")
-  # sleep 2
-
   # run jekyll sites  
   $all_domains.each do |domain|
     next unless what.include?(domain)
@@ -258,7 +252,7 @@ def patch_jekyll_config()
   end
   
   config["layouts"] = "base/layouts"
-  config["plugins"] = "../_plugins"
+  config["plugins"] = "../.jekyll-plugins"
   config["stylus"] = {
     "compress" => true,
     "path" => "./base/css/site.styl"
