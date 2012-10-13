@@ -11,11 +11,15 @@ This is an umbrella project to organize sites under *.binaryage.com.
 The idea is to have one repo with all subdomains as separate repositories, each tracked as am individual git submodule. Individual sites have usually a dependency on [base](/binaryage/base) - again tracked as a git submodule. This should give us tools to reconstruct the whole site to any point in the history while having granular control of commit rights to parts of the site. Nice transparency via GitHub is a bonus.
 
     .
+    ├── www
+    │   ├── base
+    │   ├── index.md
+    |   ...
     ├── totalfinder-web
     │   ├── base
     │   ├── index.md
     |   ...
-    ├── www
+    ├── totalspaces-web
     │   ├── base
     │   ├── index.md
     |   ...
@@ -39,6 +43,31 @@ The idea is to have one repo with all subdomains as separate repositories, each 
     cd site
     rake init
     
+Init task does [several things](https://github.com/binaryage/site/blob/master/rakefile#L120-153):
+  
+  * fetches all submodules
+  * update push remote urls to be writable
+  * hard-links all base submodules into www/base
+  
+Hard-linking is essential for local development. Changes you make under base are then effective in all repos.
+
+    .
+    ├── www
+    │   ├── base (real folder)
+    │   ├── index.md
+    |   ...
+    ├── totalfinder-web
+    │   ├── base (hard link to ../www/base)
+    │   ├── index.md
+    |   ...
+    ├── totalspaces-web
+    │   ├── base (hard link to ../www/base)
+    │   ├── index.md
+    |   ...
+    ├── blog
+    ...
+
+    
 ### Launch development server
 
   * make sure you have your /etc/hosts properly configured, see `rake hosts`
@@ -53,7 +82,9 @@ The idea is to have one repo with all subdomains as separate repositories, each 
 
 ### Deployment
 
-Just push your changes into `source` branch on GitHub. We have setup post-recieve hook which will build whole web and then push baked static site files back into `gh-pages` branch. [GitHub Pages](//pages.github.com) will do the deployment to S3 automatically. <span style="color:red">Don't forget to push submodules first if you have modified some shared stuff.</span>
+Just push your changes into `web` branch on GitHub and you are done. 
+
+We have setup post-recieve hook which will build whole web site and then will push baked static site files back into `gh-pages` branch. [GitHub Pages](//pages.github.com) will do the deployment automatically. <span style="color:red">Don't forget to push "base" submodule first if you have modified some shared stuff.</span>
 
 ### Update from remote
 
