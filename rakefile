@@ -305,7 +305,7 @@ task :push do
   $all.each do |path|
     puts "in #{yellow(path)}"
     Dir.chdir(path) do
-      sys("git push")
+      sys("git push origin web")
     end
   end
 end
@@ -317,7 +317,7 @@ task :upgrade do
     puts "in #{yellow(path)}"
     Dir.chdir(path) do
       sys("git add .")
-      sys("git commit -m \"upgrade submodules\"")
+      sys("git commit -m \"fix stylesheet link in 404 pages\"")
     end
   end
 end
