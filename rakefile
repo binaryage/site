@@ -226,7 +226,7 @@ task :serve do
       patch_jekyll_config()
       work_dir = File.join(TEMP_DIR, "serve", domain)
       sys("mkdir -p \"#{work_dir}\"")
-      sys("jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} \"#{work_dir}\" &")
+      sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} \"#{work_dir}\" &")
     end
   end
   sleep 8
@@ -270,7 +270,7 @@ def build_single_web(name, stage)
   # build jekyll
   Dir.chdir name do
     patch_jekyll_config()
-    sys("jekyll \"#{stage}/_#{name}\"")
+    sys("bundle exec jekyll \"#{stage}/_#{name}\"")
   end
   
   # sync static site to stage
