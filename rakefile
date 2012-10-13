@@ -157,17 +157,17 @@ task :reset do
   Dir.chdir($master) do
     puts "in #{yellow($master)}"
     sys("git checkout -f web")
-    sys("git reset --hard HEAD")
+    sys("git reset --hard HEAD^") # be resilient to amends
     sys("git clean -fd")
-    sys("git pull")
+    sys("git pull origin web")
     ["base"].each do |submodule|
       submodule = File.join($master, submodule)
       Dir.chdir(submodule) do
         puts "in #{yellow(submodule)}"
         sys("git checkout -f master")
-        sys("git reset --hard HEAD")
+        sys("git reset --hard HEAD^") # be resilient to amends
         sys("git clean -fd")
-        sys("git pull")
+        sys("git pull origin master")
       end
     end
   end
@@ -175,9 +175,9 @@ task :reset do
     Dir.chdir(slave) do
       puts "in #{yellow(slave)}"
       sys("git checkout -f web")
-      sys("git reset --hard HEAD")
+      sys("git reset --hard HEAD^") # be resilient to amends
       sys("git clean -fd")
-      sys("git pull")
+      sys("git pull origin web")
     end
     # base should be hard linked, so we got pull for free from master
   end
