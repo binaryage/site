@@ -44,7 +44,7 @@ def subdomain(path)
 end
 
 
-$master = WWW # this repo will hold real submodule "base", slaves will hard-link them
+$master = WWW # this repo will hold real submodule "shared", slaves will hard-link them
 $slaves = [TESTWEB, BLOG, SUPPORT, VISOR, TOTALFINDER, TOTALSPACES, FIREQUERY, FIRELOGGER, FIRERAINBOW, DRYDROP, XREFRESH, TOTALTERMINAL, ASEPSIS, HINTS, RESTATIC]
 $all = [$master].concat $slaves
 $all_domains = $all.collect {|x| subdomain(x)}
@@ -130,14 +130,14 @@ task :init => [:init_gem, :init_npm] do
 
   # cleanup submodules
   $slaves.each do |slave|
-    sys("rm -rf \"#{slave}/base\"")
+    sys("rm -rf \"#{slave}/shared\"")
   end
   
   # download submodules into master repo
   Dir.chdir($master) do
     sys("git submodule update --init")
     # fix push url in submodule
-    Dir.chdir("base") do
+    Dir.chdir("shared") do
       sys("git remote set-url --push origin #{get_writable_git_url()}")
     end
   end
@@ -147,8 +147,8 @@ task :init => [:init_gem, :init_npm] do
     Dir.chdir(slave) do
       sys("git submodule init")
     end
-    sys("rmdir \"#{slave}/base\"") if File.directory?("#{slave}/base")
-    sys("./.bin/hlink/hlink \"#{$master}/base\" \"#{slave}/base\"")
+    sys("rmdir \"#{slave}/shared\"") if File.directory?("#{slave}/shared")
+    sys("./.bin/hlink/hlink \"#{$master}/shared\" \"#{slave}/shared\"")
   end
 end
 
@@ -160,7 +160,7 @@ task :reset do
     sys("git reset --hard HEAD^") # be resilient to amends
     sys("git clean -fd")
     sys("git pull origin web")
-    ["base"].each do |submodule|
+    ["shared"].each do |submodule|
       submodule = File.join($master, submodule)
       Dir.chdir(submodule) do
         puts "in #{yellow(submodule)}"
@@ -179,7 +179,7 @@ task :reset do
       sys("git clean -fd")
       sys("git pull origin web")
     end
-    # base should be hard linked, so we got pull for free from master
+    # shared should be hard linked, so we got pull for free from master
   end
 end
 
@@ -252,11 +252,11 @@ def patch_jekyll_config()
     config = {}
   end
   
-  config["layouts"] = "base/layouts"
+  config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
   config["stylus"] = {
     "compress" => true,
-    "path" => "./base/css/site.styl"
+    "path" => "./shared/css/site.styl"
   }
 
   File.open('_config.yml', "w") do |f|
@@ -316,8 +316,9 @@ task :upgrade do
   $all.each do |path|
     puts "in #{yellow(path)}"
     Dir.chdir(path) do
-      sys("git add .")
-      sys("git commit -m \"fix stylesheet link in 404 pages\"")
+       sys("git checkout web")
+       sys("rm -rf base")
+       sys("git commit --amend -am \"rename base -> shared\"")
     end
   end
 end
