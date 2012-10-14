@@ -158,7 +158,7 @@ task :reset do
     puts "in #{yellow($master)}"
     sys("git checkout -f web")
     sys("git reset --hard HEAD^") # be resilient to amends
-    sys("git clean -fd")
+    sys("git clean -f -f -d") # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
     sys("git pull origin web")
     ["shared"].each do |submodule|
       submodule = File.join($master, submodule)
@@ -166,7 +166,7 @@ task :reset do
         puts "in #{yellow(submodule)}"
         sys("git checkout -f master")
         sys("git reset --hard HEAD^") # be resilient to amends
-        sys("git clean -fd")
+        sys("git clean -f -f -d") # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
         sys("git pull origin master")
       end
     end
@@ -176,7 +176,7 @@ task :reset do
       puts "in #{yellow(slave)}"
       sys("git checkout -f web")
       sys("git reset --hard HEAD^") # be resilient to amends
-      sys("git clean -fd")
+      sys("git clean -f -f -d") # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
       sys("git pull origin web")
     end
     # shared should be hard linked, so we got pull for free from master
@@ -317,8 +317,7 @@ task :upgrade do
     puts "in #{yellow(path)}"
     Dir.chdir(path) do
        sys("git checkout web")
-       sys("rm -rf base")
-       sys("git commit --amend -am \"rename base -> shared\"")
+       sys("git commit -am \"update 404\"")
     end
   end
 end
