@@ -46,7 +46,7 @@ The idea is to have one repo with all subdomains as separate repositories, each 
 Init task does [several things](https://github.com/binaryage/site/blob/master/rakefile#L120-153):
   
   * fetches all submodules
-  * update push remote urls to be writable
+  * updates push remote urls to be writable
   * hard-links all shared submodules into www/shared
   
 Hard-linking is essential for local development. Changes you make under `shared` are then effective in all repos.

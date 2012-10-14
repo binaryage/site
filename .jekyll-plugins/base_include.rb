@@ -7,7 +7,7 @@ module Jekyll
     end
 
     def render(context)
-      includes_dir = File.join(context.registers[:site].source, 'base', 'includes')
+      includes_dir = File.join(context.registers[:site].source, 'shared', 'includes')
 
       if File.symlink?(includes_dir)
         return "Includes directory '#{includes_dir}' cannot be a symlink"
@@ -26,7 +26,7 @@ module Jekyll
             partial.render(context)
           end
         else
-          "Included file '#{@file}' not found in base/includes directory"
+          "Included file '#{@file}' not found in shared/includes directory"
         end
       end
     end

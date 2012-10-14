@@ -37,6 +37,7 @@ module Jekyll
     end
     
     def convert(content)
+      # puts content
       begin
         setup
         Dir.chdir File.dirname(Stylus.paths[0]) do
