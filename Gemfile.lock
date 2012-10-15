@@ -1,6 +1,6 @@
 GIT
-  remote: git://github.com/mojombo/jekyll.git
-  revision: fa8400ab61cb8df176f9fb2ec52d85f93c7418a7
+  remote: git://github.com/binaryage/jekyll.git
+  revision: 1d156dc527c6dc825c7faaa1f19ffc48c51bc77b
   specs:
     jekyll (0.11.2)
       classifier (~> 1.3)
@@ -16,6 +16,7 @@ GEM
     blankslate (3.1.2)
     classifier (1.3.3)
       fast-stemmer (>= 1.0.0)
+    closure-compiler (1.1.7)
     coffee-script (2.2.0)
       coffee-script-source
       execjs
@@ -48,6 +49,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  closure-compiler
   coffee-script
   jekyll!
   rdiscount

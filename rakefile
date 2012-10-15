@@ -1,6 +1,8 @@
 # coding: utf-8
 require 'yaml'
 require 'json'
+require 'tempfile'
+require 'pathname'
 
 begin
   require 'term/ansicolor'
@@ -100,6 +102,31 @@ def get_writable_git_url()
   end
   
   $1.sub("git://", "git@").sub("github.com/", "github.com:")
+end
+
+def prepare_patched_jekyll_config(dev_mode=false)
+  begin
+    config = YAML.load_file('_config.yml')
+  rescue => err
+    config = {}
+  end
+  
+  config["layouts"] = "shared/layouts"
+  config["plugins"] = "../.jekyll-plugins"
+  config["stylus"] = {
+    "compress" => true,
+    "path" => "./shared/css/site.styl"
+  }
+  config["combinejs"] = {
+    "path" => "./shared/js/code.list",
+    "minify" => (not dev_mode)
+  }
+
+  temp_config = Tempfile.new('jekyll_config.yml')
+  temp_config.write(YAML.dump(config))
+  temp_config.close
+  
+  Pathname.new(temp_config.path).relative_path_from(Pathname.new Dir.pwd)
 end
 
 ################################################################################
@@ -223,13 +250,12 @@ task :serve do
     path = path_for_domain(domain)
     port = port_for_domain(domain)
     Dir.chdir path do
-      patch_jekyll_config()
+      config = prepare_patched_jekyll_config(true) # dev mode
       work_dir = File.join(TEMP_DIR, "serve", domain)
       sys("mkdir -p \"#{work_dir}\"")
-      sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} \"#{work_dir}\" &")
+      sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\" &")
     end
   end
-  sleep 8
 
   # run reverse proxy
   sys("rake -s proxy_config > .proxy.config")
@@ -245,35 +271,17 @@ task :serve do
   Process.kill('INT', -Process.getpgrp)    
 end
 
-def patch_jekyll_config()
-  begin
-    config = YAML.load_file('_config.yml')
-  rescue => err
-    config = {}
-  end
-  
-  config["layouts"] = "shared/layouts"
-  config["plugins"] = "../.jekyll-plugins"
-  config["stylus"] = {
-    "compress" => true,
-    "path" => "./shared/css/site.styl"
-  }
-
-  File.open('_config.yml', "w") do |f|
-      f.write(YAML.dump(config))
-  end  
-end
-
 def build_single_web(name, stage)
   domain = subdomain(name)
 
   # build jekyll
   Dir.chdir name do
-    patch_jekyll_config()
-    sys("bundle exec jekyll \"#{stage}/_#{name}\"")
+    config = prepare_patched_jekyll_config()
+    sys("bundle exec jekyll --config \"#{config}\" \"#{stage}/_#{name}\"")
   end
   
   # sync static site to stage
+  sys("mkdir -p \"#{stage}/#{name}\"")
   sys("cp -r \"#{stage}/_#{name}\"/* \"#{stage}/#{name}\"")
 end
 
