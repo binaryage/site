@@ -272,6 +272,8 @@ end
 def build_single_web(name, stage)
   domain = subdomain(name)
 
+  sys("rm -rf \"#{stage}/_#{name}\"") # make it clean just for sure
+
   # build jekyll
   Dir.chdir name do
     config = prepare_patched_jekyll_config()
