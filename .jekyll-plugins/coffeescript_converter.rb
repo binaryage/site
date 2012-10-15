@@ -16,7 +16,8 @@ module Jekyll
       begin
         CoffeeScript.compile content
       rescue StandardError => e
-        puts "CoffeeScript error:" + e.message
+        STDERR.puts "CoffeeScript error:" + e.message
+        raise FatalException.new("CoffeeScript error: #{e.message}")
       end
     end
   end
