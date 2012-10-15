@@ -73,6 +73,8 @@ module Jekyll
           site.pages.each do |page|
             if file == page.destination(site.source) then
               site.pages.delete(page)
+              # we need to pre-render the page, generate step goes prior page generation
+              page.render(site.layouts, site.site_payload)
               removed_files << page
               break
             end
