@@ -72,7 +72,7 @@ def port_for_domain(domain)
   BASE_PORT + $all_domains.index(domain)
 end
 
-def path_for_domain(domain) 
+def path_for_domain(domain)
   $all[$all_domains.index(domain)]
 end
 
@@ -95,7 +95,7 @@ def get_writable_git_url()
     puts "unable to parse: #{res} (ouput from: git remote show origin | grep \"Fetch URL:\")"
     exit 2
   end
-  
+
   $1.sub("git://", "git@").sub("github.com/", "github.com:")
 end
 
@@ -105,7 +105,7 @@ def prepare_patched_jekyll_config(dev_mode=false)
   rescue => err
     config = {}
   end
-  
+
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
   config["stylus"] = {
@@ -123,7 +123,7 @@ def prepare_patched_jekyll_config(dev_mode=false)
   temp_config = Tempfile.new('jekyll_config.yml')
   temp_config.write(YAML.dump(config))
   temp_config.close
-  
+
   Pathname.new(temp_config.path).relative_path_from(Pathname.new Dir.pwd)
 end
 
@@ -157,7 +157,7 @@ task :init => [:init_gem, :init_npm] do
   $slaves.each do |slave|
     sys("rm -rf \"#{slave}/shared\"")
   end
-  
+
   # download submodules into master repo
   Dir.chdir($master) do
     sys("git submodule update --init")
@@ -166,7 +166,7 @@ task :init => [:init_gem, :init_npm] do
       sys("git remote set-url --push origin #{get_writable_git_url()}")
     end
   end
-  
+
   # for each slave, "symlink" submodules from master repo
   $slaves.each do |slave|
     Dir.chdir(slave) do
@@ -228,7 +228,7 @@ task :proxy_config do
     "router" => {
     }
   }
-  
+
   $all_domains.each do |domain|
     port = port_for_domain(domain)
     hash["router"]["#{domain}.#{LOCAL_DOMAIN}"] = "127.0.0.1:#{port}"
@@ -239,10 +239,10 @@ end
 desc "run dev server"
 task :serve do
   puts "note: make sure you have /etc/hosts properly configured, see> rake hosts"
-  
+
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
-  # run jekyll sites  
+  # run jekyll sites
   $all_domains.each do |domain|
     next unless what.include?(domain)
     path = path_for_domain(domain)
@@ -260,13 +260,13 @@ task :serve do
   puts "Launching proxy server on port 80 (root needed)"
   puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
   sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config")
-  
+
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
   trap("INT") do
     exit
   end
-  Process.kill('INT', -Process.getpgrp)    
+  Process.kill('INT', -Process.getpgrp)
 end
 
 def build_single_web(name, stage)
@@ -277,17 +277,18 @@ def build_single_web(name, stage)
     config = prepare_patched_jekyll_config()
     sys("bundle exec jekyll --config \"#{config}\" \"#{stage}/_#{name}\"")
   end
-  
+
   # sync static site to stage
   sys("mkdir -p \"#{stage}/#{name}\"")
   sys("cp -r \"#{stage}/_#{name}\"/* \"#{stage}/#{name}\"")
+  sys("rm -rf \"#{stage}/_#{name}\"")
 end
 
 desc "build site"
 task :build do
   what = (ENV["what"] || $all_domains.join(",")).split(",")
   stage = ENV["stage"] || File.join(ROOT, "stage")
-  
+
   what.each do |web|
     build_single_web(web, stage)
   end
@@ -331,7 +332,7 @@ end
 desc "convert pngs to loseless jpgs"
 task :strip do
   require_rmagick!
-  
+
   Dir.glob(File.join(WWW, 'shared', "img", "*.png")) do |file|
     next unless file =~ /body-repeat/
     puts file
@@ -348,7 +349,7 @@ task :print do
   Dir.glob(File.join(WWW, 'shared', "img", "*.png")) do |file|
     next unless file =~ /tabs-background/
     puts file
-        
+
     img = Magick::Image::read(file).first
     puts "   Format: #{img.format}"
     puts "   Geometry: #{img.columns}x#{img.rows}"
@@ -363,7 +364,7 @@ task :print do
     puts "   Filesize: #{img.filesize}"
     puts "   Resolution: #{img.x_resolution.to_i}x#{img.y_resolution.to_i} "+"pixels/#{img.units == Magick::PixelsPerInchResolution ? "inch" : "centimeter"}"
     if img.properties.length > 0
-      puts "   Properties:" 
+      puts "   Properties:"
       img.properties { |name,value| puts %Q|      #{name} = "#{value}"| }
     end
   end
@@ -372,7 +373,7 @@ end
 desc "convert icons to other formats"
 task :icons do
   require_rmagick!
-  
+
   Dir.glob(File.join(WWW, 'shared', "img", "icons", "totalspaces-512.png")) do |file|
     puts file
     image = ImageList.new(file)
@@ -388,7 +389,7 @@ task :icons do
     file256 = file.gsub('512', '256')
     image256 = image.resize(256, 256)
     image256.write(file256)
-        
+
     file512white = file.gsub('512', '512-white')
     bg = Image.new(image.columns, image.rows) {
       self.background_color = "white"
