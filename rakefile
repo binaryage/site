@@ -68,11 +68,6 @@ def sys(cmd)
   end
 end
 
-def sys(cmd)
-  puts blue("> "+cmd)
-  system(cmd)
-end
-
 def port_for_domain(domain)
   BASE_PORT + $all_domains.index(domain)
 end
