@@ -56,6 +56,7 @@ module Jekyll
         site.static_files.delete_if { |sf| sf.path == list_file }
 
         list.each do |file|
+          next if file.strip.empty?
           found = false
           # remove listed file from static files (if present)
           site.static_files.each do |sf|
