@@ -13,7 +13,7 @@
 module Jekyll
   class StylusConverter < Converter
     safe true
-    
+
     def setup
       return if @setup
       require 'stylus'
@@ -26,15 +26,15 @@ module Jekyll
       STDERR.puts '  $ [sudo] gem install stylus'
       raise FatalException.new('Missing dependency: stylus')
     end
-    
+
     def matches(ext)
       ext =~ /styl/i
     end
-    
+
     def output_ext(ext)
       '.css'
     end
-    
+
     def convert(content)
       # puts content
       begin

@@ -1,4 +1,13 @@
 GIT
+  remote: git://github.com/binaryage/html_press.git
+  revision: 4d1f95a82357b44bd73079b8e89034b70e3f2c68
+  specs:
+    html_press (0.7.1)
+      css_press (>= 0.3.2)
+      htmlentities
+      uglifier
+
+GIT
   remote: git://github.com/binaryage/jekyll.git
   revision: 1d156dc527c6dc825c7faaa1f19ffc48c51bc77b
   specs:
@@ -13,6 +22,10 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    POpen4 (0.1.4)
+      Platform (>= 0.4.0)
+      open4
+    Platform (0.4.0)
     blankslate (3.1.2)
     classifier (1.3.3)
       fast-stemmer (>= 1.0.0)
@@ -21,16 +34,23 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.3.3)
+    css_press (0.3.2)
+      csspool-st (= 3.1.2)
+      json
+    csspool-st (3.1.2)
     directory_watcher (1.4.1)
     execjs (1.4.0)
       multi_json (~> 1.0)
     fast-stemmer (1.0.1)
     ffi (1.0.11)
+    htmlentities (4.3.1)
+    json (1.7.5)
     kramdown (0.13.8)
     liquid (2.4.1)
     maruku (0.6.1)
       syntax (>= 1.0.0)
     multi_json (1.3.6)
+    open4 (1.3.0)
     pygments.rb (0.2.13)
       rubypython (~> 0.5.3)
     rdiscount (1.6.8)
@@ -44,6 +64,11 @@ GEM
     syntax (1.0.0)
     term-ansicolor (1.0.7)
     tilt (1.3.3)
+    uglifier (1.3.0)
+      execjs (>= 0.3.0)
+      multi_json (~> 1.0, >= 1.0.2)
+    yui-compressor (0.9.6)
+      POpen4 (>= 0.1.4)
 
 PLATFORMS
   ruby
@@ -51,8 +76,10 @@ PLATFORMS
 DEPENDENCIES
   closure-compiler
   coffee-script
+  html_press!
   jekyll!
   rdiscount
   stylus
   term-ansicolor
   tilt
+  yui-compressor

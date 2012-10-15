@@ -116,6 +116,9 @@ def prepare_patched_jekyll_config(dev_mode=false)
     "path" => "./shared/js/code.list",
     "minify" => (not dev_mode)
   }
+  config["html_press"] = {
+    "compress" => (not dev_mode)
+  }
 
   temp_config = Tempfile.new('jekyll_config.yml')
   temp_config.write(YAML.dump(config))

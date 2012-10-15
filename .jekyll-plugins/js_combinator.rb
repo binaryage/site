@@ -3,26 +3,26 @@ require 'closure-compiler' # https://github.com/documentcloud/closure-compiler
 
 module Jekyll
   module JsCombinator
-    
+
     class Page
       attr_accessor :dir
     end
-    
+
     class CombinedJsFile < Jekyll::StaticFile
       attr_accessor :list, :minify
-      
+
       def write(dest)
         dest_path = File.join(dest, @dir, @name)
-  
+
         content = []
         @list.each do |thing|
           content << File.read(thing.path) if thing.kind_of?(Jekyll::StaticFile)
           content << thing.output if thing.kind_of?(Jekyll::Page)
         end
-        
+
         # if there is missing semicolon at the end of some file, new line is a safe delimiter
         content = content.join("\n")
-        
+
         FileUtils.mkdir_p(File.dirname(dest_path))
         begin
           content = Closure::Compiler.new.compile(content) if @minify
@@ -37,7 +37,7 @@ module Jekyll
         true
       end
     end
-    
+
     class CombinedJsGenerator < Jekyll::Generator
       safe true
 
@@ -45,16 +45,16 @@ module Jekyll
         list_file = File.expand_path(File.join(site.source, site.config["combinejs"]["path"]))
         list_file_dir = File.dirname(list_file)
         list = File.read(list_file).split("\n")
-        
+
         list.map! do |path|
           File.expand_path(File.join(list_file_dir, path+".js"))
         end
-        
+
         removed_files = []
-        
+
         # remove list from static files
         site.static_files.delete_if { |sf| sf.path == list_file }
-        
+
         list.each do |file|
           found = false
           # remove listed file from static files (if present)
@@ -80,7 +80,16 @@ module Jekyll
             end
           end
         end
-        
+
+        # site.pages.clone.each do |page|
+        #   puts page.dir
+        #   if page.dir == "shared/layouts" then
+        #     puts "deleted #{page}"
+        #     site.pages.delete(page)
+        #     break
+        #   end
+        # end
+
         # something.list -> something.js (will contain final concatenated js files)
         name = File.basename(list_file, ".list") + ".js"
         destination = list_file_dir.sub(site.source, '')
