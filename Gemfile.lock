@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: git://github.com/binaryage/jekyll.git
-  revision: 1d156dc527c6dc825c7faaa1f19ffc48c51bc77b
+  revision: 191d4da8c5abac40d3d850e2de451e4ee063af57
   specs:
     jekyll (0.11.2)
       classifier (~> 1.3)
