@@ -5,50 +5,62 @@ This is an umbrella project to organize sites under *.binaryage.com.
   * local development server
   * maintenance utilities
   * mass deploying
-  
+
 ### The idea
 
 The idea is to have one repo with all subdomains as separate repositories, each tracked as am individual git submodule. Individual sites have usually a dependency on [shared](/binaryage/shared) - again tracked as a git submodule. This should give us tools to reconstruct the whole site to any point in the history while having granular control of commit rights to parts of the site. Nice transparency via GitHub is a bonus.
 
     .
     ├── www
-    │   ├── shared
-    │   ├── index.md
+    │   ├── shared
+    │   ├── index.md
     |   ...
     ├── totalfinder-web
-    │   ├── shared
-    │   ├── index.md
+    │   ├── shared
+    │   ├── index.md
     |   ...
     ├── totalspaces-web
-    │   ├── shared
-    │   ├── index.md
+    │   ├── shared
+    │   ├── index.md
     |   ...
     ├── blog
     ...
-  
+
+### Shared stuff
+
+Files which should be shared by all sites should go into [shared](/binaryage/shared) repo.
+
+  * layouts - jekyll layout files, these won't be present in the generate site
+  * includes - various includes for layout files, these won't be present in the generate site
+  * root - these will be generated as usual and then moved to the root level of the site, useful for generating the same page into all sites, like 404.html
+  * img - shared images
+  * css - shared css files, we use stylus for preprocessing
+  * js - shared javascript/coffeescript files
+  * ...
+
 ### Prerequisities
 
   * [ruby](http://www.ruby-lang.org), [rake](http://rake.rubyforge.org), [rubygems](http://rubygems.org)
   * [node.js](http://nodejs.org), [npm](http://npmjs.org)
-  
+
 **Recommended** (optional):
 
   * [brew](http://mxcl.github.com/homebrew)
   * [rvm](http://beginrescueend.com)
   * [nvm](https://github.com/creationix/nvm)
-  
+
 ### Bootstrap local development
 
     git clone git@github.com:binaryage/site.git
     cd site
     rake init
-    
+
 Init task does [several things](https://github.com/binaryage/site/blob/master/rakefile#L120-153):
-  
+
   * fetches all submodules
   * updates push remote urls to be writable
   * hard-links all shared submodules into www/shared
-  
+
 Hard-linking is essential for local development. Changes you make under `shared` are then effective in all repos.
 
     .
@@ -67,7 +79,7 @@ Hard-linking is essential for local development. Changes you make under `shared`
     ├── blog
     ...
 
-    
+
 ### Launch development server
 
   * make sure you have your /etc/hosts properly configured, see `rake hosts`
@@ -75,7 +87,7 @@ Hard-linking is essential for local development. Changes you make under `shared`
 **To run the full dev server**:
 
     rake
-    
+
 **To run the dev server only for selected sub-sites**:
 
     rake serve what=www,totalspaces,blog
@@ -83,7 +95,7 @@ Hard-linking is essential for local development. Changes you make under `shared`
 ### Deployment
 
 You don't have to push to this `site` repo if you want to update some web.
-Just make changes in some subsite repo and push your changes into it's `web` branch. 
+Just make changes in some subsite repo and push your changes into it's `web` branch.
 
 We have setup post-recieve hook which will build whole web site and then will push baked static site files back into `gh-pages` branch. [GitHub Pages](//pages.github.com) will do the deployment automatically. It will also move pointer of submodule here in the `site` repo.  <span style="color:red">Don't forget to push `shared` submodule first if you have modified some shared stuff.</span>
 

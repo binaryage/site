@@ -1,5 +1,6 @@
 module Jekyll
   require 'coffee-script'
+
   class CoffeeScriptConverter < Converter
     safe true
     priority :normal
@@ -21,4 +22,5 @@ module Jekyll
       end
     end
   end
+
 end

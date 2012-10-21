@@ -47,8 +47,10 @@ $slaves = [
   RESTATIC,
   TESTWEB
 ]
+$all = [$master].concat $slaves
 
 TEMP_DIR = "/tmp/binaryage-site"
+STAGE_DIR = File.join(ROOT, "_stage")
 
 STORE_TEMPLATE_WORKING_DIR = File.join(TEMP_DIR, '_storetemplate')
 STORE_TEMPLATE_WORKING_DIR_WINDOW = File.join(STORE_TEMPLATE_WORKING_DIR, 'window.xhtml')
@@ -87,6 +89,7 @@ end
 
 # "some/path/to/repo" => "repo"
 def extract_name(path)
+  return if path.nil?
   name = path.split("/").last # get last component of the path
 end
 
@@ -96,16 +99,26 @@ def subdomain(path)
   name.split("-")[0] # strips -web postfixes
 end
 
-$all = [$master].concat $slaves
+
 $all_domains = $all.collect {|x| subdomain(x)}
 $all_names = $all.collect {|x| extract_name(x)}
 
 def port_for_domain(domain)
-  BASE_PORT + $all_domains.index(domain)
+  i = $all_domains.index(domain)
+  return if i.nil?
+  BASE_PORT + i
 end
 
 def path_for_domain(domain)
-  $all[$all_domains.index(domain)]
+  i = $all_domains.index(domain)
+  return if i.nil?
+  $all[i]
+end
+
+def name_for_domain(domain)
+  i = $all_domains.index(domain)
+  return if i.nil?
+  $all_names[i]
 end
 
 def require_rmagick!
@@ -147,7 +160,7 @@ def get_writable_git_url()
   $1.sub("git://", "git@").sub("github.com/", "github.com:")
 end
 
-def prepare_patched_jekyll_config(dev_mode=false)
+def prepare_patched_jekyll_config(dev_mode, repo)
   begin
     config = YAML.load_file('_config.yml')
   rescue => err
@@ -156,6 +169,8 @@ def prepare_patched_jekyll_config(dev_mode=false)
 
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
+  config["url"] = "http://#{subdomain(repo)}.binaryage.com"
+  config["markdown"] = "rdiscount"
   config["stylus"] = {
     "compress" => true,
     "path" => "./shared/css/site.styl"
@@ -324,24 +339,34 @@ task :serve do
 
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
-  # run jekyll sites
-  $all_domains.each do |domain|
-    next unless what.include?(domain)
-    path = path_for_domain(domain)
-    port = port_for_domain(domain)
-    Dir.chdir path do
-      config = prepare_patched_jekyll_config(true) # dev mode
-      work_dir = File.join(TEMP_DIR, "serve", domain)
-      sys("mkdir -p \"#{work_dir}\"")
-      sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\" &")
-    end
-  end
-
   # run reverse proxy
   sys("rake -s proxy_config > .proxy.config")
   puts "Launching proxy server on port 80 (root needed)"
   puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
-  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config")
+  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config &")
+
+  # run jekyll sites
+  what.each do |web|
+    unless $all_names.include? web
+      # got subdomain name instead?
+      path = path_for_domain(web)
+      die "unknown web: #{web}" unless path
+      web = extract_name(path)
+    end
+    unless $all_names.include? web
+      die "unknown web: #{web}"
+    end
+    domain = subdomain(web)
+    path = path_for_domain(domain)
+    port = port_for_domain(domain)
+
+    Dir.chdir path do
+      config = prepare_patched_jekyll_config(true, name) # dev mode
+      work_dir = File.join(TEMP_DIR, "serve", domain)
+      sys("mkdir -p \"#{work_dir}\"")
+      sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\"")
+    end
+  end
 
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
@@ -351,29 +376,34 @@ task :serve do
   Process.kill('INT', -Process.getpgrp)
 end
 
-def build_single_web(name, stage)
+def build_single_web(name, stage, clean_stage=true)
   domain = subdomain(name)
+  dest = File.join(stage, name)
 
-  sys("rm -rf \"#{stage}/_#{name}\"") # make it clean just for sure
+  sys("rm -rf \"#{dest}\"") if clean_stage
 
   # build jekyll
   Dir.chdir name do
-    config = prepare_patched_jekyll_config()
-    sys("bundle exec jekyll --config \"#{config}\" \"#{stage}/_#{name}\"")
+    config = prepare_patched_jekyll_config(false, name)
+    sys("bundle exec jekyll --config \"#{config}\" \"#{dest}\"")
   end
 
-  # sync static site to stage
-  sys("mkdir -p \"#{stage}/#{name}\"")
-  sys("cp -r \"#{stage}/_#{name}\"/* \"#{stage}/#{name}\"")
-  sys("rm -rf \"#{stage}/_#{name}\"")
+  puts "=> " + "#{dest}".magenta
 end
 
 desc "build site"
 task :build do
   what = (ENV["what"] || $all_domains.join(",")).split(",")
-  stage = ENV["stage"] || File.join(ROOT, "stage")
+  stage = ENV["stage"] || STAGE_DIR
 
   what.each do |web|
+    unless $all_names.include? web
+      puts web
+      # got subdomain name instead?
+      path = path_for_domain(web)
+      die "unknown web: #{web}" if path.nil?
+      web = extract_name(path)
+    end
     build_single_web(web, stage)
   end
 end
@@ -407,8 +437,8 @@ task :upgrade do
   $all.each do |path|
     puts "in #{path.yellow}"
     Dir.chdir(path) do
-       sys("git checkout web")
-       sys("git commit -am \"update 404\"")
+       sys("rm 404.html")
+       sys("git commit -am \"removed 404 file, it will be auto-generated from shared/pages/404.md\"")
     end
   end
 end
@@ -586,23 +616,6 @@ task :store do
     end
 
     puts "Store template is in " + ZIP_PATH.yellow + ". " + "Don't forget to upload it to FastSpring".green
-end
-
-desc "generate 404.html and copy it to all subdomains"
-task :error404 do
-    # build the site using jekyll
-    sys("rm -rf \"#{STORE_STAGE_DIR}\"")
-    sys("rm 404.html")
-    sys('jekyll')
-
-    page = File.join(STORE_STAGE_DIR, "404.html")
-    die("something went wrong, page #{page} does not exist") unless File.exists?(page)
-
-    Dir.glob(File.join(ROOT, "..", "*")) do |path|
-        next unless File.directory?(path)
-        dir = File.expand_path(path)
-        sys("cp \"#{page}\" \"#{dir}\"")
-    end
 end
 
 task :default => :serve

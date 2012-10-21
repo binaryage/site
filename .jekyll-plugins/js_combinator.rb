@@ -4,10 +4,6 @@ require 'closure-compiler' # https://github.com/documentcloud/closure-compiler
 module Jekyll
   module JsCombinator
 
-    class Page
-      attr_accessor :dir
-    end
-
     class CombinedJsFile < Jekyll::StaticFile
       attr_accessor :list, :minify
 
@@ -81,15 +77,6 @@ module Jekyll
             end
           end
         end
-
-        # site.pages.clone.each do |page|
-        #   puts page.dir
-        #   if page.dir == "shared/layouts" then
-        #     puts "deleted #{page}"
-        #     site.pages.delete(page)
-        #     break
-        #   end
-        # end
 
         # something.list -> something.js (will contain final concatenated js files)
         name = File.basename(list_file, ".list") + ".js"
