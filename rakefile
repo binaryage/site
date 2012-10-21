@@ -183,6 +183,10 @@ def prepare_patched_jekyll_config(dev_mode, repo)
   config["html_press"] = {
     "compress" => (not dev_mode)
   }
+  config["busterizer"] = {
+    "css" => (not dev_mode),
+    "html" => (not dev_mode)
+  }
 
   temp_config = Tempfile.new('jekyll_config.yml')
   temp_config.write(YAML.dump(config))
