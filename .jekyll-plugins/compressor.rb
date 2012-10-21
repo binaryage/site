@@ -24,4 +24,20 @@ module Jekyll
     end
   end
 
+  class Post
+    alias_method :compressor_orig_write, :write
+
+    def write(dest)
+      puts "generating > #{destination(dest)}"
+      do_press = @site.config["html_press"]["compress"]
+      if do_press then
+        self.output = HtmlPress.press(self.output, {
+          :strip_crlf => false,
+          :logger => SimpleLogger.new
+        })
+      end
+      compressor_orig_write(dest)
+    end
+  end
+
 end
