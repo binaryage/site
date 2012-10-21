@@ -53,6 +53,7 @@ module Jekyll
           return # skip it, the file already exists in the repo at the root level
         end
         puts "rewriting /shared/root/#{@name} -> #{new_path}"
+        self.output.gsub!(/shared\/root\//, "")
       end
       reshaper_orig_write dest
     end
