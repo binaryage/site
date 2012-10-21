@@ -169,7 +169,7 @@ def prepare_patched_jekyll_config(dev_mode, repo)
 
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
-  config["url"] = "http://#{subdomain(repo)}.binaryage.com"
+  config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
   config["markdown"] = "rdiscount"
   config["stylus"] = {
     "compress" => true,
@@ -339,12 +339,6 @@ task :serve do
 
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
-  # run reverse proxy
-  sys("rake -s proxy_config > .proxy.config")
-  puts "Launching proxy server on port 80 (root needed)"
-  puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
-  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config &")
-
   # run jekyll sites
   what.each do |web|
     unless $all_names.include? web
@@ -361,12 +355,20 @@ task :serve do
     port = port_for_domain(domain)
 
     Dir.chdir path do
-      config = prepare_patched_jekyll_config(true, name) # dev mode
+      config = prepare_patched_jekyll_config(true, web) # dev mode
       work_dir = File.join(TEMP_DIR, "serve", domain)
       sys("mkdir -p \"#{work_dir}\"")
       sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\"")
     end
   end
+
+  sleep 5 # wait for jekyll to spill its output
+
+  # run reverse proxy
+  sys("rake -s proxy_config > .proxy.config")
+  puts "Launching proxy server on port 80 (root needed)"
+  puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
+  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config")
 
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
