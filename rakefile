@@ -80,9 +80,10 @@ def die(msg, code=1)
   exit(code)
 end
 
-def sys(cmd)
+def sys(cmd, check=true)
   puts "> #{cmd}".blue
-  if not system(cmd) then
+  res = system(cmd)
+  if check and not res then
     die "something went wrong"
   end
 end
@@ -423,7 +424,7 @@ task :force do
   end
 end
 
-desc "push all"
+desc "push all webs"
 task :push do
   $all.each do |path|
     puts "in #{path.yellow}"
@@ -433,14 +434,24 @@ task :push do
   end
 end
 
-desc "upgrade submodule pointers"
+desc "rebase all webs"
+task :rebase do
+  $all.each do |path|
+    puts "in #{path.yellow}"
+    Dir.chdir(path) do
+      sys("git fetch")
+      sys("git rebase origin/web")
+    end
+  end
+end
+
+desc "some maintenance work"
 task :upgrade do
   # better use: git submodule foreach 'cmds'
   $all.each do |path|
     puts "in #{path.yellow}"
     Dir.chdir(path) do
-       sys("rm 404.html")
-       sys("git commit -am \"removed 404 file, it will be auto-generated from shared/pages/404.md\"")
+       sys("git commit -am \"removed jekyll config file, it will be generated with defaults if not present\"", false)
     end
   end
 end
