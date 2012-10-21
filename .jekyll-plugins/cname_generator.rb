@@ -6,17 +6,19 @@ end
 
 module Jekyll
 
-  class CnamePageGenerator < Generator
-    safe true
+  class Site
+    alias_method :cname_orig_cleanup, :cleanup
 
-    def generate(site)
-      if will_be_generated?(site, nil, site.dest, File.join(site.dest, "CNAME")) then
+    def cleanup
+      cname_orig_cleanup
+
+      if will_be_generated?(self, nil, @dest, File.join(@dest, "CNAME")) then
         puts "!skipping generating CNAME"
         return
       end
 
-      cname = site.config["url"].gsub("http://", "")
-      cname_path = File.join(site.dest, "CNAME")
+      cname = @config["url"].gsub("http://", "")
+      cname_path = File.join(@dest, "CNAME")
       puts "generating CNAME: #{cname}"
       FileUtils.mkdir_p(File.dirname(cname_path))
       File.open(cname_path, 'w') {|f| f.write(cname) }
