@@ -161,7 +161,7 @@ def get_writable_git_url()
   $1.sub("git://", "git@").sub("github.com/", "github.com:")
 end
 
-def prepare_patched_jekyll_config(dev_mode, repo)
+def prepare_patched_jekyll_config(dev_mode, repo, busters)
   begin
     config = YAML.load_file('_config.yml')
   rescue => err
@@ -184,8 +184,8 @@ def prepare_patched_jekyll_config(dev_mode, repo)
     "compress" => (not dev_mode)
   }
   config["busterizer"] = {
-    "css" => (not dev_mode),
-    "html" => (not dev_mode)
+    "css" => (busters and (not dev_mode)),
+    "html" => (busters and (not dev_mode))
   }
 
   temp_config = Tempfile.new('jekyll_config.yml')
@@ -383,7 +383,7 @@ task :serve do
   Process.kill('INT', -Process.getpgrp)
 end
 
-def build_single_web(name, stage, clean_stage=true)
+def build_single_web(name, stage, clean_stage=true, busters=true)
   domain = subdomain(name)
   dest = File.join(stage, name)
 
@@ -391,7 +391,7 @@ def build_single_web(name, stage, clean_stage=true)
 
   # build jekyll
   Dir.chdir name do
-    config = prepare_patched_jekyll_config(false, name)
+    config = prepare_patched_jekyll_config(false, name, busters)
     sys("bundle exec jekyll --config \"#{config}\" \"#{dest}\"")
   end
 
@@ -584,7 +584,7 @@ desc "generate store template zip" # see https://springboard.fastspring.com/site
 task :store do
     # build the site using jekyll
     sys("rm -rf \"#{STORE_STAGE_DIR}\"")
-    build_single_web('www', STORE_STAGE_DIR)
+    build_single_web('www', STORE_STAGE_DIR, true, false) # no cache busters
 
     # copy interesting parts
     sys("rm -rf \"#{STORE_TEMPLATE_WORKING_DIR}\"")
