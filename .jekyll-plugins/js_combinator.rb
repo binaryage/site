@@ -1,5 +1,6 @@
 # based on code from: https://github.com/lyoshenka/jekyll-js-minify-plugin
 require 'closure-compiler' # https://github.com/documentcloud/closure-compiler
+require 'colored'
 
 module Jekyll
   module JsCombinator
@@ -21,7 +22,32 @@ module Jekyll
 
         FileUtils.mkdir_p(File.dirname(dest_path))
         begin
-          content = Closure::Compiler.new.compile(content) if @minify
+          if @minify then
+            print "minifying #{dest_path} "
+            res = nil
+            cache_dir = @site.config["html_press"]["cache"]
+            if cache_dir then
+              my_cache_dir = File.join(cache_dir, "list")
+              sha = Digest::SHA1.hexdigest content
+              cache_hit = File.join(my_cache_dir, sha)
+              if File.exists? cache_hit then
+                print "<= cache @ #{nice_cache_hit(cache_hit).green}"
+                res = File.read(cache_hit)
+              end
+            end
+            if not res then
+              print "=> compiling"
+              res = Closure::Compiler.new.compile(content)
+            end
+            if cache_hit and not File.exists? cache_hit then
+              print " @ #{nice_cache_hit(cache_hit).red}"
+              FileUtils.mkdir_p(my_cache_dir)
+              File.open(cache_hit, 'w') {|f| f.write(res) }
+            end
+            print "\n"
+            content = res
+          end
+
           File.open(dest_path, 'w') do |f|
             f.write(content)
           end

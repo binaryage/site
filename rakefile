@@ -51,6 +51,7 @@ $all = [$master].concat $slaves
 
 TEMP_DIR = "/tmp/binaryage-site"
 STAGE_DIR = File.join(ROOT, "_stage")
+PRESS_CACHE_DIR = File.join(STAGE_DIR, "_cache")
 
 STORE_TEMPLATE_WORKING_DIR = File.join(TEMP_DIR, '_storetemplate')
 STORE_TEMPLATE_WORKING_DIR_WINDOW = File.join(STORE_TEMPLATE_WORKING_DIR, 'window.xhtml')
@@ -181,7 +182,8 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
     "minify" => (not dev_mode)
   }
   config["html_press"] = {
-    "compress" => (not dev_mode)
+    "compress" => (not dev_mode),
+    "cache" => PRESS_CACHE_DIR
   }
   config["busterizer"] = {
     "css" => (busters and (not dev_mode)),
