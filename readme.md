@@ -1,6 +1,6 @@
 # BinaryAge Site
 
-This is an umbrella project to organize sites under *.binaryage.com.
+This is an umbrella project to organize sites under [*.binaryage.com](http://www.binaryage.com).
 
   * local development server
   * maintenance utilities
@@ -30,12 +30,12 @@ The idea is to have one repo with all subdomains as separate repositories, each 
 
 Files which should be shared by all sites should go into [shared](/binaryage/shared) repo.
 
-  * layouts - jekyll layout files, these won't be present in the generate site
-  * includes - various includes for layout files, these won't be present in the generate site
-  * root - these will be generated as usual and then moved to the root level of the site, useful for generating the same page into all sites, like 404.html
-  * img - shared images
-  * css - shared css files, we use stylus for preprocessing
-  * js - shared javascript/coffeescript files
+  * [layouts](https://github.com/binaryage/shared/tree/master/layouts) - jekyll layout files, these won't be present in the generate site
+  * [includes](https://github.com/binaryage/shared/tree/master/includes) - various includes for layout files, these won't be present in the generate site
+  * [root](https://github.com/binaryage/shared/tree/master/root) - these will be generated as usual and then moved to the root level of the site, useful for generating the same page into all sites, like 404.html
+  * [img](https://github.com/binaryage/shared/tree/master/img) - shared images
+  * [css](https://github.com/binaryage/shared/tree/master/css) - shared css files, we use stylus for preprocessing and concatenation
+  * [js](https://github.com/binaryage/shared/tree/master/js) - shared javascript/coffeescript files, we have defined [.list file](https://github.com/binaryage/shared/blob/master/js/code.list) for concatenation
   * ...
 
 ### Prerequisities
@@ -55,7 +55,7 @@ Files which should be shared by all sites should go into [shared](/binaryage/sha
     cd site
     rake init
 
-Init task does [several things](https://github.com/binaryage/site/blob/master/rakefile#L120-153):
+Init task does [several things](https://github.com/binaryage/site/blob/master/rakefile):
 
   * fetches all submodules
   * updates push remote urls to be writable
@@ -98,10 +98,10 @@ You don't have to push to this `site` repo if you want to update some web. Just 
 
 We have setup post-recieve hook which will build sub-site and then will push baked static site files back into its `gh-pages` branch. [GitHub Pages](//pages.github.com) will do the deployment automatically. It will also move pointer of submodule here in the `site` repo.
 
-<div style="color:red">Don't forget to push "shared" submodule first if you have modified some shared stuff.</div>
+Don't forget to push `shared` submodule first if you have modified some shared stuff.
 
 ### Update from remote
 
-If you want to get incrementally to remote state without doing `rake init`, you may reset your repo to remote state via `rake reset`. <span style="color:red">This will destroy your local changes!!!.</span>
+If you want to get incrementally to remote state without doing `rake init`, you may reset your repo to remote state via `rake reset` (**will destroy your local changes!!!**).
 
 Alternatively you may always use your git-fu to non-destructively pull from remotes (`git submodule` is your friend).
