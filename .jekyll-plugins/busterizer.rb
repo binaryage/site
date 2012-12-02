@@ -15,6 +15,8 @@ module Jekyll
 
     def cache_busting(m, dir, m1, m2, m3)
       return m if m1[0..4]=="http"
+      return m if m2.nil? or m2=="/" or m2==""
+      m2 = m2.split("?")[0]
       if m2[0] == "/" then
         file = File.join(self.dest, m2)
       else
@@ -46,7 +48,6 @@ module Jekyll
       end
 
       File.open(path, 'w') {|f| f.write(content) }
-
     end
 
     def busterize_site

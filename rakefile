@@ -4,6 +4,7 @@ require 'json'
 require 'tempfile'
 require 'pathname'
 require 'colored'
+require 'digest/sha1'
 
 BASE_PORT = 4101
 MIN_NPM_VERSION = "1.1.18"
@@ -52,6 +53,10 @@ $all = [$master].concat $slaves
 TEMP_DIR = "/tmp/binaryage-site"
 STAGE_DIR = File.join(ROOT, "_stage")
 PRESS_CACHE_DIR = File.join(STAGE_DIR, "_cache")
+CDN_ZONE_DIR = File.join(STAGE_DIR, "_cdn")
+CDN_URL = "http://static.binaryage.com/"
+
+CONFIGS_DIR = File.join(ROOT, ".configs")
 
 STORE_TEMPLATE_WORKING_DIR = File.join(TEMP_DIR, '_storetemplate')
 STORE_TEMPLATE_WORKING_DIR_WINDOW = File.join(STORE_TEMPLATE_WORKING_DIR, 'window.xhtml')
@@ -185,16 +190,25 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
     "compress" => (not dev_mode),
     "cache" => PRESS_CACHE_DIR
   }
+  config["cdn"] = {
+    "enabled" => (not dev_mode),
+    "zone" => CDN_ZONE_DIR,
+    "url" => CDN_URL
+  }
   config["busterizer"] = {
     "css" => (busters and (not dev_mode)),
     "html" => (busters and (not dev_mode))
   }
 
-  temp_config = Tempfile.new('jekyll_config.yml')
-  temp_config.write(YAML.dump(config))
-  temp_config.close
+  output = YAML.dump(config)
+  sha = Digest::SHA1.hexdigest output
+  sha = sha[0..7]
 
-  Pathname.new(temp_config.path).relative_path_from(Pathname.new Dir.pwd)
+  FileUtils.mkdir_p(CONFIGS_DIR)
+  config_path = File.join(CONFIGS_DIR, sha+"_config.yml")
+  File.open(config_path, 'w') {|f| f.write(output) }
+
+  Pathname.new(config_path).relative_path_from(Pathname.new Dir.pwd)
 end
 
 def prune_shared(dir)
@@ -369,7 +383,7 @@ task :serve do
     end
   end
 
-  sleep 5 # wait for jekyll to spill its output
+  sleep 10
 
   # run reverse proxy
   sys("rake -s proxy_config > .proxy.config")
