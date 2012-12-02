@@ -108,7 +108,7 @@ module Jekyll
       puts "Pushing zone files to CDN...".blue
       Dir.chdir zone_dir do
         ENV["RSYNC_PASSWORD"] = password
-        cmd = "rsync -va . #{url}"
+        cmd = "rsync -va --ignore-existing . #{url}"
         unless system(cmd) then
           raise FatalException.new("rsync failed with code #{$?}")
         end
@@ -116,7 +116,7 @@ module Jekyll
     end
 
     def process
-      cdnizer_process
+      cdnizer_process # call original process method
       return unless config["cdn"]["enabled"]
       cdnizer_clean_zone!
       cdnize_site!
