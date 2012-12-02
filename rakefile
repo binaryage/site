@@ -356,7 +356,7 @@ end
 
 desc "run dev server"
 task :serve do
-  puts "note: make sure you have /etc/hosts properly configured, see> rake hosts"
+  puts "note: #{"make sure you have".green} #{"/etc/hosts".yellow} #{"properly configured, see".green} #{"rake hosts".blue}"
 
   what = (ENV["what"] || $all_domains.join(",")).split(",")
 
@@ -378,7 +378,7 @@ task :serve do
     Dir.chdir path do
       config = prepare_patched_jekyll_config(true, web, true) # dev mode
       work_dir = File.join(TEMP_DIR, "serve", domain)
-      sys("mkdir -p \"#{work_dir}\"")
+      FileUtils.mkdir_p(work_dir)
       sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\" &")
     end
   end

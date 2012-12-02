@@ -13,13 +13,13 @@ module Jekyll
       cname_orig_cleanup
 
       if will_be_generated?(self, nil, @dest, File.join(@dest, "CNAME")) then
-        puts "!skipping generating CNAME"
+        puts "#{"CNAME   ".magenta} !skipping generating CNAME"
         return
       end
 
       cname = @config["url"].gsub("http://", "")
       cname_path = File.join(@dest, "CNAME")
-      puts "generating CNAME: #{cname}"
+      puts "#{"CNAME   ".magenta} generating #{cname.green}"
       FileUtils.mkdir_p(File.dirname(cname_path))
       File.open(cname_path, 'w') {|f| f.write(cname) }
     end

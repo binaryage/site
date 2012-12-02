@@ -24,7 +24,7 @@ module Jekyll
       zone_file = File.join(zone_dir, flat_name)
       return if File.exists? zone_file
       FileUtils.cp(file_path, zone_file)
-      puts "copied #{file_path} -> #{zone_file}"
+      puts "#{"CDN     ".magenta} copied #{file_path.yellow} -> #{zone_file.yellow}"
     end
 
     def cdnize_fragment(m, dir, m1, m2, m3)
@@ -44,7 +44,7 @@ module Jekyll
     end
 
     def cdnize_file(path)
-      puts "redirecting asset urls in #{path} to #{config["cdn"]["url"]}"
+      puts "#{"CDN     ".magenta} redirecting asset urls in #{path.yellow} to #{(config["cdn"]["url"]).green}"
 
       dir = File.dirname(path)
 
@@ -92,7 +92,7 @@ module Jekyll
       zone_dir = config["cdn"]["zone"]
       raise FatalException.new("CDN error: specify config[\"cdn\"][\"zone\"]") unless zone_dir
       list = Dir.glob(File.join(zone_dir, "*"))
-      puts "Cleaning #{list.size} files in zone folder: #{zone_dir.yellow}"
+      puts "#{"CDN     ".magenta} cleaning #{"#{list.size} files".green} in zone folder: #{zone_dir.yellow}"
       FileUtils.rm(list)
     end
 
@@ -105,7 +105,7 @@ module Jekyll
         return
       end
       zone_dir = config["cdn"]["zone"]
-      puts "Pushing zone files to CDN...".blue
+      puts "#{"CDN     ".magenta} pushing zone files to CDN...".blue
       Dir.chdir zone_dir do
         ENV["RSYNC_PASSWORD"] = password
         cmd = "rsync -va --ignore-existing . #{url}"

@@ -18,7 +18,7 @@ module Jekyll
     alias_method :compressor_orig_write, :write
 
     def write(dest)
-      print "generating > #{destination(dest)} "
+      print "#{"COMPRESS".magenta} generating #{destination(dest).yellow} "
       do_press = @site.config["html_press"]["compress"]
       if self.html? and do_press then
         res = nil
@@ -56,7 +56,7 @@ module Jekyll
     alias_method :compressor_orig_write, :write
 
     def write(dest)
-      print "generating > #{destination(dest)} "
+      print "#{"COMPRESS".magenta} generating #{destination(dest).yellow} "
       do_press = @site.config["html_press"]["compress"]
       if do_press then
         res = nil

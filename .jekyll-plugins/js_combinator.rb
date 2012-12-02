@@ -23,7 +23,7 @@ module Jekyll
         FileUtils.mkdir_p(File.dirname(dest_path))
         begin
           if @minify then
-            print "minifying #{dest_path} "
+            print "#{"COMBINE ".magenta} minifying #{dest_path.yellow} "
             res = nil
             cache_dir = @site.config["html_press"]["cache"]
             if cache_dir then

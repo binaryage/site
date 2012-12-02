@@ -28,7 +28,7 @@ module Jekyll
     end
 
     def busterize_file(path)
-      puts "adding cache busters to #{path}"
+      puts "#{"BUSTER  ".magenta} adding cache busters to #{path.yellow}"
 
       dir = File.dirname(path)
 

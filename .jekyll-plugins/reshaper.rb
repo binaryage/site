@@ -49,10 +49,10 @@ module Jekyll
         @dir = @dir.gsub("shared/root", "")
         new_path = destination(dest)
         if will_be_generated?(site, self, dest, new_path)  then
-          puts "!skipped rewriting /shared/root/#{@name} -> #{new_path}"
+          puts "#{"RESHAPER".magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
           return # skip it, the file already exists in the repo at the root level
         end
-        puts "rewriting /shared/root/#{@name} -> #{new_path}"
+        puts "#{"RESHAPER".magenta} rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
         self.output.gsub!(/shared\/root\//, "")
       end
       reshaper_orig_write dest
@@ -71,10 +71,10 @@ module Jekyll
         @dir = @dir.gsub("shared/root", "")
         new_path = destination(dest)
         if will_be_generated?(site, self, dest, new_path) then
-          puts "!skipped rewriting /shared/root/#{@name} -> #{new_path}"
+          puts "#{"RESHAPER".magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
           return # skip it, the file already exists in the repo at the root level
         end
-        puts "rewriting /shared/root/#{@name} -> #{new_path}"
+        puts "#{"RESHAPER".magenta} rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
         FileUtils.mkdir_p(File.dirname(new_path))
         FileUtils.cp(orig_path, new_path)
         return
