@@ -108,7 +108,7 @@ module Jekyll
       puts "#{"CDN     ".magenta} pushing zone files to CDN...".blue
       Dir.chdir zone_dir do
         ENV["RSYNC_PASSWORD"] = password
-        cmd = "rsync -va --ignore-existing . #{url}"
+        cmd = "sshpass -p \"#{password}\" rsync -va --ignore-existing . #{url}"
         unless system(cmd) then
           raise FatalException.new("rsync failed with code #{$?}")
         end
@@ -140,9 +140,8 @@ module Jekyll
       return unless config["cdn"]["enabled"]
       cdnizer_clean_zone!
       cdnize_site!
-      # note: I wasn't able to figure out how to pass password to RSYNC with SSH transport
-      # push_zone_to_cdn_via_rsync!
-      push_zone_to_cdn_via_ftp!
+      push_zone_to_cdn_via_rsync!
+      # push_zone_to_cdn_via_ftp!
     end
 
   end
