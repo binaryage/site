@@ -96,7 +96,7 @@ module Jekyll
       FileUtils.rm(list)
     end
 
-    def push_zone_to_cdn!
+    def push_zone_to_cdn_via_rsync!
       url = ENV["CDN_RSYNC_URL"] # "rsync://user_ho054rw1@push-1.cdn77.com/user_ho054rw1/"
       password = ENV["CDN_RSYNC_PASSWORD"]
       unless (url and password)
@@ -108,10 +108,29 @@ module Jekyll
       puts "#{"CDN     ".magenta} pushing zone files to CDN...".blue
       Dir.chdir zone_dir do
         ENV["RSYNC_PASSWORD"] = password
-        cmd = "RSYNC_PASSWORD=#{password}; rsync -va --ignore-existing . #{url}"
-        puts "! #{cmd}"
+        cmd = "rsync -va --ignore-existing . #{url}"
         unless system(cmd) then
           raise FatalException.new("rsync failed with code #{$?}")
+        end
+      end
+    end
+
+    def push_zone_to_cdn_via_ftp!
+      url = ENV["CDN_FTP_URL"]
+      user = ENV["CDN_FTP_USER"]
+      password = ENV["CDN_FTP_PASSWORD"]
+      path = ENV["CDN_FTP_PATH"]
+      unless (url and password and user and path)
+        puts "set ENV variables CDN_FTP_URL and CDN_FTP_USER and CDN_FTP_PASSWORD and CDN_FTP_PATH".red
+        puts "  => skipping CDN push"
+        return
+      end
+      zone_dir = config["cdn"]["zone"]
+      puts "#{"CDN     ".magenta} pushing zone files to CDN...".blue
+      Dir.chdir zone_dir do
+        cmd = "ncftpput -R -v -u \"#{user}\" -p \"#{password}\" #{url} #{path} ."
+        unless system(cmd) then
+          raise FatalException.new("ncftpput failed with code #{$?}")
         end
       end
     end
@@ -121,7 +140,9 @@ module Jekyll
       return unless config["cdn"]["enabled"]
       cdnizer_clean_zone!
       cdnize_site!
-      push_zone_to_cdn!
+      # note: I wasn't able to figure out how to pass password to RSYNC with SSH transport
+      # push_zone_to_cdn_via_rsync!
+      push_zone_to_cdn_via_ftp!
     end
 
   end
