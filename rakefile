@@ -379,7 +379,7 @@ task :serve do
       config = prepare_patched_jekyll_config(true, web, true) # dev mode
       work_dir = File.join(TEMP_DIR, "serve", domain)
       FileUtils.mkdir_p(work_dir)
-      sys("bundle exec jekyll --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\" &")
+      sys("bundle exec jekyll serve --auto --server #{port} --url http://#{domain}.#{LOCAL_DOMAIN} --config \"#{config}\" \"#{work_dir}\" &")
     end
   end
 
@@ -408,7 +408,7 @@ def build_single_web(name, stage, clean_stage=true, busters=true)
   # build jekyll
   Dir.chdir name do
     config = prepare_patched_jekyll_config(false, name, busters)
-    sys("bundle exec jekyll --config \"#{config}\" \"#{dest}\"")
+    sys("bundle exec jekyll build --config \"#{config}\" \"#{dest}\"")
   end
 
   puts "=> " + "#{dest}".magenta
