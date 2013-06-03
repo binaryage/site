@@ -3,7 +3,7 @@ if RUBY_VERSION =~ /1.9/
   Encoding.default_internal = Encoding::UTF_8
 end
 source "http://rubygems.org"
-gem 'jekyll', :git => 'git://github.com/binaryage/jekyll.git' # our modified fork
+gem 'jekyll'
 gem 'rdiscount'
 gem 'colored'
 gem 'stylus'
