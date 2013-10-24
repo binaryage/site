@@ -30,9 +30,9 @@ The idea is to have one repo with all subdomains as separate repositories, each 
 
 Files which should be shared by all sites should go into [shared](/binaryage/shared) repo.
 
-  * [layouts](https://github.com/binaryage/shared/tree/master/layouts) - jekyll layout files, these won't be present in the generate site
-  * [includes](https://github.com/binaryage/shared/tree/master/includes) - various includes for layout files, these won't be present in the generate site
-  * [root](https://github.com/binaryage/shared/tree/master/root) - these will be generated as usual and then moved to the root level of the site, useful for generating the same page into all sites, like 404.html
+  * [layouts](https://github.com/binaryage/shared/tree/master/layouts) - jekyll layout files, these won't be present in the generated site
+  * [includes](https://github.com/binaryage/shared/tree/master/includes) - various includes for layout files, these won't be present in the generated site
+  * [root](https://github.com/binaryage/shared/tree/master/root) - these will be generated as usual and then moved to the root level of the site, useful for generating same page for all sites, like 404.html
   * [img](https://github.com/binaryage/shared/tree/master/img) - shared images
   * [css](https://github.com/binaryage/shared/tree/master/css) - shared css files, we use stylus for preprocessing and concatenation
   * [js](https://github.com/binaryage/shared/tree/master/js) - shared javascript/coffeescript files, we have defined [.list file](https://github.com/binaryage/shared/blob/master/js/code.list) for concatenation
