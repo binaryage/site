@@ -45,4 +45,4 @@
 	url = git://github.com/binaryage/test-web.git
 [submodule "visor"]
 	path = visor
-	url = git@github.com:binaryage/visor.git
+	url = git://github.com/binaryage/visor.git
