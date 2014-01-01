@@ -108,7 +108,7 @@ module Jekyll
       puts "#{"CDN     ".magenta} pushing zone files to CDN...".blue
       Dir.chdir zone_dir do
         ENV["RSYNC_PASSWORD"] = password
-        cmd = "sshpass -p \"#{password}\" rsync -va --ignore-existing . #{url}"
+        cmd = "sshpass -p \"#{password}\" rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" . #{url}"
         unless system(cmd) then
           raise FatalException.new("rsync failed with code #{$?}")
         end
