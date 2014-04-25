@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+
+var path = require('path'),
+    fs = require('fs'),
+    util  = require('util'),
+    argv = require('optimist').argv,
+    httpProxy = require('http-proxy');
+
+var help = [
+    "usage: node-http-proxy [options] ",
+    "",
+    "Starts a node-http-proxy server using the specified command-line options",
+    "",
+    "options:",
+    "  --port   PORT       Port that the proxy server should run on",
+    "  --config OUTFILE    Location of the configuration file for the proxy server",
+    "  --silent            Silence the log output from the proxy server",
+    "  -h, --help          You're staring at it"
+].join('\n');
+
+if (argv.h || argv.help || Object.keys(argv).length === 2) {
+  return util.puts(help);
+}
+
+var location, config = {},
+    port = argv.port || 80;
+
+try {
+  var data = fs.readFileSync(argv.config);
+  config = JSON.parse(data.toString());
+} catch (ex) {
+  util.puts('Error starting node-http-proxy: ' + ex);
+  process.exit(1);
+}
+
+config.silent = typeof argv.silent !== 'undefined' ? argv.silent : config.silent;
+
+var proxy = httpProxy.createProxyServer(config.proxy || {});
+
+var server;
+if (config.router) {
+  server = require('http').createServer(function(req, res) {  
+    proxy.web(req, res, {
+      target: config.router[req.headers.host]
+    });
+  });
+} else {
+  return util.puts(help);
+}
+
+server.on('error', function (e) { 
+  console.log("Error:", e);
+});
+
+server.listen(port);
+
+if (!config.silent) {
+  util.puts('node-http-proxy server now listening on port: ' + port);
+}

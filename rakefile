@@ -7,6 +7,8 @@ require 'colored'
 require 'digest/sha1'
 
 BASE_PORT = 4101
+MAIN_PORT = 80 # we will need admin rights to bind to this port
+
 MIN_NPM_VERSION = "1.1.18"
 MIN_GEM_VERSION = "1.8.23"
 LOCAL_DOMAIN = "binaryage.org"
@@ -339,28 +341,38 @@ end
 
 desc "generate proxy config"
 task :proxy_config do
-  hash = {
-    "host" => "localhost",
-    "port" => 80,
-    "hostnameOnly" => true,
+  config = {
     "router" => {
     }
   }
-
   $all_domains.each do |domain|
     port = port_for_domain(domain)
-    hash["router"]["#{domain}.#{LOCAL_DOMAIN}"] = "127.0.0.1:#{port}"
+    config["router"]["#{domain}.#{LOCAL_DOMAIN}"] = "http://127.0.0.1:#{port}"
   end
-  puts JSON.pretty_generate(hash)
+  puts JSON.pretty_generate(config)
 end
 
 desc "run dev server"
 task :serve do
   puts "note: #{"make sure you have".green} #{"/etc/hosts".yellow} #{"properly configured, see".green} #{"rake hosts".blue}"
-
-  what = (ENV["what"] || $all_domains.join(",")).split(",")
-
+  
+  pids = []
+  
+  # run reverse proxy
+  sys("rake -s proxy_config > .proxy.config")
+  pids <<  fork do
+    trap("SIGINT") { exit! }
+    at_exit {
+      # if process exits on its own we want to kill whole group
+      Process.kill('INT', -Process.getpgrp)
+    }
+    puts "=> #{"something.#{LOCAL_DOMAIN}".green}, use #{"CTRL^C to kill all".magenta}"
+    sys("sudo node .bin/proxy --port #{MAIN_PORT} --config .proxy.config")
+  end
+  
   # run jekyll sites
+  everything = $all_domains.join(",")
+  what = (ENV["what"] || everything).split(",").map {|s| s.strip }
   what.each do |web|
     unless $all_names.include? web
       # got subdomain name instead?
@@ -379,24 +391,25 @@ task :serve do
       config = prepare_patched_jekyll_config(true, web, true) # dev mode
       work_dir = File.join(TEMP_DIR, "serve", domain)
       FileUtils.mkdir_p(work_dir)
-      sys("bundle exec jekyll serve --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\" &")
+      pids << fork do
+        trap("SIGINT") { exit! }
+        at_exit { 
+          # if process exits on its own we want to kill whole group
+          Process.kill('INT', -Process.getpgrp)
+        }
+        sys("bundle exec jekyll serve --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
+      end
     end
   end
-
-  sleep 10
-
-  # run reverse proxy
-  sys("rake -s proxy_config > .proxy.config")
-  puts "Launching proxy server on port 80 (root needed)"
-  puts "=> www.#{LOCAL_DOMAIN}, use CTRL^C to kill all"
-  sys("sudo ./node_modules/.bin/node-http-proxy --config .proxy.config")
 
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
   trap("INT") do
+    Process.kill('INT', -Process.getpgrp)
     exit
   end
-  Process.kill('INT', -Process.getpgrp)
+  
+  Process.waitall
 end
 
 def build_single_web(name, stage, clean_stage=true, busters=true)
