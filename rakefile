@@ -179,6 +179,7 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
   config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
+  config["livereload_host"] = ENV["LIVERELOAD_HOST"] if ENV["LIVERELOAD_HOST"]
   config["markdown"] = "rdiscount"
   config["stylus"] = {
     "compress" => true,
@@ -360,6 +361,7 @@ task :serve do
   
   # run reverse proxy
   sys("rake -s proxy_config > .proxy.config")
+  sys("sudo -v") # just synchronous asking for password to prevent confusion in forked process with tons of output
   pids <<  fork do
     trap("SIGINT") { exit! }
     at_exit {
