@@ -40,6 +40,9 @@ var proxy = httpProxy.createProxyServer(config.proxy || {});
 var server;
 if (config.router) {
   server = require('http').createServer(function(req, res) {  
+    if (!(req.url=="/" || req.url.match(/\./))) {
+      req.url = req.url+".html";
+    }
     proxy.web(req, res, {
       target: config.router[req.headers.host]
     });
