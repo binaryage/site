@@ -2,13 +2,13 @@
 # This plugin requires the stylus gem, do:
 # $ [sudo] gem install stylus
 
-# See _config.yml above for configuration options.
+# See _config.yml for configuration options.
 
 # Caveats:
 # 1. Files intended for conversion must have empty YAML front matter a the top.
-#    See all.styl above.
-# 2. You can not @import .styl files intended to be converted.
-#    See all.styl and individual.styl above.
+#    See site.styl above.
+# 2. You must not @import .styl files intended to be converted.
+#    See site.styl and individual.styl above.
 
 module Jekyll
   class StylusConverter < Converter
@@ -16,10 +16,12 @@ module Jekyll
 
     def setup
       return if @setup
+      @setup = true
       require 'stylus'
       Stylus.compress = @config['stylus']['compress'] if @config['stylus']['compress']
       Stylus.paths << @config['stylus']['path'] if @config['stylus']['path']
-      @setup = true
+      Stylus.debug = @config['stylus']['debug'] if @config['stylus']['debug']
+      Stylus.use :nib
     rescue LoadError
       STDERR.puts $!
       STDERR.puts 'You are missing a library required for Stylus. Please run:'
@@ -36,7 +38,6 @@ module Jekyll
     end
 
     def convert(content)
-      # puts content
       begin
         setup
         Dir.chdir File.dirname(Stylus.paths[0]) do

@@ -19,7 +19,7 @@ module Jekyll
 
       cname = @config["url"].gsub("http://", "")
       cname_path = File.join(@dest, "CNAME")
-      puts "#{"CNAME   ".magenta} generating #{cname.green}"
+      puts "\n#{"CNAME   ".magenta} generating #{cname.green}"
       FileUtils.mkdir_p(File.dirname(cname_path))
       File.open(cname_path, 'w') {|f| f.write(cname) }
     end

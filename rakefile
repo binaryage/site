@@ -182,7 +182,8 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
   config["livereload_host"] = ENV["LIVERELOAD_HOST"] if ENV["LIVERELOAD_HOST"]
   config["markdown"] = "rdiscount"
   config["stylus"] = {
-    "compress" => true,
+    "compress" => (not dev_mode),
+    "debug" => dev_mode,
     "path" => "./shared/css/site.styl"
   }
   config["combinejs"] = {
@@ -250,6 +251,11 @@ end
 
 ################################################################################
 
+desc "install tool dependencies"
+task :init_tools do
+  # sys("brew install cairo --without-x11")
+end
+
 desc "install npm dependencies"
 task :init_npm do
   die "install npm (>=v#{MIN_NPM_VERSION}) => http://npmjs.org" unless Gem::Version.new(`npm --version`) >= Gem::Version.new(MIN_NPM_VERSION)
@@ -263,7 +269,7 @@ task :init_gem do
 end
 
 desc "init repositories - needs special care"
-task :init => [:init_gem, :init_npm] do
+task :init => [:init_tools, :init_gem, :init_npm] do
   sys("git remote set-url --push origin #{get_writable_git_url()}")
   sys("git submodule update --init")
 
@@ -362,15 +368,6 @@ task :serve do
   # run reverse proxy
   sys("rake -s proxy_config > .proxy.config")
   sys("sudo -v") # just synchronous asking for password to prevent confusion in forked process with tons of output
-  pids <<  fork do
-    trap("SIGINT") { exit! }
-    at_exit {
-      # if process exits on its own we want to kill whole group
-      Process.kill('INT', -Process.getpgrp)
-    }
-    puts "=> #{"something.#{LOCAL_DOMAIN}".green}, use #{"CTRL^C to kill all".magenta}"
-    sys("sudo node .bin/proxy --port #{MAIN_PORT} --config .proxy.config")
-  end
   
   # run jekyll sites
   everything = $all_domains.join(",")
@@ -402,6 +399,18 @@ task :serve do
         sys("bundle exec jekyll serve --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
       end
     end
+  end
+
+  sleep 5
+
+  pids <<  fork do
+    trap("SIGINT") { exit! }
+    at_exit {
+      # if process exits on its own we want to kill whole group
+      Process.kill('INT', -Process.getpgrp)
+    }
+    puts "=> #{"something.#{LOCAL_DOMAIN}".green}, use #{"CTRL^C to kill all".magenta}"
+    sys("sudo node .bin/proxy --port #{MAIN_PORT} --config .proxy.config")
   end
 
   # wait for signal and instantly kill all ofsprings
