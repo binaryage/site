@@ -45,6 +45,7 @@ module Jekyll
         end
       rescue => e
         puts "Stylus Exception: #{e.message}"
+        exit 233
       end
     end
   end
