@@ -21,7 +21,6 @@ module Jekyll
       Stylus.compress = @config['stylus']['compress'] if @config['stylus']['compress']
       Stylus.paths << @config['stylus']['path'] if @config['stylus']['path']
       Stylus.debug = @config['stylus']['debug'] if @config['stylus']['debug']
-      Stylus.use :nib
     rescue LoadError
       STDERR.puts $!
       STDERR.puts 'You are missing a library required for Stylus. Please run:'
