@@ -21,6 +21,9 @@ module Jekyll
       Stylus.compress = @config['stylus']['compress'] if @config['stylus']['compress']
       Stylus.paths << @config['stylus']['path'] if @config['stylus']['path']
       Stylus.debug = @config['stylus']['debug'] if @config['stylus']['debug']
+      @options = {
+        "include css" => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
+      }
     rescue LoadError
       STDERR.puts $!
       STDERR.puts 'You are missing a library required for Stylus. Please run:'
@@ -29,7 +32,7 @@ module Jekyll
     end
 
     def matches(ext)
-      ext =~ /styl/i
+      ext =~ /\.styl$/i
     end
 
     def output_ext(ext)
@@ -40,11 +43,11 @@ module Jekyll
       begin
         setup
         Dir.chdir File.dirname(Stylus.paths[0]) do
-          Stylus.compile content
+          Stylus.compile content, @options
         end
       rescue => e
         puts "Stylus Exception: #{e.message}"
-        exit 233
+        raise FatalException.new("Stylus Exception: #{e.message}")
       end
     end
   end
