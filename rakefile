@@ -346,63 +346,8 @@ task :hosts do
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
 
-<<<<<<< HEAD
-desc "generate proxy config"
+desc "generate proxy config (nginx)"
 task :proxy_config do
-  config = {
-    "router" => {
-    }
-  }
-  $all_domains.each do |domain|
-    port = port_for_domain(domain)
-    config["router"]["#{domain}.#{LOCAL_DOMAIN}"] = "http://127.0.0.1:#{port}"
-  end
-  puts JSON.pretty_generate(config)
-end
-
-desc "generate haproxy config"
-task :haproxy_config do
-
-  config = <<eos
-global
-   maxconn 256
-
-defaults
-  log     global
-  mode    http
-  option  httplog
-  option  dontlognull
-  option  http-server-close
-  option  http-pretend-keepalive
-  option  forwardfor
-  option  originalto
-  retries 3
-  option redispatch
-  maxconn 2000
-  contimeout      5000
-  clitimeout      50000
-  srvtimeout      50000
-eos
-
-  i = 0
-  $all_domains.each do |domain|
-    port = port_for_domain(domain)
-    i += 1
-    fragment = <<eos
-listen proxy#{i}
-  bind #{domain}.#{LOCAL_DOMAIN}:80
-  server server#{i} 0.0.0.0:#{port} port 80
-
-eos
-
-    config = config + fragment
-  end
-
-   puts config
-end
-
-desc "generate nginx proxy config"
-task :ngproxy_config do
 
   config = <<eos
 daemon off;
@@ -449,8 +394,19 @@ task :serve do
   pids = []
   
   # run reverse proxy
-  sys("rake -s ngproxy_config > .proxy.config")
+  sys("rake -s proxy_config > .proxy.config")
   sys("sudo -v") # just synchronous asking for password to prevent confusion in forked process with tons of output
+
+  puts "=> #{"something.#{LOCAL_DOMAIN}".green}, use #{"CTRL^C to kill them all".magenta}"
+  pids <<  fork do
+    trap("SIGINT") { exit! }
+    at_exit {
+      # if process exits on its own we want to kill whole group
+      Process.kill('INT', -Process.getpgrp)
+    }
+    config = File.expand_path(".proxy.config")
+    sys("sudo nginx -c \"#{config}\"")
+  end
   
   # run jekyll sites
   everything = $all_domains.join(",")
@@ -482,20 +438,6 @@ task :serve do
         sys("bundle exec jekyll serve --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
       end
     end
-  end
-
-  sleep 5
-
-  pids <<  fork do
-    trap("SIGINT") { exit! }
-    at_exit {
-      # if process exits on its own we want to kill whole group
-      Process.kill('INT', -Process.getpgrp)
-    }
-    puts "=> #{"something.#{LOCAL_DOMAIN}".green}, use #{"CTRL^C to kill all".magenta}"
-    config = File.expand_path(".proxy.config")
-    sys("sudo nginx -c \"#{config}\"")
-    #sys("sudo node .bin/proxy --port #{MAIN_PORT} --config .proxy.config")
   end
 
   # wait for signal and instantly kill all ofsprings
