@@ -346,6 +346,7 @@ task :hosts do
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
 
+<<<<<<< HEAD
 desc "generate proxy config"
 task :proxy_config do
   config = {
@@ -406,7 +407,7 @@ task :ngproxy_config do
   config = <<eos
 daemon off;
 events {
-    worker_connections 1024;
+  worker_connections 1024;
 }
 http {
 eos
@@ -416,19 +417,19 @@ eos
     port = port_for_domain(domain)
     i += 1
     fragment = <<eos
-    server {
-	    listen 80;
-	    server_name #{domain}.#{LOCAL_DOMAIN};
+  server {
+    listen 80;
+    server_name #{domain}.#{LOCAL_DOMAIN};
 
-	    location / {
-		    proxy_set_header X-Real-IP $remote_addr;
-		    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		    proxy_set_header Host $http_host;
-		    proxy_set_header X-NginX-Proxy true;
-		    proxy_pass http://0.0.0.0:#{port};
-		    proxy_redirect off;
-	    }
+    location / {
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_set_header X-NginX-Proxy true;
+      proxy_pass http://0.0.0.0:#{port};
+      proxy_redirect off;
     }
+  }
 eos
 
     config += fragment
