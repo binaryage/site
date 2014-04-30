@@ -40,6 +40,7 @@ Files which should be shared by all sites should go into [shared](/binaryage/sha
 
 ### Prerequisities
 
+  * [nginx](http://nginx.org)
   * [ruby](http://www.ruby-lang.org), [rake](http://rake.rubyforge.org), [rubygems](http://rubygems.org)
   * [node.js](http://nodejs.org), [npm](http://npmjs.org)
 

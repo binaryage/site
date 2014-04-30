@@ -251,11 +251,6 @@ end
 
 ################################################################################
 
-desc "install tool dependencies"
-task :init_tools do
-  # sys("brew install cairo --without-x11")
-end
-
 desc "install npm dependencies"
 task :init_npm do
   die "install npm (>=v#{MIN_NPM_VERSION}) => http://npmjs.org" unless Gem::Version.new(`npm --version`) >= Gem::Version.new(MIN_NPM_VERSION)
@@ -269,7 +264,7 @@ task :init_gem do
 end
 
 desc "init repositories - needs special care"
-task :init => [:init_tools, :init_gem, :init_npm] do
+task :init => [:init_gem, :init_npm] do
   sys("git remote set-url --push origin #{get_writable_git_url()}")
   sys("git submodule update --init")
 
