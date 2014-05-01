@@ -346,6 +346,7 @@ task :proxy_config do
 
   config = <<eos
 daemon off;
+master_process off;
 error_log /dev/stdout info;
 events {
   worker_connections 1024;
@@ -363,6 +364,7 @@ eos
     server_name #{domain}.#{LOCAL_DOMAIN};
 
     location / {
+      proxy_buffering off;
       rewrite ^/$ / break;
       rewrite ^([^.]*)$ $1.html break;
       proxy_set_header X-Real-IP $remote_addr;
@@ -385,27 +387,22 @@ eos
   puts config
 end
 
+desc "start proxy server"
+task :proxy do
+  trap("INT") do
+    exit 10
+  end
+  sys("rake -s proxy_config > .proxy.config")
+  config = File.expand_path(".proxy.config")
+  sys("sudo nginx -c \"#{config}\"")
+end
+
 desc "run dev server"
 task :serve do
   puts "note: #{"make sure you have".green} #{"/etc/hosts".yellow} #{"properly configured, see".green} #{"rake hosts".blue}"
   
-  pids = []
-  
-  # run reverse proxy
-  sys("rake -s proxy_config > .proxy.config")
-  sys("sudo -v") # just synchronous asking for password to prevent confusion in forked process with tons of output
+  master_pid = Process.pid
 
-  puts "=> #{"something.#{LOCAL_DOMAIN}".green}, use #{"CTRL^C to kill them all".magenta}"
-  pids <<  fork do
-    trap("SIGINT") { exit! }
-    at_exit {
-      # if process exits on its own we want to kill whole group
-      Process.kill('INT', -Process.getpgrp)
-    }
-    config = File.expand_path(".proxy.config")
-    sys("sudo nginx -c \"#{config}\"")
-  end
-  
   # run jekyll sites
   everything = $all_domains.join(",")
   what = (ENV["what"] || everything).split(",").map {|s| s.strip }
@@ -427,12 +424,13 @@ task :serve do
       config = prepare_patched_jekyll_config(true, web, true) # dev mode
       work_dir = File.join(TEMP_DIR, "serve", domain)
       FileUtils.mkdir_p(work_dir)
-      pids << fork do
-        trap("SIGINT") { exit! }
-        at_exit { 
-          # if process exits on its own we want to kill whole group
-          Process.kill('INT', -Process.getpgrp)
-        }
+      fork do
+	trap("INT") do
+	  exit 11
+	end
+	at_exit do
+	  Process.kill('INT', master_pid) # nginx starts in different process group :(
+	end
         sys("bundle exec jekyll serve --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
       end
     end
@@ -441,8 +439,11 @@ task :serve do
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
   trap("INT") do
+    exit 10
+  end
+  at_exit do
+    # if process exits on its own we want to kill whole group
     Process.kill('INT', -Process.getpgrp)
-    exit
   end
   
   Process.waitall

@@ -87,7 +87,17 @@ Hard-linking is essential for local development. Changes you make under `shared`
 
 **To run the full dev server**:
 
-    rake
+in one terminal session:
+
+    rake proxy
+
+in second terminal session:
+
+    rake serve
+
+optionally you may run livereload watcher via gulp in another teminal session
+
+    gulp
 
 **To run the dev server only for selected sub-sites**:
 
