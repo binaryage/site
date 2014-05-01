@@ -346,6 +346,7 @@ task :proxy_config do
 
   config = <<eos
 daemon off;
+error_log /dev/stdout info;
 events {
   worker_connections 1024;
 }
@@ -362,6 +363,8 @@ eos
     server_name #{domain}.#{LOCAL_DOMAIN};
 
     location / {
+      rewrite ^/$ / break;
+      rewrite ^([^.]*)$ $1.html break;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header Host $http_host;
