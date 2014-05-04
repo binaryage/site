@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/binaryage/html_press.git
-  revision: 6d83c13e3a63a892b7a9844b177282ba6f3e94de
+  revision: fdb4bc2966d4ff709fc4640993bba5d29547c684
   specs:
     html_press (0.7.1)
       css_press (>= 0.3.2)
