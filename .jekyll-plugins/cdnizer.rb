@@ -8,7 +8,7 @@ module Jekyll
 
     def flat_name(path)
       path = path[1..-1] if path[0] == "/"
-      path.gsub("/", "_")
+      path.gsub(/[\/\.]/, "_")
     end
 
     def generate_hash file
@@ -28,7 +28,8 @@ module Jekyll
     end
 
     def cdnize_fragment(m, dir, m1, m2, m3)
-      return m if m1[0..4]=="http"
+      return m if m2[0..3]=="http"
+      return m if m2[0..1]=="//"
       return m if m2.nil? or m2=="/" or m2==""
       m2 = m2.split("?")[0]
       if m2[0] == "/" then
@@ -38,7 +39,7 @@ module Jekyll
       end
       hash = generate_hash(file)
       return m if hash.nil?
-      flat = "#{hash}_#{flat_name(m2)}"
+      flat = "#{hash}_#{flat_name(m2)}".gsub(/_+/, "_")
       copy_into_zone(file, flat)
       m1 + config["cdn"]["url"] + flat + m3
     end
@@ -51,15 +52,15 @@ module Jekyll
       content = File.read(path)
 
       # css
-      content.gsub!(/(url\(")(.*?)("\))/) do |m|
+      content.gsub!(/(url\(["'])(.*?)(["']\))/) do |m|
         cdnize_fragment m, dir, $1, $2, $3
       end
 
       # html
-      content.gsub!(/(src=")(.*?)(")/) do |m|
+      content.gsub!(/(src=["'])(.*?)(["'])/) do |m|
         cdnize_fragment m, dir, $1, $2, $3
       end
-      content.gsub!(/(href=")(.*?)(")/) do |m|
+      content.gsub!(/(href=["'])(.*?)(["'])/) do |m|
         cdnize_fragment m, dir, $1, $2, $3
       end
 
