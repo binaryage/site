@@ -8,7 +8,7 @@ module Jekyll
 
     def flat_name(path)
       path = path[1..-1] if path[0] == "/"
-      path.gsub(/[\/\.]/, "_")
+      path.gsub(/[\/]/, "_").gsub(".._", "_")
     end
 
     def generate_hash file
