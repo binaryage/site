@@ -181,6 +181,7 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
   config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
   config["livereload_host"] = ENV["LIVERELOAD_HOST"] if ENV["LIVERELOAD_HOST"]
   config["markdown"] = "rdiscount"
+  config["dev"] = dev_mode
   config["stylus"] = {
     "compress" => (not dev_mode),
     "debug" => dev_mode,
@@ -335,8 +336,9 @@ task :hosts do
   puts "add this section into your /etc/hosts:"
   puts
   puts "#### #{LOCAL_DOMAIN} test site ####"
+  ip = (`ipconfig getifaddr en0` or `ipconfig getifaddr en1`).strip
   $all_domains.each do |domain|
-    puts "127.0.0.1 #{domain}.#{LOCAL_DOMAIN}"
+    puts "#{ip} #{domain}.#{LOCAL_DOMAIN}"
   end
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
@@ -365,7 +367,7 @@ eos
 
     location / {
       proxy_buffering off;
-      rewrite ^/$ / break;
+      rewrite ^(.*)/$ $1/ break;
       rewrite ^([^.]*)$ $1.html break;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
