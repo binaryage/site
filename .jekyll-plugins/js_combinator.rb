@@ -68,10 +68,10 @@ module Jekyll
         list_file_dir = File.dirname(list_file)
         list = File.read(list_file).split("\n")
 
-	# reject commented-out lines and empty lines
-	list.reject! do |path|
-	  path =~ /^\s*\#/ or path =~ /^\s*$/
-	end
+        # reject commented-out lines and empty lines
+        list.reject! do |path|
+          path =~ /^\s*\#/ or path =~ /^\s*$/
+        end
 
         list.map! do |path|
           File.expand_path(File.join(list_file_dir, path+".js"))

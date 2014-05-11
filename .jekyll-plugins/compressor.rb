@@ -20,7 +20,7 @@ module Jekyll
     def write(dest)
       do_press = @site.config["html_press"]["compress"]
       if self.html? and do_press then
-	print "#{"COMPRESS".magenta} generating #{destination(dest).yellow} "
+        print "#{"COMPRESS".magenta} generating #{destination(dest).yellow} "
         res = nil
         cache_dir = @site.config["html_press"]["cache"]
         if cache_dir then
@@ -46,7 +46,7 @@ module Jekyll
           File.open(cache_hit, 'w') {|f| f.write(res) }
         end
         self.output = res
-	print "\n"
+        print "\n"
       end
       compressor_orig_write(dest)
     end
@@ -58,7 +58,7 @@ module Jekyll
     def write(dest)
       do_press = @site.config["html_press"]["compress"]
       if do_press then
-	print "#{"COMPRESS".magenta} generating #{destination(dest).yellow} "
+        print "#{"COMPRESS".magenta} generating #{destination(dest).yellow} "
         res = nil
         cache_dir = @site.config["html_press"]["cache"]
         if cache_dir then
@@ -84,7 +84,7 @@ module Jekyll
           File.open(cache_hit, 'w') {|f| f.write(res) }
         end
         self.output = res
-	print "\n"
+        print "\n"
       end
       compressor_orig_write(dest)
     end
