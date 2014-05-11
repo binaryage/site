@@ -179,7 +179,7 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
   config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
-  config["livereload_host"] = ENV["LIVERELOAD_HOST"] if ENV["LIVERELOAD_HOST"]
+  config["livereload_host"] = (ENV["LIVERELOAD_HOST"] or my_ip()) if dev_mode
   config["markdown"] = "rdiscount"
   config["dev"] = dev_mode
   config["stylus"] = {
@@ -248,6 +248,10 @@ def prune_shared(dir)
   sys("rm \"#{img_dir}/nbair\"*")
   sys("rm \"#{img_dir}/matrix\"*")
   sys("rm \"#{img_dir}/chimp\"*")
+end
+
+def my_ip
+  (`ipconfig getifaddr en0` or `ipconfig getifaddr en1`).strip
 end
 
 ################################################################################
@@ -336,9 +340,8 @@ task :hosts do
   puts "add this section into your /etc/hosts:"
   puts
   puts "#### #{LOCAL_DOMAIN} test site ####"
-  ip = (`ipconfig getifaddr en0` or `ipconfig getifaddr en1`).strip
   $all_domains.each do |domain|
-    puts "#{ip} #{domain}.#{LOCAL_DOMAIN}"
+    puts "#{my_ip()} #{domain}.#{LOCAL_DOMAIN}"
   end
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
