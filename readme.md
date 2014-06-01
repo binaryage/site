@@ -87,21 +87,21 @@ Hard-linking is essential for local development. Changes you make under `shared`
 
 **To run the full dev server**:
 
-in one terminal session:
+in one terminal session run nginx proxy:
 
     rake proxy
 
-in second terminal session:
+in a second terminal session run the jekyll debug server:
 
-    rake serve
+    rake serve what=www,totalspaces,blog
 
 optionally you may run livereload watcher via gulp in another teminal session
 
     gulp
 
-**To run the dev server only for selected sub-sites**:
+To run the dev server for all sites:
 
-    rake serve what=www,totalspaces,blog
+    rake serve
 
 ### Deployment
 
