@@ -175,6 +175,9 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
   rescue => err
     config = {}
   end
+  
+  require 'pp'
+  pp config
 
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
@@ -463,7 +466,7 @@ def build_single_web(name, stage, clean_stage=true, busters=true)
   # build jekyll
   Dir.chdir name do
     config = prepare_patched_jekyll_config(false, name, busters)
-    sys("bundle exec jekyll build --config \"#{config}\" --destination \"#{dest}\"")
+    sys("bundle exec jekyll build --config \"#{config}\" --destination \"#{dest}\" --trace")
   end
 
   puts "=> " + "#{dest}".magenta
