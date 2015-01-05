@@ -99,7 +99,7 @@ module Jekyll
           # note: some js files may be generated (coffeescript),
           #       that is why we have to go through pages
           site.pages.each do |page|
-            if file == page.destination(site.source) then
+	    if page.destination(site.source).end_with? file then
               site.pages.delete(page)
               # we need to pre-render the page, generate step goes prior page generation
               page.render(site.layouts, site.site_payload)
