@@ -176,9 +176,6 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
     config = {}
   end
   
-  require 'pp'
-  pp config
-
   config["layouts"] = "shared/layouts"
   config["plugins"] = "../.jekyll-plugins"
   config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
