@@ -46,3 +46,6 @@
 [submodule "visor"]
 	path = visor
 	url = git://github.com/binaryage/visor.git
+[submodule "hodlwallet"]
+	path = hodlwallet
+	url = git://github.com/binaryage/hodlwallet.git

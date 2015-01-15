@@ -31,6 +31,7 @@ XREFRESH = File.join(ROOT, 'xrefresh')
 HINTS = File.join(ROOT, 'hints')
 RESTATIC = File.join(ROOT, 'restatic-web')
 TESTWEB = File.join(ROOT, 'test-web')
+HODLWALLET = File.join(ROOT, 'hodlwallet')
 
 $master = WWW # this repo will hold real submodule "shared", slaves will hard-link them
 $slaves = [
@@ -48,7 +49,8 @@ $slaves = [
   XREFRESH,
   HINTS,
   RESTATIC,
-  TESTWEB
+  TESTWEB,
+  HODLWALLET
 ]
 $all = [$master].concat $slaves
 
