@@ -171,7 +171,7 @@ def get_writable_git_url()
   $1.sub("git://", "git@").sub("github.com/", "github.com:")
 end
 
-def prepare_patched_jekyll_config(dev_mode, repo, busters)
+def prepare_patched_jekyll_config(dev_mode, repo, busters, cdn=true)
   begin
     config = YAML.load_file('_config.yml')
   rescue => err
@@ -198,7 +198,7 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters)
     "cache" => PRESS_CACHE_DIR
   }
   config["cdn"] = {
-    "enabled" => (not dev_mode),
+    "enabled" => ((not dev_mode) and cdn),
     "zone" => CDN_ZONE_DIR,
     "url" => CDN_URL
   }
@@ -224,11 +224,13 @@ def prune_shared(dir)
   css_dir = File.join(dir, 'css')
   js_dir = File.join(dir, 'js')
   sys("rm -rf \"#{img2_dir}/overlay\"*")
+  sys("rm -rf \"#{img2_dir}/asset\"*")
   sys("rm -rf \"#{img_dir}/overlay\"")
   sys("rm -rf \"#{img_dir}/scrollable\"")
   sys("rm -rf \"#{img_dir}/tabs\"")
   sys("rm -rf \"#{img_dir}/flags\"")
   sys("rm -rf \"#{img_dir}/icons\"")
+  sys("rm -rf \"#{img_dir}/os/\"")
   sys("rm -rf \"#{css_dir}/nib\"")
   sys("rm \"#{css_dir}/\"syntax.css")
   sys("rm \"#{img_dir}/totalterminal-\"*")
@@ -456,7 +458,7 @@ task :serve do
   Process.waitall
 end
 
-def build_single_web(name, stage, clean_stage=true, busters=true)
+def build_single_web(name, stage, clean_stage=true, busters=true, cdn=true)
   domain = subdomain(name)
   dest = File.join(stage, name)
 
@@ -464,7 +466,7 @@ def build_single_web(name, stage, clean_stage=true, busters=true)
 
   # build jekyll
   Dir.chdir name do
-    config = prepare_patched_jekyll_config(false, name, busters)
+    config = prepare_patched_jekyll_config(false, name, busters, cdn)
     sys("bundle exec jekyll build --config \"#{config}\" --destination \"#{dest}\" --trace")
   end
 
@@ -657,7 +659,7 @@ desc "generate store template zip" # see https://springboard.fastspring.com/site
 task :store do
     # build the site using jekyll
     sys("rm -rf \"#{STORE_STAGE_DIR}\"")
-    build_single_web('www', STORE_STAGE_DIR, true, false) # no cache busters
+    build_single_web('www', STORE_STAGE_DIR, true, false, false) # no cache busters, no cdn
 
     # copy interesting parts
     sys("rm -rf \"#{STORE_TEMPLATE_WORKING_DIR}\"")
@@ -702,7 +704,7 @@ task :store do
     # zip it!
     sys("rm \"#{ZIP_PATH}\"") if File.exists? ZIP_PATH
     Dir.chdir(STORE_TEMPLATE_WORKING_DIR) do
-        sys("zip -r \"#{ZIP_PATH}\" .")
+        sys("zip -r -du \"#{ZIP_PATH}\" .")
     end
 
     puts "Store template is in " + ZIP_PATH.yellow + ". " + "Don't forget to upload it to FastSpring".green
