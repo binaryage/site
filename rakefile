@@ -255,7 +255,13 @@ def prune_shared(dir)
 end
 
 def my_ip
-  (`ipconfig getifaddr en0` or `ipconfig getifaddr en1`).strip
+  ethernet_ip = `ipconfig getifaddr en0`.strip
+  return ethernet_ip unless ethernet_ip.empty?
+  
+  wifi_ip = `ipconfig getifaddr en1`.strip
+  return wifi_ip unless wifi_ip.empty?
+
+  die("unable to obtain local ip - fix my_ip in the rake task")  
 end
 
 ################################################################################
