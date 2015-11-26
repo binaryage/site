@@ -8,6 +8,7 @@ module Jekyll
       include ::Jekyll::ContentBlocks::ContentBlockTag
 
       def render(context)
+        @content_block_name = "inline_styles"
         content = content_for_block(context)
         return '' if not content or content.size==0
         texts = ['<style>']
