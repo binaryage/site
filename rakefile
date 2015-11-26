@@ -178,8 +178,10 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters, cdn=true)
     config = {}
   end
   
-  config["layouts"] = "shared/layouts"
-  config["plugins"] = "../.jekyll-plugins"
+  config["gems"] ||= []
+  config["gems"] << "jekyll-coffeescript"
+  config["layouts_dir"] = "shared/layouts"
+  config["plugins_dir"] = "../.jekyll-plugins"
   config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
   config["livereload_host"] = (ENV["LIVERELOAD_HOST"] or my_ip()) if dev_mode
   config["markdown"] = "rdiscount"
@@ -446,7 +448,7 @@ task :serve do
 	at_exit do
 	  Process.kill('INT', master_pid) # nginx starts in different process group :(
 	end
-        sys("bundle exec jekyll serve --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
+        sys("bundle exec jekyll serve --incremental --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
       end
     end
   end
