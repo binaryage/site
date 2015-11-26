@@ -52,9 +52,6 @@ module Jekyll
 
     def busterize_site
       busterization_list = []
-      self.posts.each do |post|
-        busterization_list << post.destination(self.dest)
-      end
       self.pages.each do |page|
         busterization_list << page.destination(self.dest)
       end
