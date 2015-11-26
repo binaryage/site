@@ -13,3 +13,4 @@ gem 'closure-compiler'
 gem 'html_press', :git => 'git://github.com/binaryage/html_press.git'
 gem "yui-compressor"
 gem 'jekyll-contentblocks'
+gem 'jekyll-coffeescript'
