@@ -24,7 +24,7 @@ GEM
     execjs (2.6.0)
     ffi (1.9.10)
     htmlentities (4.3.4)
-    jekyll (3.1.2)
+    jekyll (3.0.3)
       colorator (~> 0.1)
       jekyll-sass-converter (~> 1.0)
       jekyll-watch (~> 1.1)
@@ -74,7 +74,7 @@ DEPENDENCIES
   coffee-script
   colored
   html_press!
-  jekyll
+  jekyll (= 3.0.3)
   jekyll-coffeescript
   jekyll-contentblocks
   jekyll-paginate

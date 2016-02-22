@@ -3,7 +3,7 @@ if RUBY_VERSION =~ /1.9/
   Encoding.default_internal = Encoding::UTF_8
 end
 source "http://rubygems.org"
-gem 'jekyll'
+gem 'jekyll', '3.0.3' # https://github.com/rustygeldmacher/jekyll-contentblocks/issues/17#issuecomment-187223884
 gem 'rdiscount'
 gem 'colored'
 gem 'stylus'
