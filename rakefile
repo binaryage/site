@@ -449,7 +449,7 @@ task :serve do
 	at_exit do
 	  Process.kill('INT', master_pid) # nginx starts in different process group :(
 	end
-        sys("bundle exec jekyll serve --incremental --plugins \"../.jekyll-plugins\" --watch --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
+        sys("bundle exec jekyll serve --incremental --plugins \"../.jekyll-plugins\" --force_polling --drafts --port #{port} -b / --config \"#{config}\" --destination \"#{work_dir}\"")
       end
     end
   end
