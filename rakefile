@@ -273,6 +273,8 @@ end
 desc "install npm dependencies"
 task :init_npm do
   die "install npm (>=v#{MIN_NPM_VERSION}) => http://npmjs.org" unless Gem::Version.new(`npm --version`) >= Gem::Version.new(MIN_NPM_VERSION)
+  sys("rm -rf node_modules")
+  sys("npm cache clean")
   sys("npm install")
 end
 
