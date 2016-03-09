@@ -97,11 +97,7 @@ in a second terminal session run the jekyll debug server:
 
 optionally you may run livereload watcher via gulp in another teminal session
 
-    gulp
-
-To run the dev server for all sites:
-
-    rake serve
+    rake gulp
 
 ### Deployment
 
