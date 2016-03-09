@@ -62,6 +62,7 @@ CDN_URL = "http://static.binaryage.com/"
 
 CONFIGS_DIR = File.join(ROOT, ".configs")
 
+STORE_TEMPLATE = 'store-template.html'
 STORE_TEMPLATE_WORKING_DIR = File.join(TEMP_DIR, '_storetemplate')
 STORE_TEMPLATE_WORKING_DIR_WINDOW = File.join(STORE_TEMPLATE_WORKING_DIR, 'window.xhtml')
 STORE_TEMPLATE_WORKING_DIR_SHARED = File.join(STORE_TEMPLATE_WORKING_DIR, 'shared')
@@ -76,7 +77,6 @@ SHOEBOX_TEMPLATE_WORKING_DIR_SHARED = File.join(SHOEBOX_TEMPLATE_WORKING_DIR, 's
 STORE_STAGE_DIR = File.join(TEMP_DIR, '_store_workspace')
 STORE_STAGE_WWW = File.join(STORE_STAGE_DIR, 'www')
 STORE_STAGE_SHARED_DIR = File.join(STORE_STAGE_WWW, 'shared')
-STORE_STAGE_STORE_TEMPLATE = File.join(STORE_STAGE_WWW, 'store-template.html')
 STORE_STAGE_STORE_FAVICON = File.join(STORE_STAGE_WWW, 'favicon.ico')
 STORE_STAGE_STORE_ROBOTS = File.join(STORE_STAGE_WWW, 'robots.txt')
 STORE_STAGE_STORE_SHOEBOX_TEMPLATE = File.join(STORE_STAGE_WWW, 'shoebox-template.html')
@@ -669,12 +669,14 @@ task :store do
     # build the site using jekyll
     sys("rm -rf \"#{STORE_STAGE_DIR}\"")
     build_single_web('www', STORE_STAGE_DIR, true, false, false) # no cache busters, no cdn
+    
+    template_path = File.join(STORE_STAGE_WWW, (ENV["STORE_TEMPLATE"] or STORE_TEMPLATE))
 
     # copy interesting parts
     sys("rm -rf \"#{STORE_TEMPLATE_WORKING_DIR}\"")
     sys("mkdir -p \"#{STORE_TEMPLATE_WORKING_DIR}\"")
     sys("cp -r \"#{STORE_STAGE_SHARED_DIR}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
-    sys("cp \"#{STORE_STAGE_STORE_TEMPLATE}\" \"#{STORE_TEMPLATE_WORKING_DIR_WINDOW}\"")
+    sys("cp \"#{template_path}\" \"#{STORE_TEMPLATE_WORKING_DIR_WINDOW}\"")
     sys("cp \"#{STORE_STAGE_STORE_FAVICON}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
     sys("cp \"#{STORE_STAGE_STORE_ROBOTS}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
 
