@@ -57,6 +57,7 @@ $all = [$master].concat $slaves
 TEMP_DIR = "/tmp/binaryage-site"
 STAGE_DIR = File.join(ROOT, "_stage")
 PRESS_CACHE_DIR = File.join(STAGE_DIR, "_cache")
+TEMP_DIR_SERVE = File.join(TEMP_DIR, "serve")
 CDN_ZONE_DIR = File.join(STAGE_DIR, "_cdn")
 CDN_URL = "http://static.binaryage.com/"
 
@@ -440,7 +441,7 @@ task :serve do
 
     Dir.chdir path do
       config = prepare_patched_jekyll_config(true, web, true) # dev mode
-      work_dir = File.join(TEMP_DIR, "serve", domain)
+      work_dir = File.join(TEMP_DIR_SERVE, domain)
       FileUtils.mkdir_p(work_dir)
       fork do
         trap("INT") do
