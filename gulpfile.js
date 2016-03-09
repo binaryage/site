@@ -8,7 +8,7 @@ var cache = [];
 // we have to compare file content for changes, because our jekyll stuff may write out the same results
 gulp.task('watch', function() {
   livereload.listen();
-  var w = gulp.watch('/tmp/binaryage-site/serve/**/*.{css,js,html}');
+  var w = gulp.watch('/tmp/binaryage-site/serve/**/*.{css,js,html}', { readDelay: 100 });
   w.on('change', function(file) {
     try {
       var cachedContent = cache[file.path];
