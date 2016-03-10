@@ -72,15 +72,11 @@ STORE_TEMPLATE_WORKING_DIR_SHARED_JS = File.join(STORE_TEMPLATE_WORKING_DIR_SHAR
 STORE_TEMPLATE_WORKING_DIR_SHARED_IMG = File.join(STORE_TEMPLATE_WORKING_DIR_SHARED, 'img')
 STORE_TEMPLATE_WORKING_DIR_SHARED_CSS_SITE = File.join(STORE_TEMPLATE_WORKING_DIR_SHARED_CSS, 'site.css')
 
-SHOEBOX_TEMPLATE_WORKING_DIR = File.join(TEMP_DIR, '_shoeboxtemplate')
-SHOEBOX_TEMPLATE_WORKING_DIR_SHARED = File.join(SHOEBOX_TEMPLATE_WORKING_DIR, 'shared')
-
 STORE_STAGE_DIR = File.join(TEMP_DIR, '_store_workspace')
 STORE_STAGE_WWW = File.join(STORE_STAGE_DIR, 'www')
 STORE_STAGE_SHARED_DIR = File.join(STORE_STAGE_WWW, 'shared')
 STORE_STAGE_STORE_FAVICON = File.join(STORE_STAGE_WWW, 'favicon.ico')
 STORE_STAGE_STORE_ROBOTS = File.join(STORE_STAGE_WWW, 'robots.txt')
-STORE_STAGE_STORE_SHOEBOX_TEMPLATE = File.join(STORE_STAGE_WWW, 'shoebox-template.html')
 
 ZIP_PATH = File.join(ROOT, 'store-template.zip')
 
@@ -99,6 +95,8 @@ def sys(cmd, check=true)
   end
 end
 
+################################################################################
+
 # "some/path/to/repo" => "repo"
 def extract_name(path)
   return if path.nil?
@@ -110,7 +108,6 @@ def subdomain(path)
   name = extract_name(path)
   name.split("-")[0] # strips -web postfixes
 end
-
 
 $all_domains = $all.collect {|x| subdomain(x)}
 $all_names = $all.collect {|x| extract_name(x)}
@@ -268,6 +265,21 @@ def my_ip
   die("unable to obtain local ip - fix my_ip in the rake task")  
 end
 
+def build_single_web(name, stage, clean_stage=true, busters=true, cdn=true)
+  domain = subdomain(name)
+  dest = File.join(stage, name)
+
+  sys("rm -rf \"#{dest}\"") if clean_stage
+
+  # build jekyll
+  Dir.chdir name do
+    config = prepare_patched_jekyll_config(false, name, busters, cdn)
+    sys("bundle exec jekyll build --config \"#{config}\" --destination \"#{dest}\" --trace")
+  end
+
+  puts "=> " + "#{dest}".magenta
+end
+
 ################################################################################
 
 desc "install npm dependencies"
@@ -362,7 +374,7 @@ task :hosts do
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
 
-desc "generate proxy config (nginx)"
+desc "generate proxy config (for nginx)"
 task :proxy_config do
 
   config = <<eos
@@ -470,21 +482,6 @@ task :serve do
   Process.waitall
 end
 
-def build_single_web(name, stage, clean_stage=true, busters=true, cdn=true)
-  domain = subdomain(name)
-  dest = File.join(stage, name)
-
-  sys("rm -rf \"#{dest}\"") if clean_stage
-
-  # build jekyll
-  Dir.chdir name do
-    config = prepare_patched_jekyll_config(false, name, busters, cdn)
-    sys("bundle exec jekyll build --config \"#{config}\" --destination \"#{dest}\" --trace")
-  end
-
-  puts "=> " + "#{dest}".magenta
-end
-
 desc "build site"
 task :build do
   what = (ENV["what"] || $all_domains.join(",")).split(",")
@@ -500,171 +497,6 @@ task :build do
     end
     build_single_web(web, stage)
   end
-end
-
-desc "force github pages update"
-task :force do
-  $slaves.each do |path|
-    puts "in #{path.yellow}"
-    Dir.chdir(path) do
-      `touch _force_github_pages_update_the_site`
-      `git add .`
-      `git commit -m "force github pages update the site"`
-      `git push`
-    end
-  end
-end
-
-desc "push all webs"
-task :push do
-  $all.each do |path|
-    puts "in #{path.yellow}"
-    Dir.chdir(path) do
-      sys("git push origin web")
-    end
-  end
-end
-
-desc "rebase all webs"
-task :rebase do
-  $all.each do |path|
-    puts "in #{path.yellow}"
-    Dir.chdir(path) do
-      sys("git fetch")
-      sys("git rebase origin/web")
-    end
-  end
-end
-
-desc "some maintenance work"
-task :upgrade do
-  # better use: git submodule foreach 'cmds'
-  $all.each do |path|
-    puts "in #{path.yellow}"
-    Dir.chdir(path) do
-       sys("git commit -am \"removed jekyll config file, it will be generated with defaults if not present\"", false)
-    end
-  end
-end
-
-desc "convert pngs to loseless jpgs"
-task :strip do
-  require_rmagick!
-
-  Dir.glob(File.join(WWW, 'shared', "img", "*.png")) do |file|
-    next unless file =~ /body-repeat/
-    puts file
-    image = ImageList.new(file)
-    image.strip!
-    image.write(file) #{ self.quality = 100; }
-  end
-end
-
-desc "convert pngs to loseless jpgs"
-task :print do
-  require_rmagick!
-
-  Dir.glob(File.join(WWW, 'shared', "img", "*.png")) do |file|
-    next unless file =~ /tabs-background/
-    puts file
-
-    img = Magick::Image::read(file).first
-    puts "   Format: #{img.format}"
-    puts "   Geometry: #{img.columns}x#{img.rows}"
-    puts "   Class: " + case img.class_type
-      when Magick::DirectClass
-        "DirectClass"
-      when Magick::PseudoClass
-        "PseudoClass"
-    end
-    puts "   Depth: #{img.depth} bits-per-pixel"
-    puts "   Colors: #{img.number_colors}"
-    puts "   Filesize: #{img.filesize}"
-    puts "   Resolution: #{img.x_resolution.to_i}x#{img.y_resolution.to_i} "+"pixels/#{img.units == Magick::PixelsPerInchResolution ? "inch" : "centimeter"}"
-    if img.properties.length > 0
-      puts "   Properties:"
-      img.properties { |name,value| puts %Q|      #{name} = "#{value}"| }
-    end
-  end
-end
-
-desc "convert icons to other formats"
-task :icons do
-  require_rmagick!
-
-  Dir.glob(File.join(WWW, 'shared', "img", "icons", "totalspaces-512.png")) do |file|
-    puts file
-    image = ImageList.new(file)
-
-    file64 = file.gsub('512', '64')
-    image64 = image.resize(64, 64)
-    image64.write(file64)
-
-    file128 = file.gsub('512', '128')
-    image128 = image.resize(128, 128)
-    image128.write(file128)
-
-    file256 = file.gsub('512', '256')
-    image256 = image.resize(256, 256)
-    image256.write(file256)
-
-    file512white = file.gsub('512', '512-white')
-    bg = Image.new(image.columns, image.rows) {
-      self.background_color = "white"
-    }
-    bg = bg.composite(image, CenterGravity, OverCompositeOp)
-    bg.write(file512white)
-
-    file256white = file.gsub('512', '256-white')
-    bg = Image.new(image.columns, image.rows) {
-      self.background_color = "white"
-    }
-    bg = bg.composite(image, CenterGravity, OverCompositeOp)
-    bg = bg.resize(256, 256)
-    bg.write(file256white)
-  end
-end
-
-desc "optimize png images"
-task :optimize do
-  Dir.glob(File.join(WWW, 'shared', "**", "*.png")) do |file|
-    puts file
-    `optipng −i1 −o7 "#{file}"`
-    break
-  end
-  Dir.glob(File.join(WWW, 'images', "**", "*.png")) do |file|
-    puts file
-    `optipng −i1 −o7 "#{file}"`
-    break
-  end
-end
-
-desc "generate shoebox template into _shoeboxtemplate"
-task :shoebox do
-    # build the site using jekyll
-    sys("rm -rf \"#{STORE_STAGE_DIR}\"")
-    build_single_web('www', STORE_STAGE_DIR)
-
-    # copy interesting parts
-    sys("rm -rf \"#{SHOEBOX_TEMPLATE_WORKING_DIR}\"")
-    sys("mkdir -p \"#{SHOEBOX_TEMPLATE_WORKING_DIR}\"")
-    sys("cp -r \"#{STORE_STAGE_SHARED_DIR}\" \"#{SHOEBOX_TEMPLATE_WORKING_DIR}\"")
-    sys("cp \"#{STORE_STAGE_STORE_FAVICON}\" \"#{SHOEBOX_TEMPLATE_WORKING_DIR}\"")
-    sys("cp \"#{STORE_STAGE_STORE_ROBOTS}\" \"#{SHOEBOX_TEMPLATE_WORKING_DIR}\"")
-    sys("cp \"#{STORE_STAGE_STORE_SHOEBOX_TEMPLATE}\" \"#{SHOEBOX_TEMPLATE_WORKING_DIR}\"")
-
-    patch(File.join(SHOEBOX_TEMPLATE_WORKING_DIR, 'shoebox-template.html'), [
-        [/<body(.*?)>/, "<body\\1><div id=\"page-shoebox-template\">"],
-        ["</body>", "</div></body>"]
-    ])
-
-    # fix paths in CSS
-    patch(File.join(SHOEBOX_TEMPLATE_WORKING_DIR, 'shared', 'css', 'site.css'), [
-        [/\/shared\//, "../"]
-    ])
-
-    # clean up shared folder to reduce size
-    prune_shared(SHOEBOX_TEMPLATE_WORKING_DIR_SHARED)
 end
 
 desc "generate store template zip" # see https://springboard.fastspring.com/site/configuration/template/doc/templateOverview.xml
