@@ -80,6 +80,13 @@ Hard-linking is essential for local development. Changes you make under `shared`
     ├── blog
     ...
 
+Note that submodules are specified as read-only git repo urls. The reason is to support workflow for someone who has just partial rights or just read-only access.
+To push your changes you have to add write-able remote repo url to repos you are working on. For example for www repo, you should:
+
+    cd site/www
+    git remote add gh git@github.com:binaryage/www.git
+
+Then, to push run `git push gh web` or `git push gh`.
 
 ### Launch development server
 
