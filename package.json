@@ -10,6 +10,6 @@
   "dependencies": {
     "gulp": "^3.9.1",
     "gulp-livereload": "^3.8.1",
-    "stylus": "^0.54.0"
+    "stylus": "^0.54.2"
   }
 }
