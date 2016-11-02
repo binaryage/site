@@ -181,7 +181,7 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters, cdn=true)
   config["gems"] << "jekyll-paginate"
   config["layouts_dir"] = "shared/layouts"
   config["plugins_dir"] = "../.jekyll-plugins"
-  config["url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
+  config["target_url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
   config["livereload_host"] = (ENV["LIVERELOAD_HOST"] or my_ip()) if dev_mode
   config["markdown"] = "rdiscount"
   config["dev"] = dev_mode

@@ -10,6 +10,7 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    addressable (2.4.0)
     closure-compiler (1.1.12)
     coffee-script (2.4.1)
       coffee-script-source
@@ -25,7 +26,8 @@ GEM
     ffi (1.9.14)
     forwardable-extended (2.6.0)
     htmlentities (4.3.4)
-    jekyll (3.2.1)
+    jekyll (3.3.0)
+      addressable (~> 2.4)
       colorator (~> 1.0)
       jekyll-sass-converter (~> 1.0)
       jekyll-watch (~> 1.1)
@@ -45,7 +47,7 @@ GEM
     jekyll-watch (1.5.0)
       listen (~> 3.0, < 3.1)
     json (2.0.2)
-    kramdown (1.11.1)
+    kramdown (1.12.0)
     liquid (3.0.6)
     listen (3.0.8)
       rb-fsevent (~> 0.9, >= 0.9.4)
@@ -53,19 +55,19 @@ GEM
     mercenary (0.3.6)
     pathutil (0.14.0)
       forwardable-extended (~> 2.6)
-    rb-fsevent (0.9.7)
+    rb-fsevent (0.9.8)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
     rdiscount (2.2.0.1)
     rouge (1.11.1)
     safe_yaml (1.0.4)
     sass (3.4.22)
-    stylus (1.0.1)
+    stylus (1.0.2)
       execjs
       stylus-source
-    stylus-source (0.49.3)
+    stylus-source (0.54.5)
     tilt (2.0.5)
-    uglifier (3.0.1)
+    uglifier (3.0.3)
       execjs (>= 0.3.0, < 3)
     yui-compressor (0.12.0)
 
@@ -87,4 +89,4 @@ DEPENDENCIES
   yui-compressor
 
 BUNDLED WITH
-   1.11.2
+   1.13.6
