@@ -9,9 +9,9 @@ require 'digest/sha1'
 BASE_PORT = 4101
 MAIN_PORT = 80 # we will need admin rights to bind to this port
 
-MIN_NPM_VERSION = "1.1.18"
-MIN_GEM_VERSION = "1.8.23"
-LOCAL_DOMAIN = "binaryage.org"
+MIN_NPM_VERSION = '1.1.18'
+MIN_GEM_VERSION = '1.8.23'
+LOCAL_DOMAIN = 'binaryage.org'
 
 ROOT = File.expand_path('.')
 
@@ -35,42 +35,42 @@ HODLWALLET = File.join(ROOT, 'hodlwallet')
 
 $master = WWW # this repo will hold real submodule "shared", slaves will hard-link them
 $slaves = [
-  BLOG,
-  SUPPORT,
-  TOTALFINDER,
-  TOTALTERMINAL,
-  TOTALSPACES,
-  ASEPSIS,
-  VISOR,
-  FIREQUERY,
-  FIRELOGGER,
-  FIRERAINBOW,
-  DRYDROP,
-  XREFRESH,
-  HINTS,
-  RESTATIC,
-  TESTWEB,
-  HODLWALLET
+    BLOG,
+    SUPPORT,
+    TOTALFINDER,
+    TOTALTERMINAL,
+    TOTALSPACES,
+    ASEPSIS,
+    VISOR,
+    FIREQUERY,
+    FIRELOGGER,
+    FIRERAINBOW,
+    DRYDROP,
+    XREFRESH,
+    HINTS,
+    RESTATIC,
+    TESTWEB,
+    HODLWALLET
 ]
 $all = [$master].concat $slaves
 
-TEMP_DIR = "/tmp/binaryage-site"
-STAGE_DIR = File.join(ROOT, "_stage")
-PRESS_CACHE_DIR = File.join(STAGE_DIR, "_cache")
-TEMP_DIR_SERVE = File.join(TEMP_DIR, "serve")
-CDN_ZONE_DIR = File.join(STAGE_DIR, "_cdn")
-CDN_URL = "https://static.binaryage.com/"
+TEMP_DIR = '/tmp/binaryage-site'
+STAGE_DIR = File.join(ROOT, '_stage')
+PRESS_CACHE_DIR = File.join(STAGE_DIR, '_cache')
+TEMP_DIR_SERVE = File.join(TEMP_DIR, 'serve')
+CDN_ZONE_DIR = File.join(STAGE_DIR, '_cdn')
+CDN_URL = 'https://static.binaryage.com/'
 
-CONFIGS_DIR = File.join(ROOT, ".configs")
+CONFIGS_DIR = File.join(ROOT, '.configs')
 
 STORE_TEMPLATE = 'store-template.html'
 STORE_TEMPLATE_WORKING_DIR = File.join(TEMP_DIR, '_storetemplate')
-STORE_TEMPLATE_WORKING_DIR_WINDOW = File.join(STORE_TEMPLATE_WORKING_DIR, 'window.xhtml')
-STORE_TEMPLATE_WORKING_DIR_SHARED = File.join(STORE_TEMPLATE_WORKING_DIR, 'shared')
-STORE_TEMPLATE_WORKING_DIR_SHARED_CSS = File.join(STORE_TEMPLATE_WORKING_DIR_SHARED, 'css')
-STORE_TEMPLATE_WORKING_DIR_SHARED_JS = File.join(STORE_TEMPLATE_WORKING_DIR_SHARED, 'js')
-STORE_TEMPLATE_WORKING_DIR_SHARED_IMG = File.join(STORE_TEMPLATE_WORKING_DIR_SHARED, 'img')
-STORE_TEMPLATE_WORKING_DIR_SHARED_CSS_SITE = File.join(STORE_TEMPLATE_WORKING_DIR_SHARED_CSS, 'site.css')
+STORE_TEMPLATE_WINDOW = File.join(STORE_TEMPLATE_WORKING_DIR, 'window.xhtml')
+STORE_TEMPLATE_SHARED = File.join(STORE_TEMPLATE_WORKING_DIR, 'shared')
+STORE_TEMPLATE_SHARED_CSS = File.join(STORE_TEMPLATE_SHARED, 'css')
+STORE_TEMPLATE_SHARED_JS = File.join(STORE_TEMPLATE_SHARED, 'js')
+STORE_TEMPLATE_SHARED_IMG = File.join(STORE_TEMPLATE_SHARED, 'img')
+STORE_TEMPLATE_SHARED_CSS_SITE = File.join(STORE_TEMPLATE_SHARED_CSS, 'site.css')
 
 STORE_STAGE_DIR = File.join(TEMP_DIR, '_store_workspace')
 STORE_STAGE_WWW = File.join(STORE_STAGE_DIR, 'www')
@@ -90,8 +90,8 @@ end
 def sys(cmd, check=true)
   puts "> #{cmd}".blue
   res = system(cmd)
-  if check and not res then
-    die "something went wrong"
+  if check and not res
+    die 'something went wrong'
   end
 end
 
@@ -100,17 +100,17 @@ end
 # "some/path/to/repo" => "repo"
 def extract_name(path)
   return if path.nil?
-  name = path.split("/").last # get last component of the path
+  path.split('/').last # get last component of the path
 end
 
 # "totalfinder-web" => "totalfinder"
 def subdomain(path)
   name = extract_name(path)
-  name.split("-")[0] # strips -web postfixes
+  name.split('-')[0] # strips -web postfixes
 end
 
-$all_domains = $all.collect {|x| subdomain(x)}
-$all_names = $all.collect {|x| extract_name(x)}
+$all_domains = $all.collect { |x| subdomain(x) }
+$all_names = $all.collect { |x| extract_name(x) }
 
 def port_for_domain(domain)
   i = $all_domains.index(domain)
@@ -130,19 +130,10 @@ def name_for_domain(domain)
   $all_names[i]
 end
 
-def require_rmagick!
-  begin
-    require 'rmagick'
-    include Magick
-  rescue LoadError
-    raise 'You must "sudo gem install rmagick"'
-  end
-end
-
 def patch(path, replacers)
-  puts "Patching " + path.blue
+  puts 'Patching ' + path.blue
   lines = []
-  File.open(path, "r") do |f|
+  File.open(path, 'r') do |f|
     f.each do |line|
       replacers.each do |r|
         line.gsub!(r[0], r[1])
@@ -150,7 +141,7 @@ def patch(path, replacers)
       lines << line
     end
   end
-  File.open(path, "w") do |f|
+  File.open(path, 'w') do |f|
     f << lines.join
   end
 end
@@ -158,7 +149,7 @@ end
 # prevents git error message:
 # You can't push to git://github.com/darwin/site.git
 # Use git@github.com:darwin/site.git
-def get_writable_git_url()
+def get_writable_git_url
   `git remote show origin | grep "Fetch URL:"`.strip =~ /Fetch URL:\s*(.*)/
 
   if $1.nil?
@@ -166,47 +157,48 @@ def get_writable_git_url()
     exit 2
   end
 
-  $1.sub("git://", "git@").sub("github.com/", "github.com:")
+  $1.sub('git://', 'git@').sub('github.com/', 'github.com:')
 end
 
+# noinspection RubyStringKeysInHashInspection
 def prepare_patched_jekyll_config(dev_mode, repo, busters, cdn=true)
   begin
     config = YAML.load_file('_config.yml')
-  rescue => err
+  rescue => _
     config = {}
   end
-  
-  config["gems"] ||= []
-  config["gems"] << "jekyll-coffeescript"
-  config["gems"] << "jekyll-paginate"
-  config["layouts_dir"] = "shared/layouts"
-  config["plugins_dir"] = "../.jekyll-plugins"
-  config["target_url"] = "https://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
-  config["enforce_ssl"] = "#{subdomain(repo)}.binaryage."+ (dev_mode ? "org" : "com")
-  config["livereload_host"] = (ENV["LIVERELOAD_HOST"] or my_ip()) if dev_mode
-  config["markdown"] = "rdiscount"
-  config["dev"] = dev_mode
-  config["stylus"] = {
-    "compress" => (not dev_mode),
-    "debug" => dev_mode,
-    "path" => "./shared/css/site.styl"
+
+  config['gems'] ||= []
+  config['gems'] << 'jekyll-coffeescript'
+  config['gems'] << 'jekyll-paginate'
+  config['layouts_dir'] = 'shared/layouts'
+  config['plugins_dir'] = '../.jekyll-plugins'
+  config['target_url'] = "https://#{subdomain(repo)}.binaryage." + (dev_mode ? 'org' : 'com')
+  config['enforce_ssl'] = "#{subdomain(repo)}.binaryage."+ (dev_mode ? 'org' : 'com')
+  config['livereload_host'] = (ENV['LIVERELOAD_HOST'] or my_ip) if dev_mode
+  config['markdown'] = 'rdiscount'
+  config['dev'] = dev_mode
+  config['stylus'] = {
+      'compress' => (not dev_mode),
+      'debug' => dev_mode,
+      'path' => './shared/css/site.styl'
   }
-  config["combinejs"] = {
-    "path" => "./shared/js/code.list",
-    "minify" => (not dev_mode)
+  config['combinejs'] = {
+      'path' => './shared/js/code.list',
+      'minify' => (not dev_mode)
   }
-  config["html_press"] = {
-    "compress" => (not dev_mode),
-    "cache" => PRESS_CACHE_DIR
+  config['html_press'] = {
+      'compress' => (not dev_mode),
+      'cache' => PRESS_CACHE_DIR
   }
-  config["cdn"] = {
-    "enabled" => ((not dev_mode) and cdn),
-    "zone" => CDN_ZONE_DIR,
-    "url" => CDN_URL
+  config['cdn'] = {
+      'enabled' => ((not dev_mode) and cdn),
+      'zone' => CDN_ZONE_DIR,
+      'url' => CDN_URL
   }
-  config["busterizer"] = {
-    "css" => (busters and (not dev_mode)),
-    "html" => (busters and (not dev_mode))
+  config['busterizer'] = {
+      'css' => (busters and (not dev_mode)),
+      'html' => (busters and (not dev_mode))
   }
 
   output = YAML.dump(config)
@@ -214,8 +206,8 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters, cdn=true)
   sha = sha[0..7]
 
   FileUtils.mkdir_p(CONFIGS_DIR)
-  config_path = File.join(CONFIGS_DIR, sha+"_config.yml")
-  File.open(config_path, 'w') {|f| f.write(output) }
+  config_path = File.join(CONFIGS_DIR, sha+'_config.yml')
+  File.open(config_path, 'w') { |f| f.write(output) }
 
   Pathname.new(config_path).relative_path_from(Pathname.new Dir.pwd)
 end
@@ -224,7 +216,6 @@ def prune_shared(dir)
   img_dir = File.join(dir, 'img')
   img2_dir = File.join(dir, 'img2')
   css_dir = File.join(dir, 'css')
-  js_dir = File.join(dir, 'js')
   sys("rm -rf \"#{img2_dir}/overlay\"*")
   sys("rm -rf \"#{img2_dir}/asset\"*")
   sys("rm -rf \"#{img_dir}/overlay\"")
@@ -259,15 +250,14 @@ end
 def my_ip
   ethernet_ip = `ipconfig getifaddr en0`.strip
   return ethernet_ip unless ethernet_ip.empty?
-  
+
   wifi_ip = `ipconfig getifaddr en1`.strip
   return wifi_ip unless wifi_ip.empty?
 
-  die("unable to obtain local ip - fix my_ip in the rake task")  
+  die('unable to obtain local ip - fix my_ip in the rake task')
 end
 
 def build_single_web(name, stage, clean_stage=true, busters=true, cdn=true)
-  domain = subdomain(name)
   dest = File.join(stage, name)
 
   sys("rm -rf \"#{dest}\"") if clean_stage
@@ -278,34 +268,34 @@ def build_single_web(name, stage, clean_stage=true, busters=true, cdn=true)
     sys("bundle exec jekyll build --config \"#{config}\" --destination \"#{dest}\" --trace")
   end
 
-  puts "=> " + "#{dest}".magenta
+  puts '=> ' + "#{dest}".magenta
 end
 
 ################################################################################
 
-desc "install npm dependencies"
+desc 'install npm dependencies'
 task :init_npm do
   die "install npm (>=v#{MIN_NPM_VERSION}) => http://npmjs.org" unless Gem::Version.new(`npm --version`) >= Gem::Version.new(MIN_NPM_VERSION)
-  sys("rm -rf node_modules")
-  sys("npm cache clean")
-  sys("npm install")
+  sys('rm -rf node_modules')
+  sys('npm cache clean')
+  sys('npm install')
 end
 
-desc "install gem dependencies"
+desc 'install gem dependencies'
 task :init_gem do
   die "install rubygems (>=v#{MIN_GEM_VERSION}, no sudo, consider rvm) => http://rubygems.org, http://beginrescueend.com" unless Gem::Version.new(`gem --version`) >= Gem::Version.new(MIN_GEM_VERSION)
-  sys("bundle install")
+  sys('bundle install')
 end
 
-desc "init repositories - needs special care"
+desc 'init repositories - needs special care'
 task :init => [:init_gem, :init_npm] do
-  sys("git remote set-url --push origin #{get_writable_git_url()}")
-  sys("git submodule update --init")
+  sys("git remote set-url --push origin #{get_writable_git_url}")
+  sys('git submodule update --init')
 
   # fix push urls
   $all.each do |repo|
     Dir.chdir(repo) do
-      sys("git remote set-url --push origin #{get_writable_git_url()}")
+      sys("git remote set-url --push origin #{get_writable_git_url}")
     end
   end
 
@@ -316,66 +306,66 @@ task :init => [:init_gem, :init_npm] do
 
   # download submodules into master repo
   Dir.chdir($master) do
-    sys("git submodule update --init")
+    sys('git submodule update --init')
     # fix push url in submodule
-    Dir.chdir("shared") do
-      sys("git remote set-url --push origin #{get_writable_git_url()}")
+    Dir.chdir('shared') do
+      sys("git remote set-url --push origin #{get_writable_git_url}")
     end
   end
 
   # for each slave, "symlink" submodules from master repo
   $slaves.each do |slave|
     Dir.chdir(slave) do
-      sys("git submodule init")
+      sys('git submodule init')
     end
     sys("rmdir \"#{slave}/shared\"") if File.directory?("#{slave}/shared")
     sys("./.bin/hlink/hlink \"#{$master}/shared\" \"#{slave}/shared\"")
   end
 end
 
-desc "reset to remote changes - this will destroy your local changes!!!"
+desc 'reset to remote changes - this will destroy your local changes!!!'
 task :reset do
   Dir.chdir($master) do
     puts "in #{$master.yellow}"
-    sys("git checkout -f web")
-    sys("git reset --hard HEAD^") # be resilient to amends
-    sys("git clean -f -f -d") # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-    sys("git pull origin web")
-    ["shared"].each do |submodule|
+    sys('git checkout -f web')
+    sys('git reset --hard HEAD^') # be resilient to amends
+    sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
+    sys('git pull origin web')
+    ['shared'].each do |submodule|
       submodule = File.join($master, submodule)
       Dir.chdir(submodule) do
         puts "in #{submodule.yellow}"
-        sys("git checkout -f master")
-        sys("git reset --hard HEAD^") # be resilient to amends
-        sys("git clean -f -f -d") # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-        sys("git pull origin master")
+        sys('git checkout -f master')
+        sys('git reset --hard HEAD^') # be resilient to amends
+        sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
+        sys('git pull origin master')
       end
     end
   end
   $slaves.each do |slave|
     Dir.chdir(slave) do
       puts "in #{slave.yellow}"
-      sys("git checkout -f web")
-      sys("git reset --hard HEAD^") # be resilient to amends
-      sys("git clean -f -f -d") # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-      sys("git pull origin web")
+      sys('git checkout -f web')
+      sys('git reset --hard HEAD^') # be resilient to amends
+      sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
+      sys('git pull origin web')
     end
     # shared should be hard linked, so we got pull for free from master
   end
 end
 
-desc "prints info how to setup /etc/hosts"
+desc 'prints info how to setup /etc/hosts'
 task :hosts do
-  puts "add this section into your /etc/hosts:"
+  puts 'add this section into your /etc/hosts:'
   puts
   puts "#### #{LOCAL_DOMAIN} test site ####"
   $all_domains.each do |domain|
-    puts "#{my_ip()} #{domain}.#{LOCAL_DOMAIN}"
+    puts "#{my_ip} #{domain}.#{LOCAL_DOMAIN}"
   end
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
 
-desc "generate proxy config (for nginx)"
+desc 'generate proxy config (for nginx)'
 task :proxy_config do
 
   config = <<eos
@@ -421,25 +411,25 @@ eos
   puts config
 end
 
-desc "start proxy server"
+desc 'start proxy server'
 task :proxy do
-  trap("INT") do
+  trap('INT') do
     exit 10
   end
-  sys("rake -s proxy_config > .proxy.config")
-  config = File.expand_path(".proxy.config")
+  sys('rake -s proxy_config > .proxy.config')
+  config = File.expand_path('.proxy.config')
   sys("sudo nginx -c \"#{config}\"")
 end
 
-desc "run dev server"
+desc 'run dev server'
 task :serve do
-  puts "note: #{"make sure you have".green} #{"/etc/hosts".yellow} #{"properly configured, see".green} #{"rake hosts".blue}"
-  
+  puts "note: #{'make sure you have'.green} #{'/etc/hosts'.yellow} #{'properly configured, see'.green} #{'rake hosts'.blue}"
+
   master_pid = Process.pid
 
   # run jekyll sites
-  everything = $all_domains.join(",")
-  what = (ENV["what"] || everything).split(",").map {|s| s.strip }
+  everything = $all_domains.join(',')
+  what = (ENV['what'] || everything).split(',').map { |s| s.strip }
   what.each do |web|
     unless $all_names.include? web
       # got subdomain name instead?
@@ -459,7 +449,7 @@ task :serve do
       work_dir = File.join(TEMP_DIR_SERVE, domain)
       FileUtils.mkdir_p(work_dir)
       fork do
-        trap("INT") do
+        trap('INT') do
           exit 11
         end
         at_exit do
@@ -472,21 +462,21 @@ task :serve do
 
   # wait for signal and instantly kill all ofsprings
   # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
-  trap("INT") do
+  trap('INT') do
     exit 10
   end
   at_exit do
     # if process exits on its own we want to kill whole group
     Process.kill('INT', -Process.getpgrp)
   end
-  
+
   Process.waitall
 end
 
-desc "build site"
+desc 'build site'
 task :build do
-  what = (ENV["what"] || $all_domains.join(",")).split(",")
-  stage = ENV["stage"] || STAGE_DIR
+  what = (ENV['what'] || $all_domains.join(',')).split(',')
+  stage = ENV['stage'] || STAGE_DIR
 
   what.each do |web|
     unless $all_names.include? web
@@ -500,66 +490,66 @@ task :build do
   end
 end
 
-desc "generate store template zip" # see https://springboard.fastspring.com/site/configuration/template/doc/templateOverview.xml
+desc 'generate store template zip' # see https://springboard.fastspring.com/site/configuration/template/doc/templateOverview.xml
 task :store do
-    # build the site using jekyll
-    sys("rm -rf \"#{STORE_STAGE_DIR}\"")
-    build_single_web('www', STORE_STAGE_DIR, true, false, false) # no cache busters, no cdn
-    
-    template_path = File.join(STORE_STAGE_WWW, (ENV["STORE_TEMPLATE"] or STORE_TEMPLATE))
+  # build the site using jekyll
+  sys("rm -rf \"#{STORE_STAGE_DIR}\"")
+  build_single_web('www', STORE_STAGE_DIR, true, false, false) # no cache busters, no cdn
 
-    # copy interesting parts
-    sys("rm -rf \"#{STORE_TEMPLATE_WORKING_DIR}\"")
-    sys("mkdir -p \"#{STORE_TEMPLATE_WORKING_DIR}\"")
-    sys("cp -r \"#{STORE_STAGE_SHARED_DIR}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
-    sys("cp \"#{template_path}\" \"#{STORE_TEMPLATE_WORKING_DIR_WINDOW}\"")
-    sys("cp \"#{STORE_STAGE_STORE_FAVICON}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
-    sys("cp \"#{STORE_STAGE_STORE_ROBOTS}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
+  template_path = File.join(STORE_STAGE_WWW, (ENV['STORE_TEMPLATE'] or STORE_TEMPLATE))
 
-    # make our HTML valid XHTML
-    patch(STORE_TEMPLATE_WORKING_DIR_WINDOW, [
-        ["<!DOCTYPE html>", ""],
-        ["<html ", "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n      "],
-        [/<body(.*?)>/, "<body\\1><div id=\"page-store-template\">"],
-        ["</body>", "</div></body>"],
-        [/<script(.*?)>/, "<script\\1>//<![CDATA[\n"],
-        [/<\/script>/, "\n//]]></script>"],
-        [/href="\/([^\/])/, "href=\"\\1"],
-        [/src="\/([^\/])/, "src=\"\\1"],
-        ["&nbsp;", "&#160;"],
-        ["&copy;", "&#169;"],
-        ["##INSERT STORE CONTENT HERE##", "\n<!-- TemplateBeginEditable name=\"Content\" -->\n\n<!-- TemplateEndEditable -->"],
-        ["</title>", "</title>\n<link title=\"main\" rel=\"stylesheet\" href=\"http://resource.fastspring.com/app/s/style/base.css\" media=\"screen,projection\" type=\"text/css\" />\n<link title=\"main\" rel=\"stylesheet\" href=\"http://resource.fastspring.com/app/store/style/base.css\" media=\"screen,projection\" type=\"text/css\" />"]
-    ])
+  # copy interesting parts
+  sys("rm -rf \"#{STORE_TEMPLATE_WORKING_DIR}\"")
+  sys("mkdir -p \"#{STORE_TEMPLATE_WORKING_DIR}\"")
+  sys("cp -r \"#{STORE_STAGE_SHARED_DIR}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
+  sys("cp \"#{template_path}\" \"#{STORE_TEMPLATE_WINDOW}\"")
+  sys("cp \"#{STORE_STAGE_STORE_FAVICON}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
+  sys("cp \"#{STORE_STAGE_STORE_ROBOTS}\" \"#{STORE_TEMPLATE_WORKING_DIR}\"")
 
-    content = File.read(STORE_TEMPLATE_WORKING_DIR_WINDOW)
-    content.gsub!(/<!-- SCRIPTS START -->(.*?)<!-- SCRIPTS END -->(.*?)<body(.*?)>/m, "\\2<body\\3>\\1")
-    content.gsub!(/src="http:/m, "src=\"https:")
+  # make our HTML valid XHTML
+  patch(STORE_TEMPLATE_WINDOW, [
+      ['<!DOCTYPE html>', ''],
+      ['<html ', "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n      "],
+      [/<body(.*?)>/, "<body\\1><div id=\"page-store-template\">"],
+      ['</body>', '</div></body>'],
+      [/<script(.*?)>/, "<script\\1>//<![CDATA[\n"],
+      [/<\/script>/, "\n//]]></script>"],
+      [/href="\/([^\/])/, "href=\"\\1"],
+      [/src="\/([^\/])/, "src=\"\\1"],
+      ['&nbsp;', '&#160;'],
+      ['&copy;', '&#169;'],
+      ['##INSERT STORE CONTENT HERE##', "\n<!-- TemplateBeginEditable name=\"Content\" -->\n\n<!-- TemplateEndEditable -->"],
+      ['</title>', "</title>\n<link title=\"main\" rel=\"stylesheet\" href=\"http://resource.fastspring.com/app/s/style/base.css\" media=\"screen,projection\" type=\"text/css\" />\n<link title=\"main\" rel=\"stylesheet\" href=\"http://resource.fastspring.com/app/store/style/base.css\" media=\"screen,projection\" type=\"text/css\" />"]
+  ])
 
-    File.open(STORE_TEMPLATE_WORKING_DIR_WINDOW, "w") do |f|
-      f << content
-    end
+  content = File.read(STORE_TEMPLATE_WINDOW)
+  content.gsub!(/<!-- SCRIPTS START -->(.*?)<!-- SCRIPTS END -->(.*?)<body(.*?)>/m, "\\2<body\\3>\\1")
+  content.gsub!(/src="http:/m, "src=\"https:")
 
-    # fix paths in CSS
-    patch(STORE_TEMPLATE_WORKING_DIR_SHARED_CSS_SITE, [
-        [/\/shared\//, "../"]
-    ])
+  File.open(STORE_TEMPLATE_WINDOW, 'w') do |f|
+    f << content
+  end
 
-    # clean up shared folder to reduce size
-    prune_shared(STORE_TEMPLATE_WORKING_DIR_SHARED)
+  # fix paths in CSS
+  patch(STORE_TEMPLATE_SHARED_CSS_SITE, [
+      [/\/shared\//, '../']
+  ])
 
-    # zip it!
-    sys("rm \"#{ZIP_PATH}\"") if File.exists? ZIP_PATH
-    Dir.chdir(STORE_TEMPLATE_WORKING_DIR) do
-        sys("zip -r -du \"#{ZIP_PATH}\" .")
-    end
+  # clean up shared folder to reduce size
+  prune_shared(STORE_TEMPLATE_SHARED)
 
-    puts "Store template is in " + ZIP_PATH.yellow + ". " + "Don't forget to upload it to FastSpring".green
+  # zip it!
+  sys("rm \"#{ZIP_PATH}\"") if File.exists? ZIP_PATH
+  Dir.chdir(STORE_TEMPLATE_WORKING_DIR) do
+    sys("zip -r -du \"#{ZIP_PATH}\" .")
+  end
+
+  puts 'Store template is in ' + ZIP_PATH.yellow + '. ' + "Don't forget to upload it to FastSpring".green
 end
 
-desc "run gulp livereload watcher"
+desc 'run gulp livereload watcher'
 task :gulp do
-  sys("node_modules/.bin/gulp")
+  sys('node_modules/.bin/gulp')
 end
 
 task :default => :serve
