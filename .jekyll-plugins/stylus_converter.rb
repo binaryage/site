@@ -11,6 +11,7 @@
 #    See site.styl and individual.styl above.
 
 module Jekyll
+
   class StylusConverter < Converter
     safe true
 
@@ -21,8 +22,9 @@ module Jekyll
       Stylus.compress = @config['stylus']['compress'] if @config['stylus']['compress']
       Stylus.paths << @config['stylus']['path'] if @config['stylus']['path']
       Stylus.debug = @config['stylus']['debug'] if @config['stylus']['debug']
+      # noinspection RubyStringKeysInHashInspection
       @options = {
-        "include css" => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
+          'include css' => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
       }
     rescue LoadError
       STDERR.puts $!
@@ -35,7 +37,7 @@ module Jekyll
       ext =~ /\.styl$/i
     end
 
-    def output_ext(ext)
+    def output_ext(_ext)
       '.css'
     end
 
@@ -51,4 +53,5 @@ module Jekyll
       end
     end
   end
+
 end

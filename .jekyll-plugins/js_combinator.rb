@@ -8,6 +8,7 @@ module Jekyll
     class CombinedJsFile < Jekyll::StaticFile
       attr_accessor :list, :minify
 
+      # noinspection RubyResolve
       def write(dest)
         dest_path = File.join(dest, @dir, @name)
 
@@ -22,27 +23,29 @@ module Jekyll
 
         FileUtils.mkdir_p(File.dirname(dest_path))
         begin
-          if @minify then
-            print "#{"COMBINE ".magenta} minifying #{dest_path.yellow} "
+          if @minify
+            print "#{'COMBINE '.magenta} minifying #{dest_path.yellow} "
             res = nil
-            cache_dir = @site.config["html_press"]["cache"]
-            if cache_dir then
-              my_cache_dir = File.join(cache_dir, "list")
+            cache_hit = nil
+            my_cache_dir = nil
+            cache_dir = @site.config['html_press']['cache']
+            if cache_dir
+              my_cache_dir = File.join(cache_dir, 'list')
               sha = Digest::SHA1.hexdigest content
               cache_hit = File.join(my_cache_dir, sha)
-              if File.exists? cache_hit then
+              if File.exists? cache_hit
                 print "<= cache @ #{nice_cache_hit(cache_hit).green}"
                 res = File.read(cache_hit)
               end
             end
-            if not res then
-              print "=> compiling"
+            unless res
+              print '=> compiling'
               res = Closure::Compiler.new.compile(content)
             end
-            if cache_hit and not File.exists? cache_hit then
+            if cache_hit and not File.exists? cache_hit
               print " @ #{nice_cache_hit(cache_hit).red}"
               FileUtils.mkdir_p(my_cache_dir)
-              File.open(cache_hit, 'w') {|f| f.write(res) }
+              File.open(cache_hit, 'w') { |f| f.write(res) }
             end
             print "\n"
             content = res
@@ -64,17 +67,17 @@ module Jekyll
       safe true
 
       def generate(site)
-        list_file = File.expand_path(File.join(site.source, site.config["combinejs"]["path"]))
+        list_file = File.expand_path(File.join(site.source, site.config['combinejs']['path']))
         list_file_dir = File.dirname(list_file)
         list = File.read(list_file).split("\n")
 
         # reject commented-out lines and empty lines
         list.reject! do |path|
-          path =~ /^\s*\#/ or path =~ /^\s*$/
+          path =~ /^\s*#/ or path =~ /^\s*$/
         end
 
         list.map! do |path|
-          File.expand_path(File.join(list_file_dir, path+".js"))
+          File.expand_path(File.join(list_file_dir, path+'.js'))
         end
 
         removed_files = []
@@ -87,7 +90,7 @@ module Jekyll
           found = false
           # remove listed file from static files (if present)
           site.static_files.each do |sf|
-            if file == sf.path then
+            if file == sf.path
               site.static_files.delete(sf)
               removed_files << sf
               found = true
@@ -99,7 +102,7 @@ module Jekyll
           # note: some js files may be generated (coffeescript),
           #       that is why we have to go through pages
           site.pages.each do |page|
-	    if page.destination(site.source).end_with? file then
+            if page.destination(site.source).end_with? file
               site.pages.delete(page)
               # we need to pre-render the page, generate step goes prior page generation
               page.render(site.layouts, site.site_payload)
@@ -110,11 +113,11 @@ module Jekyll
         end
 
         # something.list -> something.js (will contain final concatenated js files)
-        name = File.basename(list_file, ".list") + ".js"
+        name = File.basename(list_file, '.list') + '.js'
         destination = list_file_dir.sub(site.source, '')
         minified_file = CombinedJsFile.new(site, site.source, destination, name)
         minified_file.list = removed_files
-        minified_file.minify = site.config["combinejs"]["minify"]
+        minified_file.minify = site.config['combinejs']['minify']
         site.static_files << minified_file
       end
     end

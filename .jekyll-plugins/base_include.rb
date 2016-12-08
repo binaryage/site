@@ -13,7 +13,7 @@ module Jekyll
         return "Includes directory '#{includes_dir}' cannot be a symlink"
       end
 
-      if @file !~ /^[a-zA-Z0-9_\/\.-]+$/ || @file =~ /\.\// || @file =~ /\/\./
+      if @file !~ /^[a-zA-Z0-9_\/.-]+$/ || @file =~ /\.\// || @file =~ /\/\./
         return "Include file '#{@file}' contains invalid characters or sequences"
       end
 

@@ -1,5 +1,5 @@
-require "rubygems"
-require "jekyll-contentblocks"
+require 'rubygems'
+require 'jekyll-contentblocks'
 
 module Jekyll
   module Tags

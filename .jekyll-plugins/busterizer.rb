@@ -2,22 +2,23 @@ require 'digest/sha1'
 
 module Jekyll
 
+  # noinspection RubyResolve
   class Site
 
     alias_method :busterizer_process, :process
 
-    def generate_buster file
-      return if not File.exists? file
+    def generate_buster(file)
+      return unless File.exists? file
       return if File.directory? file
       sha = Digest::SHA1.hexdigest File.read(file)
       sha[0..7]
     end
 
     def cache_busting(m, dir, m1, m2, m3)
-      return m if m1[0..4]=="http"
-      return m if m2.nil? or m2=="/" or m2==""
-      m2 = m2.split("?")[0]
-      if m2[0] == "/" then
+      return m if m1[0..4]=='http'
+      return m if m2.nil? or m2=='/' or m2==''
+      m2 = m2.split('?')[0]
+      if m2[0] == '/'
         file = File.join(self.dest, m2)
       else
         file = File.join(dir, m2)
@@ -28,7 +29,7 @@ module Jekyll
     end
 
     def busterize_file(path)
-      puts "#{"BUSTER  ".magenta} adding cache busters to #{path.yellow}"
+      puts "#{'BUSTER  '.magenta} adding cache busters to #{path.yellow}"
 
       dir = File.dirname(path)
 
@@ -47,7 +48,7 @@ module Jekyll
         cache_busting m, dir, $1, $2, $3
       end
 
-      File.open(path, 'w') {|f| f.write(content) }
+      File.open(path, 'w') { |f| f.write(content) }
     end
 
     def busterize_site
@@ -59,14 +60,14 @@ module Jekyll
       busterization_list.sort! do |a, b|
         ea = File.extname a
         eb = File.extname b
-        ia = ea == ".css" ? 0 : 1
-        ib = eb == ".css" ? 0 : 1
+        ia = ea == '.css' ? 0 : 1
+        ib = eb == '.css' ? 0 : 1
         ia <=> ib
       end
 
       busterization_list.each do |path|
         ext = File.extname path
-        if config["busterizer"][ext[1..-1]] then
+        if config['busterizer'][ext[1..-1]]
           busterize_file path
         end
       end

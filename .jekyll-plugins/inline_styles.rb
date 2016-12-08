@@ -1,5 +1,5 @@
-require "rubygems"
-require "jekyll-contentblocks"
+require 'rubygems'
+require 'jekyll-contentblocks'
 require 'pp'
 
 module Jekyll
@@ -8,7 +8,7 @@ module Jekyll
       include ::Jekyll::ContentBlocks::ContentBlockTag
 
       def render(context)
-        @content_block_name = "inline_styles"
+        @content_block_name = 'inline_styles'
         content = content_for_block(context)
         return '' if not content or content.size==0
         texts = ['<style>']
@@ -16,7 +16,7 @@ module Jekyll
           texts << block
         end
         texts << '</style>'
-        texts.join("")
+        texts.join('')
       end
     end
   end
