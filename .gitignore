@@ -5,3 +5,4 @@ stage/
 store-template.zip
 .configs/
 npm-debug*
+.idea
