@@ -70,7 +70,7 @@ module Jekyll
 
     def cdnize_site!
       cdnization_list = []
-      self.posts.each do |post|
+      self.posts.docs.each do |post|
         cdnization_list << post.destination(self.dest)
       end
       self.pages.each do |page|
