@@ -17,7 +17,7 @@ module Jekyll
         return
       end
 
-      cname = @config["target_url"].gsub("http://", "")
+      cname = @config["target_url"].gsub("http://", "").gsub("https://", "")
       cname_path = File.join(@dest, "CNAME")
       puts "\n#{"CNAME   ".magenta} generating #{cname.green}"
       FileUtils.mkdir_p(File.dirname(cname_path))

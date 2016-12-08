@@ -59,7 +59,7 @@ STAGE_DIR = File.join(ROOT, "_stage")
 PRESS_CACHE_DIR = File.join(STAGE_DIR, "_cache")
 TEMP_DIR_SERVE = File.join(TEMP_DIR, "serve")
 CDN_ZONE_DIR = File.join(STAGE_DIR, "_cdn")
-CDN_URL = "http://static.binaryage.com/"
+CDN_URL = "https://static.binaryage.com/"
 
 CONFIGS_DIR = File.join(ROOT, ".configs")
 
@@ -181,7 +181,8 @@ def prepare_patched_jekyll_config(dev_mode, repo, busters, cdn=true)
   config["gems"] << "jekyll-paginate"
   config["layouts_dir"] = "shared/layouts"
   config["plugins_dir"] = "../.jekyll-plugins"
-  config["target_url"] = "http://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
+  config["target_url"] = "https://#{subdomain(repo)}.binaryage." + (dev_mode ? "org" : "com")
+  config["enforce_ssl"] = "#{subdomain(repo)}.binaryage."+ (dev_mode ? "org" : "com")
   config["livereload_host"] = (ENV["LIVERELOAD_HOST"] or my_ip()) if dev_mode
   config["markdown"] = "rdiscount"
   config["dev"] = dev_mode
