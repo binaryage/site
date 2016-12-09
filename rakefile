@@ -546,9 +546,4 @@ task :store do
   puts 'Store template is in ' + ZIP_PATH.yellow + '. ' + "Don't forget to upload it to FastSpring".green
 end
 
-desc 'run gulp livereload watcher'
-task :gulp do
-  sys('node_modules/.bin/gulp')
-end
-
 task :default => :serve
