@@ -1,4 +1,4 @@
-require_relative './utils.rb'
+require_relative 'utils.rb'
 
 class Site
   attr_reader :dir, :port, :name, :subdomain, :domain

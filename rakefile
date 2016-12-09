@@ -1,12 +1,12 @@
 # coding: utf-8
 require 'colored2'
 
-require_relative './.lib/utils.rb'
-require_relative './.lib/site.rb'
-require_relative './.lib/workspace.rb'
-require_relative './.lib/repo.rb'
-require_relative './.lib/build.rb'
-require_relative './.lib/store.rb'
+require_relative '_lib/utils.rb'
+require_relative '_lib/site.rb'
+require_relative '_lib/workspace.rb'
+require_relative '_lib/repo.rb'
+require_relative '_lib/build.rb'
+require_relative '_lib/store.rb'
 
 ## CONFIG ###################################################################################################################
 

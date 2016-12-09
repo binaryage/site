@@ -3,7 +3,7 @@ require 'digest/sha1'
 require 'pathname'
 require 'yaml'
 
-require_relative './utils.rb'
+require_relative 'utils.rb'
 
 # noinspection RubyStringKeysInHashInspection
 def prepare_jekyll_config(site, opts)

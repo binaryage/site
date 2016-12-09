@@ -1,7 +1,7 @@
 require 'colored2'
 
-require_relative './utils.rb'
-require_relative './build.rb'
+require_relative 'utils.rb'
+require_relative 'build.rb'
 
 def prune_shared(dir)
   img_dir = File.join(dir, 'img')

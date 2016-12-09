@@ -1,7 +1,7 @@
 require 'colored2'
 
-require_relative './utils.rb'
-require_relative './site.rb'
+require_relative 'utils.rb'
+require_relative 'site.rb'
 
 def init_workspace(sites, git_url)
   master = sites[0]

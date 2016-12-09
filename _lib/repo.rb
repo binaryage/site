@@ -1,4 +1,4 @@
-require_relative './utils.rb'
+require_relative 'utils.rb'
 
 # prevents git error message:
 # You can't push to git://github.com/darwin/site.git
