@@ -8,6 +8,8 @@
     "url": "http://github.com/binaryage/site.git"
   },
   "dependencies": {
+    "browser-sync": "^2.18.2",
+    "bs-html-injector": "git+https://github.com/darwin/html-injector.git",
     "stylus": "^0.54.2"
   }
 }

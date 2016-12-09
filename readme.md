@@ -102,9 +102,7 @@ in a second terminal session run the jekyll debug server:
 
     rake serve what=www,totalspaces,blog
 
-optionally you may run livereload watcher via gulp in another teminal session
-
-    rake gulp
+Note that livereloading and css watching is enabled by default. Using [browser-sync](https://browsersync.io).
 
 ### Deployment
 
