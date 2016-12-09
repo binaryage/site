@@ -1,4 +1,4 @@
-require 'colored'
+require 'colored2'
 require_relative './compressor.rb' # blocks replacement must be applied before compression
 
 module Jekyll

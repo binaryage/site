@@ -1,4 +1,5 @@
-require 'colored'
+require 'colored2'
+require 'pathname'
 
 class SimpleLogger
   def error(msg)

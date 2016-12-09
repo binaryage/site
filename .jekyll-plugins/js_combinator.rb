@@ -1,6 +1,6 @@
 # based on code from: https://github.com/lyoshenka/jekyll-js-minify-plugin
 require 'closure-compiler' # https://github.com/documentcloud/closure-compiler
-require 'colored'
+require 'colored2'
 
 module Jekyll
   module JsCombinator

@@ -1,8 +1,5 @@
 node_modules
-.proxy.config
 _stage/
-stage/
 store-template.zip
-.configs/
 npm-debug*
 .idea

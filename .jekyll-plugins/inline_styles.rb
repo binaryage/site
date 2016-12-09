@@ -1,6 +1,4 @@
-require 'rubygems'
 require 'jekyll-contentblocks'
-require 'pp'
 
 module Jekyll
   module Tags

@@ -18,7 +18,7 @@ GEM
       execjs
     coffee-script-source (1.11.1)
     colorator (1.1.0)
-    colored (1.2)
+    colored2 (3.0.0)
     css_press (0.3.2)
       csspool-st (= 3.1.2)
       json
@@ -78,7 +78,7 @@ PLATFORMS
 DEPENDENCIES
   closure-compiler
   coffee-script
-  colored
+  colored2
   html_press!
   jekyll
   jekyll-coffeescript
