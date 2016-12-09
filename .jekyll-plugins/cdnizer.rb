@@ -99,6 +99,12 @@ module Jekyll
     end
 
     def push_zone_to_cdn_via_rsync!
+      unless ENV['HUB_SERVER']
+        puts 'set ENV variables HUB_SERVER=1 for pushing to static CDN'.red
+        puts '  => skipping CDN push'
+        return
+      end
+
       url = ENV['CDN_RSYNC_URL'] # "rsync://user_ho054rw1@push-1.cdn77.com/user_ho054rw1/"
       password = ENV['CDN_RSYNC_PASSWORD']
       unless url and password
