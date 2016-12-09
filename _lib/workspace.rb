@@ -40,7 +40,7 @@ def init_workspace(sites, git_url)
       sys('git checkout web')
     end
     sys("rmdir \"#{slave.dir}/shared\"") if File.directory?("#{slave.dir}/shared")
-    sys("./.bin/hlink/hlink \"#{master.dir}/shared\" \"#{slave.dir}/shared\"")
+    sys("./_bin/hlink/hlink \"#{master.dir}/shared\" \"#{slave.dir}/shared\"")
   end
 end
 
