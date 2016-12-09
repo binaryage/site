@@ -25,9 +25,11 @@ def init_workspace(sites, git_url)
   # download submodules into master repo
   Dir.chdir(master.dir) do
     sys('git submodule update --init')
+    sys('git checkout web')
     # fix push url in submodule
     Dir.chdir('shared') do
       sys("git remote set-url --push origin #{git_url}")
+      sys('git checkout master')
     end
   end
 
@@ -35,6 +37,7 @@ def init_workspace(sites, git_url)
   slaves.each do |slave|
     Dir.chdir(slave.dir) do
       sys('git submodule init')
+      sys('git checkout web')
     end
     sys("rmdir \"#{slave.dir}/shared\"") if File.directory?("#{slave.dir}/shared")
     sys("./.bin/hlink/hlink \"#{master.dir}/shared\" \"#{slave.dir}/shared\"")
