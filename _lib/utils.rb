@@ -41,3 +41,7 @@ def lookup_site(sites, name)
   # we are not too strict here and lookup by name or subdomain
   sites.detect { |site| site.name==name or site.subdomain==name }
 end
+
+def report_cwd
+  "in #{Dir.pwd.yellow}"
+end

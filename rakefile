@@ -74,6 +74,12 @@ task :reset => [:clean] do
   reset_workspace($sites)
 end
 
+desc 'update workspace to point latest branch tips'
+task :update do
+  puts "note: #{'to get remote changes'.green} you have to do #{'git fetch'.blue} first"
+  update_workspace($sites)
+end
+
 desc 'prints info how to setup /etc/hosts'
 task :hosts do
   puts prepare_hosts_template($sites)

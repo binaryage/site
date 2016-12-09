@@ -8,11 +8,11 @@ def init_workspace(sites, git_url)
   slaves = sites[1..-1]
 
   sys("git remote set-url --push origin #{git_url}")
-  sys('git submodule update --init')
 
   # fix push urls
   sites.each do |site|
     Dir.chdir(site.dir) do
+      puts report_cwd
       sys("git remote set-url --push origin #{git_url}")
     end
   end
@@ -24,10 +24,12 @@ def init_workspace(sites, git_url)
 
   # download submodules into master repo
   Dir.chdir(master.dir) do
+    puts report_cwd
     sys('git submodule update --init')
     sys('git checkout web')
     # fix push url in submodule
     Dir.chdir('shared') do
+      puts report_cwd
       sys("git remote set-url --push origin #{git_url}")
       sys('git checkout master')
     end
@@ -36,11 +38,42 @@ def init_workspace(sites, git_url)
   # for each slave, "symlink" submodules from master repo
   slaves.each do |slave|
     Dir.chdir(slave.dir) do
+      puts report_cwd
       sys('git submodule init')
-      sys('git checkout web')
     end
     sys("rmdir \"#{slave.dir}/shared\"") if File.directory?("#{slave.dir}/shared")
     sys("./_bin/hlink/hlink \"#{master.dir}/shared\" \"#{slave.dir}/shared\"")
+  end
+
+  # this is here for case there are additional submodules outside sites
+  sys('git submodule update --init --recursive')
+end
+
+def update_workspace(sites)
+  master = sites[0]
+  slaves = sites[1..-1]
+
+  # move to branch tips
+  Dir.chdir(master.dir) do
+    puts report_cwd
+    sys('git checkout web')
+    Dir.chdir('shared') do
+      puts report_cwd
+      # note this will reflect in all hard-linked shared folders
+      sys('git checkout master')
+    end
+  end
+
+  slaves.each do |slave|
+    Dir.chdir(slave.dir) do
+      puts report_cwd
+      sys('git checkout web')
+      Dir.chdir('shared') do
+        puts report_cwd
+        # note this should be a no-op under hard-linked setup
+        sys('git checkout master')
+      end
+    end
   end
 end
 
@@ -49,7 +82,7 @@ def reset_workspace(sites)
   master = sites[0]
   slaves = sites[1..-1]
   Dir.chdir(master.dir) do
-    puts "in #{master.dir.yellow}"
+    puts report_cwd
     sys('git checkout -f web')
     sys('git reset --hard HEAD^') # be resilient to amends
     sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
@@ -57,7 +90,7 @@ def reset_workspace(sites)
     ['shared'].each do |submodule|
       submodule = File.join(master.dir, submodule)
       Dir.chdir(submodule) do
-        puts "in #{submodule.yellow}"
+        puts report_cwd
         sys('git checkout -f master')
         sys('git reset --hard HEAD^') # be resilient to amends
         sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
@@ -67,7 +100,7 @@ def reset_workspace(sites)
   end
   slaves.each do |slave|
     Dir.chdir(slave.dir) do
-      puts "in #{slave.dir.yellow}"
+      puts report_cwd
       sys('git checkout -f web')
       sys('git reset --hard HEAD^') # be resilient to amends
       sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
