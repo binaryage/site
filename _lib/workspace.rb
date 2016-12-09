@@ -9,27 +9,17 @@ def init_workspace(sites, git_url)
 
   sys("git remote set-url --push origin #{git_url}")
 
-  # fix push urls
-  sites.each do |site|
-    Dir.chdir(site.dir) do
-      puts report_cwd
-      sys("git remote set-url --push origin #{git_url}")
-    end
-  end
+  sys('git submodule init')
+  sys("git submodule update \"#{master.dir}\"")
 
-  # cleanup submodules
-  slaves.each do |slave|
-    sys("rm -rf \"#{slave.dir}/shared\"")
-  end
-
-  # download submodules into master repo
+  # download submodules into master site
   Dir.chdir(master.dir) do
     puts report_cwd
-    sys('git submodule update --init')
     sys('git checkout web')
-    # fix push url in submodule
+    sys('git submodule update --init shared')
     Dir.chdir('shared') do
       puts report_cwd
+      # fix push url in submodule
       sys("git remote set-url --push origin #{git_url}")
       sys('git checkout master')
     end
@@ -37,12 +27,21 @@ def init_workspace(sites, git_url)
 
   # for each slave, "symlink" submodules from master repo
   slaves.each do |slave|
-    Dir.chdir(slave.dir) do
-      puts report_cwd
-      sys('git submodule init')
-    end
+    sys("git submodule update \"#{slave.dir}\"")
+    # Dir.chdir(slave.dir) do
+    #   puts report_cwd
+    #   sys('git submodule init')
+    # end
     sys("rmdir \"#{slave.dir}/shared\"") if File.directory?("#{slave.dir}/shared")
     sys("./_bin/hlink/hlink \"#{master.dir}/shared\" \"#{slave.dir}/shared\"")
+  end
+
+  # fix push urls
+  sites.each do |site|
+    Dir.chdir(site.dir) do
+      puts report_cwd
+      sys("git remote set-url --push origin #{git_url}")
+    end
   end
 
   # this is here for case there are additional submodules outside sites

@@ -58,9 +58,13 @@ task :init_gem do
   sys('bundle install')
 end
 
-desc 'init workspace - needs special care'
-task :init => [:init_gem, :init_npm] do
+desc 'init submodules / hard-links'
+task :init_repo do
   init_workspace($sites, get_writable_git_url)
+end
+
+desc 'init workspace - needs special care'
+task :init => [:init_gem, :init_npm, :init_repo] do
 end
 
 desc 'clean stage'
