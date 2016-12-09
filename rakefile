@@ -21,8 +21,7 @@ CDN_URL = 'https://static.binaryage.com/'
 
 ROOT = File.expand_path('.')
 NODE_DIR = File.join(ROOT, '_node')
-
-STAGE_DIR = File.join(ROOT, '_stage')
+STAGE_DIR = File.join(ROOT, '.stage')
 SERVE_DIR = File.join(STAGE_DIR, 'serve')
 BUILD_DIR = File.join(STAGE_DIR, 'build')
 STORE_DIR = File.join(STAGE_DIR, 'store')

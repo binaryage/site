@@ -1,5 +1,5 @@
 node_modules
-_stage/
+.stage/
 store-template.zip
 npm-debug*
 .idea
