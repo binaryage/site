@@ -20,7 +20,7 @@ def prepare_jekyll_config(site, opts)
   config['gems'] ||= []
   config['gems'] << 'jekyll-coffeescript'
   config['layouts_dir'] = 'shared/layouts'
-  config['plugins_dir'] = '../.jekyll-plugins'
+  config['plugins_dir'] = '../_plugins'
   config['target_url'] = "https://#{site.subdomain}.#{domain}"
   config['enforce_ssl'] = "#{site.subdomain}.#{domain}"
   config['markdown'] = 'rdiscount'
