@@ -19,7 +19,7 @@ MIN_GEM_VERSION = '1.8.23'
 
 CDN_URL = 'https://static.binaryage.com/'
 
-ROOT = File.expand_path('.')
+ROOT = File.expand_path(File.join(File.dirname(__FILE__)))
 NODE_DIR = File.join(ROOT, '_node')
 STAGE_DIR = File.join(ROOT, '.stage')
 SERVE_DIR = File.join(STAGE_DIR, 'serve')
