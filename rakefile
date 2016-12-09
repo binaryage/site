@@ -20,6 +20,7 @@ MIN_GEM_VERSION = '1.8.23'
 CDN_URL = 'https://static.binaryage.com/'
 
 ROOT = File.expand_path('.')
+NODE_DIR = File.join(ROOT, '_node')
 
 STAGE_DIR = File.join(ROOT, '_stage')
 SERVE_DIR = File.join(STAGE_DIR, 'serve')
@@ -44,9 +45,10 @@ task :init_npm do
   unless Gem::Version.new(`npm --version`) >= Gem::Version.new(MIN_NPM_VERSION)
     die "install npm (>=v#{MIN_NPM_VERSION}) => http://npmjs.org"
   end
-  sys('rm -rf node_modules')
-  sys('npm cache clean')
-  sys('npm install')
+  Dir.chdir NODE_DIR do
+    sys('rm -rf node_modules')
+    sys('npm install')
+  end
 end
 
 desc 'install gem dependencies'

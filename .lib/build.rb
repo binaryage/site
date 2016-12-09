@@ -105,7 +105,7 @@ def serve_site(site, base_dir)
       submisivity = '--no-ui --no-online --no-open'
       plugins = " --plugins \"bs-html-injector?files[]=#{work_dir}/**/*.html\""
       locations = "--port #{port} --proxy http://localhost:1#{port} --files \"#{work_dir}/**/*.css\""
-      sys("cd .. && node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}")
+      sys("cd .. && _node/node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}")
     end
     sleep(0.2)
   end
