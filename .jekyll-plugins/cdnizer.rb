@@ -117,33 +117,12 @@ module Jekyll
       end
     end
 
-    def push_zone_to_cdn_via_ftp!
-      url = ENV['CDN_FTP_URL']
-      user = ENV['CDN_FTP_USER']
-      password = ENV['CDN_FTP_PASSWORD']
-      path = ENV['CDN_FTP_PATH']
-      unless url and password and user and path
-        puts 'set ENV variables CDN_FTP_URL and CDN_FTP_USER and CDN_FTP_PASSWORD and CDN_FTP_PATH'.red
-        puts '  => skipping CDN push'
-        return
-      end
-      zone_dir = config['cdn']['zone']
-      puts "#{'CDN     '.magenta} pushing zone files to CDN...".blue
-      Dir.chdir zone_dir do
-        cmd = "ncftpput -R -v -u \"#{user}\" -p \"#{password}\" #{url} #{path} ."
-        unless system(cmd)
-          raise FatalException.new("ncftpput failed with code #{$?}")
-        end
-      end
-    end
-
     def process
       cdnizer_process # call original process method
       return unless config['cdn']['enabled']
       cdnizer_clean_zone!
       cdnize_site!
       push_zone_to_cdn_via_rsync!
-      # push_zone_to_cdn_via_ftp!
     end
 
   end
