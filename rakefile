@@ -246,16 +246,6 @@ def prune_shared(dir)
   sys("rm \"#{img_dir}/chimp\"*")
 end
 
-def my_ip
-  ethernet_ip = `ipconfig getifaddr en0`.strip
-  return ethernet_ip unless ethernet_ip.empty?
-
-  wifi_ip = `ipconfig getifaddr en1`.strip
-  return wifi_ip unless wifi_ip.empty?
-
-  die('unable to obtain local ip - fix my_ip in the rake task')
-end
-
 def build_single_web(name, stage, clean_stage=true, busters=true, cdn=true)
   dest = File.join(stage, name)
 
@@ -359,7 +349,7 @@ task :hosts do
   puts
   puts "#### #{LOCAL_DOMAIN} test site ####"
   $all_domains.each do |domain|
-    puts "#{my_ip} #{domain}.#{LOCAL_DOMAIN}"
+    puts "127.0.0.1 #{domain}.#{LOCAL_DOMAIN}"
   end
   puts "#### #{LOCAL_DOMAIN} test site ####"
 end
