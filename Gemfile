@@ -12,5 +12,4 @@ gem "yui-compressor"
 group :jekyll_plugins do
   gem 'jekyll-contentblocks'
   gem 'jekyll-coffeescript'
-  gem 'jekyll-paginate'
 end
