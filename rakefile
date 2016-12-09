@@ -465,7 +465,7 @@ task :serve do
           Process.kill('INT', master_pid) # nginx starts in different process group :(
         end
         # see https://browsersync.io/docs/command-line
-        params = '--logLevel info --no-open --plugins "bs-html-injector?files[]=**/*.html"'
+        params = "--logLevel info --no-open --plugins \"bs-html-injector?files[]=#{work_dir}/**/*.html\""
         sys("cd .. && node_modules/.bin/browser-sync start #{params} --port #{port} --proxy http://localhost:1#{port} --files \"#{work_dir}/**/*.css\"")
       end
     end
