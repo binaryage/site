@@ -53,6 +53,8 @@ module Jekyll
         if will_be_generated?(site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
           return # skip it, the file already exists in the repo at the root level
+        else
+          puts "#{'RESHAPER'.magenta} rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
         end
         self.output.gsub!(/shared\/root\//, '')
       end
@@ -76,6 +78,8 @@ module Jekyll
         if will_be_generated?(site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
           return # skip it, the file already exists in the repo at the root level
+        else
+          puts "#{'RESHAPER'.magenta} rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
         end
         FileUtils.mkdir_p(File.dirname(new_path))
         FileUtils.cp(orig_path, new_path)
