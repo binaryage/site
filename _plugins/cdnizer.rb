@@ -143,11 +143,11 @@ module Jekyll
     def process
       cdnizer_process # call original process method
 
-      if config['cdn']['enabled']
+      if config['cdn'] and config['cdn']['enabled']
         push_to_cdn!(dest)
       end
 
-      if config['static_cdn']['enabled']
+      if config['static_cdn'] and config['static_cdn']['enabled']
         clean_static_zone!
         prepare_static_zone!
         push_static_zone_to_cdn!
