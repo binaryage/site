@@ -105,7 +105,7 @@ module Jekyll
         puts '  => skipping STATIC CDN push'
         return
       end
-      zone_dir = config['static_cdn']['zone']
+      zone_dir = File.join(config['static_cdn']['zone'], '') # ensures trailing slash
       puts "#{'STATIC CDN     '.magenta} pushing zone files to CDN...".blue
       cmd = "rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" \"#{zone_dir}\" \"#{push_url}\""
       unless ENV['HUB_SERVER']
