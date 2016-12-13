@@ -20,12 +20,12 @@ module Jekyll
     end
 
     def copy_into_zone(file_path, flat_name)
-      zone_dir = config['cdn']['zone']
+      zone_dir = config['static_cdn']['zone']
       FileUtils.mkdir_p(zone_dir)
       zone_file = File.join(zone_dir, flat_name)
       return if File.exists? zone_file
       FileUtils.cp(file_path, zone_file)
-      puts "#{'CDN     '.magenta} copied #{file_path.yellow} -> #{zone_file.yellow}"
+      puts "#{'STATIC CDN     '.magenta} copied #{file_path.yellow} -> #{zone_file.yellow}"
     end
 
     def cdnize_fragment(m, dir, m1, m2, m3)
@@ -42,11 +42,11 @@ module Jekyll
       return m if hash.nil?
       flat = "#{hash}_#{flat_name(m2)}".gsub(/_+/, '_')
       copy_into_zone(file, flat)
-      m1 + config['cdn']['url'] + flat + m3
+      m1 + config['static_cdn']['url'] + flat + m3
     end
 
     def cdnize_file(path)
-      puts "#{'CDN     '.magenta} redirecting asset urls in #{path.yellow} to #{(config['cdn']['url']).green}"
+      puts "#{'STATIC CDN     '.magenta} redirecting asset urls in #{path.yellow} to #{(config['static_cdn']['url']).green}"
 
       dir = File.dirname(path)
 
@@ -91,41 +91,36 @@ module Jekyll
     end
 
     def cdnizer_clean_zone!
-      zone_dir = config['cdn']['zone']
-      raise FatalException.new("CDN error: specify config[\"cdn\"][\"zone\"]") unless zone_dir
+      zone_dir = config['static_cdn']['zone']
+      raise FatalException.new("CDN error: specify config['static_cdn']['zone']") unless zone_dir
       list = Dir.glob(File.join(zone_dir, '*'))
-      puts "#{'CDN     '.magenta} cleaning #{"#{list.size} files".green} in zone folder: #{zone_dir.yellow}"
+      puts "#{'STATIC CDN     '.magenta} cleaning #{"#{list.size} files".green} in zone folder: #{zone_dir.yellow}"
       FileUtils.rm(list)
     end
 
     def push_zone_to_cdn_via_rsync!
+      push_url = config['static_cdn']['push_url'] # "user_xxx@push-1.cdn77.com:/www/"
+      unless push_url
+        puts "set jekyll config['static_cdn']['push_url']".red
+        puts '  => skipping STATIC CDN push'
+        return
+      end
+      zone_dir = config['static_cdn']['zone']
+      puts "#{'STATIC CDN     '.magenta} pushing zone files to CDN...".blue
+      cmd = "rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" \"#{zone_dir}\" \"#{push_url}\""
       unless ENV['HUB_SERVER']
-        puts 'set ENV variables HUB_SERVER=1 for pushing to static CDN'.red
-        puts '  => skipping CDN push'
+        puts 'set ENV variable HUB_SERVER=1 for pushing to static CDN'.red
+        puts "would execute: #{cmd.blue}"
         return
       end
-
-      url = ENV['CDN_RSYNC_URL'] # "rsync://user_ho054rw1@push-1.cdn77.com/user_ho054rw1/"
-      password = ENV['CDN_RSYNC_PASSWORD']
-      unless url and password
-        puts 'set ENV variables CDN_RSYNC_URL and CDN_RSYNC_PASSWORD'.red
-        puts '  => skipping CDN push'
-        return
-      end
-      zone_dir = config['cdn']['zone']
-      puts "#{'CDN     '.magenta} pushing zone files to CDN...".blue
-      Dir.chdir zone_dir do
-        ENV['RSYNC_PASSWORD'] = password
-        cmd = "sshpass -p \"#{password}\" rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" . #{url}"
-        unless system(cmd)
-          raise FatalException.new("rsync failed with code #{$?}")
-        end
+      unless system(cmd)
+        raise FatalException.new("rsync failed with code #{$?}")
       end
     end
 
     def process
       cdnizer_process # call original process method
-      return unless config['cdn']['enabled']
+      return unless config['static_cdn']['enabled']
       cdnizer_clean_zone!
       cdnize_site!
       push_zone_to_cdn_via_rsync!

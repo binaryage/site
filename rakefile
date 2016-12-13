@@ -17,7 +17,8 @@ LOCAL_DOMAIN = 'binaryage.org' # this domain is for testing to be set in /etc/ho
 MIN_NPM_VERSION = '1.1.18'
 MIN_GEM_VERSION = '1.8.23'
 
-CDN_URL = 'https://static.binaryage.com/'
+STATIC_CDN_URL = 'https://static.binaryage.com/'
+STATIC_CDN_PUSH_URL= 'user_ho054rw1@push-1.cdn77.com:/www/'
 
 ROOT = File.expand_path(File.join(File.dirname(__FILE__)))
 NODE_DIR = File.join(ROOT, '_node')
@@ -129,7 +130,8 @@ task :build do
       :clean_stage => true,
       :busters => true,
       :cdn => true,
-      :cdn_url => CDN_URL
+      :static_cdn_url => STATIC_CDN_URL,
+      :static_cdn_push_url => STATIC_CDN_PUSH_URL
   }
 
   build_sites($sites, build_opts, names)

@@ -38,10 +38,11 @@ def prepare_jekyll_config(site, opts)
       'compress' => (not dev_mode),
       'cache' => File.join(stage, '_cache')
   }
-  config['cdn'] = {
+  config['static_cdn'] = {
       'enabled' => (not dev_mode and opts[:cdn]),
       'zone' => File.join(stage, '_cdn'),
-      'url' => opts[:cdn_url]
+      'url' => opts[:static_cdn_url],
+      'push_url' => opts[:static_cdn_push_url]
   }
   config['busterizer'] = {
       'css' => (busters and (not dev_mode)),
