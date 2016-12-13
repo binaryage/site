@@ -48,6 +48,7 @@ module Jekyll
       # see readme in https://github.com/binaryage/site
       if @dir =~ /shared\/root/
         @dir = @dir.gsub('shared/root', '')
+        @url = nil
         new_path = destination(dest)
         if will_be_generated?(site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
@@ -70,6 +71,7 @@ module Jekyll
       if @dir =~ /shared\/root/
         orig_path = path
         @dir = @dir.gsub('shared/root', '')
+        @url = nil
         new_path = destination(dest)
         if will_be_generated?(site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
