@@ -113,6 +113,7 @@ module Jekyll
         puts "would execute: #{cmd.blue}"
         return
       end
+      puts "> #{cmd.blue}"
       unless system(cmd)
         raise FatalException.new("rsync failed with code #{$?}")
       end
