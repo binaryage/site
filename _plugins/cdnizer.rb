@@ -68,7 +68,7 @@ module Jekyll
       File.open(path, 'w') { |f| f.write(content) }
     end
 
-    def cdnize_site!
+    def prepare_static_zone!
       cdnization_list = []
       self.posts.docs.each do |post|
         cdnization_list << post.destination(self.dest)
@@ -90,7 +90,7 @@ module Jekyll
       end
     end
 
-    def cdnizer_clean_zone!
+    def clean_static_zone!
       zone_dir = config['static_cdn']['zone']
       raise FatalException.new("CDN error: specify config['static_cdn']['zone']") unless zone_dir
       list = Dir.glob(File.join(zone_dir, '*'))
@@ -98,7 +98,7 @@ module Jekyll
       FileUtils.rm(list)
     end
 
-    def push_zone_to_cdn_via_rsync!
+    def push_static_zone_to_cdn!
       push_url = config['static_cdn']['push_url'] # "user_xxx@push-1.cdn77.com:/www/"
       unless push_url
         puts "set jekyll config['static_cdn']['push_url']".red
@@ -109,7 +109,28 @@ module Jekyll
       puts "#{'STATIC CDN     '.magenta} pushing zone files to CDN...".blue
       cmd = "rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" \"#{zone_dir}\" \"#{push_url}\""
       unless ENV['HUB_SERVER']
-        puts 'set ENV variable HUB_SERVER=1 for pushing to static CDN'.red
+        puts 'set ENV variable HUB_SERVER=1 for pushing to STATIC CDN'.red
+        puts "would execute: #{cmd.blue}"
+        return
+      end
+      puts "> #{cmd.blue}"
+      unless system(cmd)
+        raise FatalException.new("rsync failed with code #{$?}")
+      end
+    end
+
+    def push_to_cdn! (generated_web_dir)
+      push_url = config['cdn']['push_url'] # "user_xxx@push-1.cdn77.com:/www/"
+      unless push_url
+        puts "set jekyll config['cdn']['push_url']".red
+        puts '  => skipping CDN push'
+        return
+      end
+      zone_dir = File.join(generated_web_dir, '') # ensures trailing slash
+      puts "#{'CDN     '.magenta} pushing zone files to CDN...".blue
+      cmd = "rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" \"#{zone_dir}\" \"#{push_url}\""
+      unless ENV['HUB_SERVER']
+        puts 'set ENV variable HUB_SERVER=1 for pushing to CDN'.red
         puts "would execute: #{cmd.blue}"
         return
       end
@@ -121,10 +142,16 @@ module Jekyll
 
     def process
       cdnizer_process # call original process method
-      return unless config['static_cdn']['enabled']
-      cdnizer_clean_zone!
-      cdnize_site!
-      push_zone_to_cdn_via_rsync!
+
+      if config['cdn']['enabled']
+        push_to_cdn!(dest)
+      end
+
+      if config['static_cdn']['enabled']
+        clean_static_zone!
+        prepare_static_zone!
+        push_static_zone_to_cdn!
+      end
     end
 
   end
