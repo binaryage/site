@@ -140,6 +140,28 @@ module Jekyll
       end
     end
 
+    def purge_cdn!(cdn_id)
+      # see https://client.cdn77.com/support/api/version/2.0/data
+
+      unless ENV['HUB_SERVER']
+        puts 'set ENV variable HUB_SERVER=1 for purging CDN'.red
+        return
+      end
+
+      api_login = ENV['CDN77_API_LOGIN']
+      api_password = ENV['CDN77_API_PASSWORD']
+      if api_login and api_password
+        cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" https://api.cdn77.com/v2.0/data/purge-all"
+        puts "> #{cmd.blue}"
+        unless system(cmd)
+          raise FatalException.new("curl failed with code #{$?}")
+        end
+      else
+        puts 'set ENV variables CDN77_API_LOGIN and CDN77_API_PASSWORD for purging CDN'.red
+        puts '  => https://client.cdn77.com/support/api/version/2.0/data'
+      end
+    end
+
     def process
       cdnizer_process # call original process method
 
@@ -152,6 +174,8 @@ module Jekyll
         prepare_static_zone!
         push_static_zone_to_cdn!
       end
+
+      purge_cdn!(config['purge_cdn']) if config['purge_cdn']
     end
 
   end
