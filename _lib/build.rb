@@ -102,11 +102,15 @@ def serve_site(site, base_dir)
     fork do
       trap('INT') { exit 12 }
       # see https://browsersync.io/docs/command-line
-      verbosity = '--logLevel info'
-      submisivity = '--no-ui --no-online --no-open'
-      plugins = " --plugins \"bs-html-injector?files[]=#{work_dir}/**/*.html\""
-      locations = "--port #{port} --proxy http://localhost:1#{port} --files \"#{work_dir}/**/*.css\""
-      sys("cd .. && _node/node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}")
+      node_dir = File.join(Dir.pwd, '..', '_node')
+      # we have to switch to _node dir with package.json and node_modules, node/browser-sync expectes it for loading plugins
+      Dir.chdir node_dir do
+        verbosity = '--logLevel info'
+        submisivity = '--no-ui --no-online --no-open'
+        plugins = " --plugins \"bs-html-injector?files[]=#{work_dir}/**/*.html\""
+        locations = "--port #{port} --proxy http://localhost:1#{port} --files \"#{work_dir}/**/*.css\""
+        sys("node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}")
+      end
     end
     sleep(0.2)
   end
