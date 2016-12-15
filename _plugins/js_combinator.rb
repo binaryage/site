@@ -34,7 +34,7 @@ module Jekyll
               sha = Digest::SHA1.hexdigest content
               cache_hit = File.join(my_cache_dir, sha)
               if File.exists? cache_hit
-                print "<= cache @ #{nice_cache_hit(cache_hit).green}"
+                print "<= cache @ #{relative_cache_file_path(cache_hit).green}"
                 res = File.read(cache_hit)
               end
             end
@@ -43,7 +43,7 @@ module Jekyll
               res = Closure::Compiler.new.compile(content)
             end
             if cache_hit and not File.exists? cache_hit
-              print " @ #{nice_cache_hit(cache_hit).red}"
+              print " @ #{relative_cache_file_path(cache_hit).red}"
               FileUtils.mkdir_p(my_cache_dir)
               File.open(cache_hit, 'w') { |f| f.write(res) }
             end
