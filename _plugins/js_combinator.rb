@@ -5,7 +5,7 @@ require 'colored2'
 module Jekyll
   module JsCombinator
 
-    class CombinedJsFile < Jekyll::StaticFile
+    class CombinedJsFile < StaticFile
       attr_accessor :list, :minify
 
       # noinspection RubyResolve
@@ -63,7 +63,7 @@ module Jekyll
       end
     end
 
-    class CombinedJsGenerator < Jekyll::Generator
+    class CombinedJsGenerator < Generator
       safe true
 
       def generate(site)

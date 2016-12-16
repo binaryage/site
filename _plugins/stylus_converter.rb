@@ -30,11 +30,11 @@ module Jekyll
       @options = {
           'include css' => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
       }
-    rescue LoadError
+    rescue => e
       STDERR.puts $!
       STDERR.puts 'You are missing a library required for Stylus. Please run:'
       STDERR.puts '  $ [sudo] gem install stylus'
-      raise FatalException.new('Missing dependency: stylus')
+      raise e
     end
 
     def matches(ext)

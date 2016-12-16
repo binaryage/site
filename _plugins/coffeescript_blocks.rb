@@ -1,8 +1,8 @@
 require 'colored2'
+require 'coffee-script'
 require_relative './compressor.rb' # blocks replacement must be applied before compression
 
 module Jekyll
-  require 'coffee-script'
 
   # noinspection RubyResolve
   class Page
@@ -22,9 +22,9 @@ module Jekyll
             pre.gsub!('coffeescript', 'javascript')
             begin
               code = CoffeeScript.compile code
-            rescue StandardError => e
+            rescue => e
               STDERR.puts 'CoffeeScript error:' + e.message
-              raise FatalException.new("CoffeeScript error: #{e.message}")
+              raise e
             end
           end
 
