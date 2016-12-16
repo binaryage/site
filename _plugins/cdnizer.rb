@@ -46,11 +46,11 @@ module Jekyll
     end
 
     def cdnize_file(path)
+      return unless File.exists? path # some files could be deleted by pruner
       puts "#{'STATIC CDN     '.magenta} redirecting asset urls in #{path.yellow} to #{(config['static_cdn']['url']).green}"
 
-      dir = File.dirname(path)
-
       content = File.read(path)
+      dir = File.dirname(path)
 
       # css
       content.gsub!(/(url\(["'])(.*?)(["']\))/) do |m|
