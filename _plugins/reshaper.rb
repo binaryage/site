@@ -68,7 +68,3 @@ def remove_unwanted_content!(site)
   end
 
 end
-
-Jekyll::Hooks.register(:site, :post_render) do |site|
-  remove_unwanted_content!(site)
-end

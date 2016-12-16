@@ -9,7 +9,3 @@ def remove_unwanted_files!(site)
     end
   end
 end
-
-Jekyll::Hooks.register(:site, :post_write) do |site|
-  remove_unwanted_files!(site)
-end

@@ -33,5 +33,3 @@ module Jekyll
   end
 
 end
-
-Liquid::Template.register_tag('base_include', Jekyll::BaseIncludeTag)

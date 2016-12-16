@@ -12,7 +12,3 @@ def generate_cname_file!(site)
   FileUtils.mkdir_p(File.dirname(cname_path))
   File.open(cname_path, 'w') { |f| f.write(cname) }
 end
-
-Jekyll::Hooks.register(:site, :post_write) do |site|
-  generate_cname_file!(site)
-end

@@ -3,7 +3,7 @@ require 'pathname'
 require 'html_press'
 require_relative '_shared'
 
-def press(site, item)
+def press_html!(site, item)
   unless do_html_press?(site)
     return
   end
@@ -34,8 +34,4 @@ def press(site, item)
   File.open(cache_file, 'w') { |f| f.write(item.output) }
   print " @ #{relative_cache_file_path(cache_file).red}\n"
   true
-end
-
-Jekyll::Hooks.register([:documents, :pages], :post_render) do |item|
-  press(item.site, item)
 end

@@ -19,5 +19,3 @@ module Jekyll
     end
   end
 end
-
-Liquid::Template.register_tag('inline_styles', Jekyll::Tags::InlineStyles)
