@@ -66,8 +66,8 @@ module Jekyll
     class CombinedJsGenerator < Generator
       safe true
 
-      def generate(site)
-        list_file = File.expand_path(File.join(site.source, site.config['combinejs']['path']))
+      def generate_list(site, path, minify)
+        list_file = File.expand_path(File.join(site.source, path))
         list_file_dir = File.dirname(list_file)
         list = File.read(list_file).split("\n")
 
@@ -117,8 +117,15 @@ module Jekyll
         destination = list_file_dir.sub(site.source, '')
         minified_file = CombinedJsFile.new(site, site.source, destination, name)
         minified_file.list = removed_files
-        minified_file.minify = site.config['combinejs']['minify']
+        minified_file.minify = minify
         site.static_files << minified_file
+
+      end
+
+      def generate(site)
+        site.config['combinejs'].each do |config|
+          generate_list(site, config['path'], config['minify'])
+        end
       end
     end
 

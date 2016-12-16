@@ -30,10 +30,13 @@ def prepare_jekyll_config(site, opts)
       'debug' => dev_mode,
       'path' => './shared/css/site.styl'
   }
-  config['combinejs'] = {
+  config['combinejs'] = [{
       'path' => './shared/js/code.list',
       'minify' => (not dev_mode)
-  }
+  },{
+      'path' => './shared/js/changelog.list',
+      'minify' => (not dev_mode)
+  }]
   config['html_press'] = {
       'compress' => (not dev_mode),
       'cache' => File.join(stage, '_cache')
