@@ -17,11 +17,11 @@ def relative_cache_file_path(full_path)
   Pathname.new(full_path).relative_path_from(Pathname.new File.join(Dir.pwd, '..')).to_s
 end
 
-def do_press?(site)
+def do_html_press?(site)
   site.config['html_press']['compress']
 end
 
-def cache_dir(site)
+def html_press_cache_dir(site)
   site.config['html_press']['cache']
 end
 

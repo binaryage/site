@@ -4,7 +4,7 @@ require 'html_press'
 require_relative '_shared'
 
 def press(site, item)
-  unless do_press?(site)
+  unless do_html_press?(site)
     return
   end
   unless HTML_EXTENSIONS.include?(item.output_ext)
@@ -12,7 +12,7 @@ def press(site, item)
   end
   print "#{'COMPRESS'.magenta} generating #{item.inspect.yellow}"
 
-  root_cache_dir = cache_dir(site)
+  root_cache_dir = html_press_cache_dir(site)
   html_cache_dir = File.join(root_cache_dir, 'html')
   sha = Digest::SHA1.hexdigest(item.output)
   cache_file = File.join(html_cache_dir, sha)
