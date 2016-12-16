@@ -26,7 +26,9 @@ def cache_dir(site)
 end
 
 def will_be_generated?(site, me, dest, path)
-  return true if site.pages.any? { |f| f!=me and f.destination(dest) == path }
-  return true if site.static_files.any? { |f| f!=me and f.destination(dest) == path }
+  site.each_site_file do |item|
+    next if item == me
+    return true if item.destination(dest) == path
+  end
   false
 end
