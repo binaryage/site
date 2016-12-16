@@ -15,13 +15,17 @@ module Jekyll
   class StylusConverter < Converter
     safe true
 
-    def setup
-      return if @setup
-      @setup = true
+    def stylus_config(key)
+      @config['stylus'][key]
+    end
+
+    def setup_if_needed!
+      return if @setup_done
+      @setup_done = true
       require 'stylus'
-      Stylus.compress = @config['stylus']['compress'] if @config['stylus']['compress']
-      Stylus.paths << @config['stylus']['path'] if @config['stylus']['path']
-      Stylus.debug = @config['stylus']['debug'] if @config['stylus']['debug']
+      Stylus.compress = stylus_config('compress') if stylus_config('compress')
+      Stylus.paths << stylus_config('path') if stylus_config('path')
+      Stylus.debug = stylus_config('debug') if stylus_config('debug')
       # noinspection RubyStringKeysInHashInspection
       @options = {
           'include css' => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
@@ -43,13 +47,13 @@ module Jekyll
 
     def convert(content)
       begin
-        setup
+        setup_if_needed!
         Dir.chdir File.dirname(Stylus.paths[0]) do
           Stylus.compile content, @options
         end
       rescue => e
         puts "Stylus Exception: #{e.message}"
-        raise FatalException.new("Stylus Exception: #{e.message}")
+        raise e
       end
     end
   end
