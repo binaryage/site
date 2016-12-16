@@ -18,6 +18,7 @@ def press(site, item)
   cache_file = File.join(html_cache_dir, sha)
   if File.exists? cache_file
     print "<= cache @ #{relative_cache_file_path(cache_file).green}\n"
+    item.output = File.read(cache_file)
     return
   end
 
