@@ -1,8 +1,4 @@
-def will_be_generated?(site, me, dest, path)
-  return true if site.pages.any? { |f| f!=me and f.destination(dest) == path }
-  return true if site.static_files.any? { |f| f!=me and f.destination(dest) == path }
-  false
-end
+require_relative '_shared'
 
 def generate_cname_file!(site)
   if will_be_generated?(site, nil, site.dest, File.join(site.dest, 'CNAME'))

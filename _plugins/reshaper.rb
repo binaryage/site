@@ -1,8 +1,4 @@
-def will_be_generated?(site, me, dest, path)
-  return true if site.pages.any? { |f| f!=me and f.destination(dest) == path }
-  return true if site.static_files.any? { |f| f!=me and f.destination(dest) == path }
-  false
-end
+require_relative '_shared'
 
 module Jekyll
   class Site
