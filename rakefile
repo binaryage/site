@@ -141,7 +141,7 @@ desc 'generate store template zip' # see https://springboard.fastspring.com/site
 task :store do
   build_store($sites.first, {:stage => STORE_DIR,
                              :dont_prune => true,
-                             :zip_path => 'store-template.zip'})
+                             :zip_path => File.join(ROOT, 'store-template.zip')})
 end
 
 desc 'inspect the list of sites currently registered'
