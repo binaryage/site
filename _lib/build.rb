@@ -52,6 +52,10 @@ def prepare_jekyll_config(site, opts)
       'html' => (busters and (not dev_mode))
   }
 
+  if opts[:dont_prune]
+    config.delete('prune_files')
+  end
+
   output = YAML.dump(config)
   sha = Digest::SHA1.hexdigest output
   sha = sha[0..7]

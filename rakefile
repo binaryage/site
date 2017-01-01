@@ -140,6 +140,7 @@ end
 desc 'generate store template zip' # see https://springboard.fastspring.com/site/configuration/template/doc/templateOverview.xml
 task :store do
   build_store($sites.first, {:stage => STORE_DIR,
+                             :dont_prune => true,
                              :zip_path => 'store-template.zip'})
 end
 
