@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/binaryage/html_press.git
-  revision: 986e9e0f12a0a81077f2220cfb3685f9b7f6c763
+  revision: 8bc6fcb8922e66b0781a28418d5fada8aeff6255
   specs:
     html_press (0.7.1)
       css_press (>= 0.3.2)
@@ -38,8 +38,9 @@ GEM
       pathutil (~> 0.9)
       rouge (~> 1.7)
       safe_yaml (~> 1.0)
-    jekyll-coffeescript (1.0.1)
+    jekyll-coffeescript (1.0.2)
       coffee-script (~> 2.2)
+      coffee-script-source (~> 1.11.1)
     jekyll-contentblocks (1.2.0)
       jekyll
     jekyll-sass-converter (1.5.0)
@@ -55,14 +56,14 @@ GEM
     mercenary (0.3.6)
     pathutil (0.14.0)
       forwardable-extended (~> 2.6)
-    public_suffix (2.0.4)
+    public_suffix (2.0.5)
     rb-fsevent (0.9.8)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
     rdiscount (2.2.0.1)
     rouge (1.11.1)
     safe_yaml (1.0.4)
-    sass (3.4.22)
+    sass (3.4.23)
     stylus (1.0.2)
       execjs
       stylus-source
