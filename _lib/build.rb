@@ -20,6 +20,7 @@ def prepare_jekyll_config(site, opts)
   config['gems'] ||= []
   config['gems'] << 'jekyll-coffeescript'
   config['layouts_dir'] = 'shared/layouts'
+  config['includes_dir'] = 'shared/includes'
   config['plugins_dir'] = '../_plugins'
   config['target_url'] = "https://#{site.subdomain}.#{domain}"
   config['enforce_ssl'] = "#{site.subdomain}.#{domain}"

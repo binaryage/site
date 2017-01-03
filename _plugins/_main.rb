@@ -1,4 +1,5 @@
 # this script is responsible for registering our plugins in correct order
+require 'pp'
 
 require_relative 'compressor'
 require_relative 'reshaper'
@@ -6,13 +7,11 @@ require_relative 'pruner'
 require_relative 'cname_generator'
 require_relative 'coffeescript_blocks'
 
-require_relative 'base_include'
 require_relative 'inline_styles'
 require_relative 'firstcontentblock'
 
 # -- liquid tags ------------------------------------------------------------------------------------------------------------
 
-Liquid::Template.register_tag('base_include', Jekyll::BaseIncludeTag)
 Liquid::Template.register_tag('inline_styles', Jekyll::Tags::InlineStyles)
 Liquid::Template.register_tag('firstcontentblock', Jekyll::Tags::FirstContentBlock)
 
