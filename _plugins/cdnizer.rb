@@ -106,7 +106,7 @@ module Jekyll
         return
       end
       zone_dir = File.join(config['static_cdn']['zone'], '') # ensures trailing slash
-      puts "#{'STATIC CDN     '.magenta} pushing zone files to CDN...".blue
+      puts "#{'STATIC CDN     '.magenta} pushing zone files to STATIC CDN...".blue
       cmd = "rsync -va --ignore-existing -e \"ssh -o StrictHostKeyChecking=no\" \"#{zone_dir}\" \"#{push_url}\""
       unless ENV['HUB_SERVER']
         puts 'set ENV variable HUB_SERVER=1 for pushing to STATIC CDN'.red
@@ -151,6 +151,7 @@ module Jekyll
       api_login = ENV['CDN77_API_LOGIN']
       api_password = ENV['CDN77_API_PASSWORD']
       if api_login and api_password
+        puts "#{'CDN     '.magenta} purging CDN ID=#{cdn_id} ...".blue
         cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" https://api.cdn77.com/v2.0/data/purge-all"
         puts "> #{cmd.blue}"
         unless system(cmd)
@@ -165,6 +166,7 @@ module Jekyll
     def process
       cdnizer_process # call original process method
 
+      # note cdn is not used at this moment, we mirror gh-pages
       if config['cdn'] and config['cdn']['enabled']
         push_to_cdn!(dest)
       end
