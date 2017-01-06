@@ -1,5 +1,3 @@
-require 'colored2'
-
 require_relative 'utils.rb'
 require_relative 'build.rb'
 

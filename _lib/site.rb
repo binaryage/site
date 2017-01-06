@@ -8,7 +8,7 @@ class Site
     @port = port
     @name = extract_name(dir)
     @subdomain = extract_subdomain(dir)
-    @domain = @subdomain+"."+domain
+    @domain = @subdomain+'.'+domain
   end
 
   def to_s
