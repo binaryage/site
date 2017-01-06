@@ -56,7 +56,7 @@ module Jekyll
           end
         rescue => e
           STDERR.puts "Closure Compiler Exception: #{e.message}"
-          raise FatalException.new("Closure Compiler: #{e.message}")
+          raise Jekyll::Errors::FatalException.new("Closure Compiler: #{e.message}")
         end
 
         true

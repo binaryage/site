@@ -94,7 +94,7 @@ module Jekyll
 
     def clean_static_zone!
       zone_dir = config['static_cdn']['zone']
-      raise FatalException.new("CDN error: specify config['static_cdn']['zone']") unless zone_dir
+      raise Jekyll::Errors::FatalException.new("CDN error: specify config['static_cdn']['zone']") unless zone_dir
       list = Dir.glob(File.join(zone_dir, '*'))
       puts "#{'STATIC CDN     '.magenta} cleaning #{"#{list.size} files".green} in zone folder: #{zone_dir.yellow}"
       FileUtils.rm(list)
@@ -117,7 +117,7 @@ module Jekyll
       end
       puts "> #{cmd.blue}"
       unless system(cmd)
-        raise FatalException.new("rsync failed with code #{$?}")
+        raise Jekyll::Errors::FatalException.new("rsync failed with code #{$?}")
       end
     end
 
@@ -138,7 +138,7 @@ module Jekyll
       end
       puts "> #{cmd.blue}"
       unless system(cmd)
-        raise FatalException.new("rsync failed with code #{$?}")
+        raise Jekyll::Errors::FatalException.new("rsync failed with code #{$?}")
       end
     end
 
@@ -151,7 +151,7 @@ module Jekyll
       puts "> #{cmd.blue}"
       json_string = Open3.popen3(cmd) { |_stdin, stdout, _stderr, _wait_thr| stdout.read }
       unless $? == 0
-        raise FatalException.new("curl failed with code #{$?}")
+        raise Jekyll::Errors::FatalException.new("curl failed with code #{$?}")
       end
       stage = target_url_to_stage(target_url)
       begin
@@ -180,7 +180,7 @@ module Jekyll
         cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" https://api.cdn77.com/v2.0/data/purge-all"
         puts "> #{cmd.blue}"
         unless system(cmd)
-          raise FatalException.new("curl failed with code #{$?}")
+          raise Jekyll::Errors::FatalException.new("curl failed with code #{$?}")
         end
       else
         puts 'set ENV variables CDN77_API_LOGIN and CDN77_API_PASSWORD for purging CDN'.red
