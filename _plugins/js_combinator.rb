@@ -72,12 +72,12 @@ module Jekyll
         list = File.read(list_file).split("\n")
 
         # reject commented-out lines and empty lines
-        list.reject! do |path|
-          path =~ /^\s*#/ or path =~ /^\s*$/
+        list.reject! do |filename|
+          filename =~ /^\s*#/ or filename =~ /^\s*$/
         end
 
-        list.map! do |path|
-          File.expand_path(File.join(list_file_dir, path+'.js'))
+        list.map! do |filename|
+          File.expand_path(File.join(list_file_dir, filename+'.js'))
         end
 
         removed_files = []

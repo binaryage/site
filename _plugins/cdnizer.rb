@@ -202,7 +202,7 @@ module Jekyll
         push_static_zone_to_cdn!
       end
 
-      purge_cdn!() if config['purge_cdn']
+      purge_cdn! if config['purge_cdn']
     end
 
   end
