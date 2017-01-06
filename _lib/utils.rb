@@ -7,11 +7,16 @@ def die(msg, code=1)
   exit(code)
 end
 
-def sys(cmd, check=true)
-  workdir = Dir.pwd
-  if workdir.start_with? BASE_DIR
-    workdir = '.' + workdir[BASE_DIR.size..-1]
+def friendly_dir(dir)
+  if dir.start_with? BASE_DIR
+    dir[BASE_DIR.size+1..-1]
+  else
+    dir
   end
+end
+
+def sys(cmd, check=true)
+  workdir = friendly_dir(Dir.pwd)
   puts "(in #{workdir.yellow}) " + "> #{cmd}".blue
   res = system(cmd)
   if check and not res
@@ -46,4 +51,8 @@ end
 def lookup_site(sites, name)
   # we are not too strict here and lookup by name or subdomain
   sites.detect { |site| site.name==name or site.subdomain==name }
+end
+
+def git_cwd_clean?
+  system("test -z \"$(git status --porcelain)\" > /dev/null")
 end

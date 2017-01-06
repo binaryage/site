@@ -149,4 +149,10 @@ task :inspect do
   puts $sites
 end
 
+desc 'publish all dirty sites, use force=1 to force publishing of all'
+task :publish do
+  publish_workspace($sites, {:force => ENV['force']=='1',
+                             :dont_push => ENV['dont_push']=='1'})
+end
+
 task :default => :serve

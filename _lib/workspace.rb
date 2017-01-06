@@ -147,3 +147,25 @@ eos
 
   config
 end
+
+def publish_workspace(sites, opts)
+  sites.each do |site|
+    Dir.chdir(site.dir) do
+      next if not opts[:force] and git_cwd_clean?
+      if `git rev-parse --abbrev-ref HEAD`.strip != 'web'
+        puts "#{friendly_dir(pwd).yellow} not on 'web' branch => #{'skipping'.red}"
+        next
+      end
+
+      sys('git add -A .')
+      sys('git commit --allow-empty -m "publish"')
+    end
+  end
+  unless opts[:dont_push]
+    sites.each do |site|
+      Dir.chdir(site.dir) do
+        sys('git push')
+      end
+    end
+  end
+end
