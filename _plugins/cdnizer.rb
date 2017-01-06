@@ -1,4 +1,6 @@
 require 'digest/sha1'
+require 'json'
+require 'open3'
 
 module Jekyll
 
@@ -119,7 +121,7 @@ module Jekyll
       end
     end
 
-    def push_to_cdn! (generated_web_dir)
+    def push_to_cdn!(generated_web_dir)
       push_url = config['cdn']['push_url'] # "user_xxx@push-1.cdn77.com:/www/"
       unless push_url
         puts "set jekyll config['cdn']['push_url']".red
@@ -140,7 +142,29 @@ module Jekyll
       end
     end
 
-    def purge_cdn!(cdn_id)
+    def target_url_to_stage(target_url)
+      'stage.'+target_url.gsub('http://', '').gsub('https://', '')
+    end
+
+    def retrieve_cnd_id(api_login, api_password, target_url)
+      cmd ="curl \"https://api.cdn77.com/v2.0/cdn-resource/list?login=#{api_login}&passwd=#{api_password}\""
+      puts "> #{cmd.blue}"
+      json_string = Open3.popen3(cmd) { |_stdin, stdout, _stderr, _wait_thr| stdout.read }
+      unless $? == 0
+        raise FatalException.new("curl failed with code #{$?}")
+      end
+      stage = target_url_to_stage(target_url)
+      begin
+        data = JSON.parse(json_string)
+        resource = data['cdnResources'].find { |item| item['origin_url'] == stage }
+        resource['id']
+      rescue => e
+        STDERR.puts "Unable to parse JSON data: #{e.message}\n\n#{json_string}"
+        raise Jekyll::Errors::FatalException.new("Unable to parse JSON data: #{e.message}\n\n#{json_string}")
+      end
+    end
+
+    def purge_cdn!
       # see https://client.cdn77.com/support/api/version/2.0/data
 
       unless ENV['HUB_SERVER']
@@ -151,7 +175,8 @@ module Jekyll
       api_login = ENV['CDN77_API_LOGIN']
       api_password = ENV['CDN77_API_PASSWORD']
       if api_login and api_password
-        puts "#{'CDN     '.magenta} purging CDN ID=#{cdn_id} ...".blue
+        cdn_id = retrieve_cnd_id(api_login, api_password, @config['target_url'])
+        puts "#{'CDN     '.magenta} purging CDN(ID=#{cdn_id}) ...".blue
         cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" https://api.cdn77.com/v2.0/data/purge-all"
         puts "> #{cmd.blue}"
         unless system(cmd)
@@ -177,7 +202,7 @@ module Jekyll
         push_static_zone_to_cdn!
       end
 
-      purge_cdn!(config['purge_cdn']) if config['purge_cdn']
+      purge_cdn!() if config['purge_cdn']
     end
 
   end

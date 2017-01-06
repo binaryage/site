@@ -52,6 +52,7 @@ def prepare_jekyll_config(site, opts)
       'css' => (busters and (not dev_mode)),
       'html' => (busters and (not dev_mode))
   }
+  config['purge_cdn'] = true
 
   if opts[:dont_prune]
     config.delete('prune_files')
