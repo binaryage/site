@@ -153,7 +153,7 @@ def publish_workspace(sites, opts)
     Dir.chdir(site.dir) do
       next if not opts[:force] and git_cwd_clean?
       if `git rev-parse --abbrev-ref HEAD`.strip != 'web'
-        puts "#{friendly_dir(pwd).yellow} not on 'web' branch => #{'skipping'.red}"
+        puts "#{friendly_dir(Dir.pwd).yellow} not on 'web' branch => #{'skipping'.red}"
         next
       end
 

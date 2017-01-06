@@ -8,11 +8,8 @@ def die(msg, code=1)
 end
 
 def friendly_dir(dir)
-  if dir.start_with? BASE_DIR
-    dir[BASE_DIR.size+1..-1]
-  else
-    dir
-  end
+  return dir unless dir.start_with? BASE_DIR
+  dir[BASE_DIR.size+1..-1]
 end
 
 def sys(cmd, check=true)
