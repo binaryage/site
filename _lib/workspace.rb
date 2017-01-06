@@ -164,7 +164,7 @@ def publish_workspace(sites, opts)
   unless opts[:dont_push]
     sites.each do |site|
       Dir.chdir(site.dir) do
-        sys('git push')
+        sys('git push origin web')
       end
     end
   end
