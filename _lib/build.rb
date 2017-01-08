@@ -53,6 +53,8 @@ def prepare_jekyll_config(site, opts)
       'html' => (busters and (not dev_mode))
   }
   config['purge_cdn'] = true
+  config['sass'] ||= {}
+  config['sass']['load_paths'] = ['shared/css']
 
   if opts[:dont_prune]
     config.delete('prune_files')

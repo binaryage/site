@@ -3,3 +3,4 @@ node_modules
 store-template.zip
 npm-debug*
 .idea
+.sass-cache
