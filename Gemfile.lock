@@ -9,7 +9,7 @@ GIT
 
 GIT
   remote: https://github.com/binaryage/jekyll.git
-  revision: 1cfda5c6bf012ea1998a3f6fad7ac2ca072a2f53
+  revision: 1d8a574bc3b416a722f2142058bb4c53a7a605bc
   branch: binaryage-site
   specs:
     jekyll (3.3.1)
