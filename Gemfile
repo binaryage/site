@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'jekyll'
+gem 'jekyll', :git => 'https://github.com/binaryage/jekyll.git', :branch => 'binaryage-site'
 gem 'rdiscount'
 gem 'colored2'
 gem 'stylus'
