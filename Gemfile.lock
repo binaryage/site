@@ -1,11 +1,28 @@
 GIT
-  remote: git://github.com/binaryage/html_press.git
+  remote: https://github.com/binaryage/html_press
   revision: 8bc6fcb8922e66b0781a28418d5fada8aeff6255
   specs:
     html_press (0.7.1)
       css_press (>= 0.3.2)
       htmlentities
       uglifier
+
+GIT
+  remote: https://github.com/binaryage/jekyll.git
+  revision: 1cfda5c6bf012ea1998a3f6fad7ac2ca072a2f53
+  branch: binaryage-site
+  specs:
+    jekyll (3.3.1)
+      addressable (~> 2.4)
+      colorator (~> 1.0)
+      jekyll-sass-converter (~> 1.0)
+      jekyll-watch (~> 1.1)
+      kramdown (~> 1.3)
+      liquid (~> 3.0)
+      mercenary (~> 0.3.3)
+      pathutil (~> 0.9)
+      rouge (~> 1.7)
+      safe_yaml (~> 1.0)
 
 GEM
   remote: http://rubygems.org/
@@ -27,17 +44,6 @@ GEM
     ffi (1.9.14)
     forwardable-extended (2.6.0)
     htmlentities (4.3.4)
-    jekyll (3.3.1)
-      addressable (~> 2.4)
-      colorator (~> 1.0)
-      jekyll-sass-converter (~> 1.0)
-      jekyll-watch (~> 1.1)
-      kramdown (~> 1.3)
-      liquid (~> 3.0)
-      mercenary (~> 0.3.3)
-      pathutil (~> 0.9)
-      rouge (~> 1.7)
-      safe_yaml (~> 1.0)
     jekyll-coffeescript (1.0.2)
       coffee-script (~> 2.2)
       coffee-script-source (~> 1.11.1)
@@ -50,7 +56,7 @@ GEM
     jekyll-watch (1.5.0)
       listen (~> 3.0, < 3.1)
     json (2.0.2)
-    kramdown (1.13.1)
+    kramdown (1.13.2)
     liquid (3.0.6)
     listen (3.0.8)
       rb-fsevent (~> 0.9, >= 0.9.4)
@@ -83,7 +89,7 @@ DEPENDENCIES
   coffee-script
   colored2
   html_press!
-  jekyll
+  jekyll!
   jekyll-coffeescript
   jekyll-contentblocks
   jekyll-redirect-from
@@ -93,4 +99,4 @@ DEPENDENCIES
   yui-compressor
 
 BUNDLED WITH
-   1.13.6
+   1.13.7
