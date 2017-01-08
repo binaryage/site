@@ -7,7 +7,7 @@ gem 'stylus'
 gem 'tilt'
 gem 'coffee-script'
 gem 'closure-compiler'
-gem 'html_press', :git => 'git://github.com/binaryage/html_press.git'
+gem 'html_press', :git => 'https://github.com/binaryage/html_press'
 gem 'yui-compressor'
 
 group :jekyll_plugins do
