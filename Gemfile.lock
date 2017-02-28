@@ -35,7 +35,7 @@ GEM
       execjs
     coffee-script-source (1.11.1)
     colorator (1.1.0)
-    colored2 (3.0.0)
+    colored2 (3.1.2)
     css_press (0.3.2)
       csspool-st (= 3.1.2)
       json
@@ -66,7 +66,7 @@ GEM
       forwardable-extended (~> 2.6)
     public_suffix (2.0.5)
     rb-fsevent (0.9.8)
-    rb-inotify (0.9.7)
+    rb-inotify (0.9.8)
       ffi (>= 0.5.0)
     rdiscount (2.2.0.1)
     rouge (1.11.1)
@@ -76,8 +76,8 @@ GEM
       execjs
       stylus-source
     stylus-source (0.54.5)
-    tilt (2.0.5)
-    uglifier (3.0.4)
+    tilt (2.0.6)
+    uglifier (3.1.1)
       execjs (>= 0.3.0, < 3)
     yui-compressor (0.12.0)
 
