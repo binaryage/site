@@ -9,10 +9,10 @@ GIT
 
 GIT
   remote: https://github.com/binaryage/jekyll.git
-  revision: 1d8a574bc3b416a722f2142058bb4c53a7a605bc
+  revision: 83f1e78dd9080bb475a9ed62ac05d69cd2e13799
   branch: binaryage-site
   specs:
-    jekyll (3.3.1)
+    jekyll (3.4.3)
       addressable (~> 2.4)
       colorator (~> 1.0)
       jekyll-sass-converter (~> 1.0)
