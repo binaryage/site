@@ -94,9 +94,13 @@ task :hosts do
   puts prepare_hosts_template($sites)
 end
 
-desc 'generate proxy config (for nginx)'
-task :proxy_config do
-  puts prepare_proxy_config($sites)
+namespace :proxy do
+
+  desc 'generate proxy config (for nginx)'
+  task :config do
+    puts prepare_proxy_config($sites)
+  end
+
 end
 
 desc 'start proxy server'
@@ -105,7 +109,7 @@ task :proxy do
     exit 10
   end
   config_path = File.join(STAGE_DIR, '.proxy.config')
-  sys("rake -s proxy_config > \"#{config_path}\"")
+  sys("rake -s proxy:config > \"#{config_path}\"")
   sys("sudo nginx -c \"#{config_path}\"")
 end
 
