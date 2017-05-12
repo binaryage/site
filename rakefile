@@ -36,7 +36,7 @@ asepsis-web totalterminal-web visor
 firequery firerainbow firelogger xrefresh
 drydrop hints restatic-web test-web hodlwallet)
 
-$sites = $dirs.each_with_index.collect { |dir, index| Site.new(File.join(ROOT, dir), BASE_PORT+index, LOCAL_DOMAIN) }
+$sites = $dirs.each_with_index.collect {|dir, index| Site.new(File.join(ROOT, dir), BASE_PORT+index, LOCAL_DOMAIN)}
 
 ## TASKS ####################################################################################################################
 
@@ -164,6 +164,7 @@ task :publish do
 end
 
 namespace :upgrade do
+
   desc 'upgrade Ruby dependencies'
   task :ruby do
     sys('bundle update')
@@ -175,6 +176,7 @@ namespace :upgrade do
       sys('yarn upgrade')
     end
   end
+
 end
 
 desc 'upgrade dependencies (via Ruby\'s bundler and Node\'s yarn)'
