@@ -14,7 +14,7 @@ BASE_PORT = 4101
 MAIN_PORT = 80 # we will need admin rights to bind to this port when running `rake proxy`
 LOCAL_DOMAIN = 'binaryage.org' # this domain is for testing to be set in /etc/hosts, see `rake hosts`
 
-MIN_NPM_VERSION = '1.1.18'
+MIN_YARN_VERSION = '0.24.4'
 MIN_GEM_VERSION = '1.8.23'
 
 STATIC_CDN_URL = 'https://static.binaryage.com/'
@@ -40,14 +40,14 @@ $sites = $dirs.each_with_index.collect { |dir, index| Site.new(File.join(ROOT, d
 
 ## TASKS ####################################################################################################################
 
-desc 'install npm dependencies'
-task :init_npm do
-  unless Gem::Version.new(`npm --version`) >= Gem::Version.new(MIN_NPM_VERSION)
-    die "install npm (>=v#{MIN_NPM_VERSION}) => http://npmjs.org"
+desc 'install yarn dependencies'
+task :init_yarn do
+  unless Gem::Version.new(`yarn --version`) >= Gem::Version.new(MIN_YARN_VERSION)
+    die "install yarn (>=v#{MIN_YARN_VERSION}) => https://yarnpkg.com"
   end
   Dir.chdir NODE_DIR do
     sys('rm -rf node_modules')
-    sys('npm install')
+    sys('yarn install')
   end
 end
 
@@ -65,7 +65,7 @@ task :init_repo do
 end
 
 desc 'init workspace - needs special care'
-task :init => [:init_gem, :init_npm, :init_repo] do
+task :init => [:init_gem, :init_yarn, :init_repo] do
 end
 
 desc 'clean stage'
