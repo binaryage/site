@@ -69,8 +69,7 @@ namespace :init do
 end
 
 desc 'init workspace - needs special care'
-task :init => ['init:gem', 'init:yarn', 'init:repo'] do
-end
+task :init => ['init:gem', 'init:yarn', 'init:repo']
 
 desc 'clean stage'
 task :clean do
@@ -180,7 +179,6 @@ namespace :upgrade do
 end
 
 desc 'upgrade dependencies (via Ruby\'s bundler and Node\'s yarn)'
-task :default => ['upgrade:ruby', 'upgrade:node'] do
-end
+task :upgrade => ['upgrade:ruby', 'upgrade:node']
 
 task :default => :serve
