@@ -99,11 +99,11 @@ def prepare_hosts_template(sites)
   io = StringIO.new
   io.puts 'add this section into your /etc/hosts:'
   io.puts
-  io.puts "#### #{domain} test site ####"
+  io.puts "#### #{LOCAL_DOMAIN} test site ####"
   sites.each do |site|
     io.puts "127.0.0.1 #{site.domain}"
   end
-  io.puts "#### #{domain} test site ####"
+  io.puts "#### #{LOCAL_DOMAIN} test site ####"
   io.string
 end
 
