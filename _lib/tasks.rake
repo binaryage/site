@@ -1,4 +1,3 @@
-# coding: utf-8
 # frozen_string_literal: true
 
 require 'colored2'
@@ -154,9 +153,11 @@ end
 
 desc 'generate store template zip' # see https://springboard.fastspring.com/site/configuration/template/doc/templateOverview.xml
 task :store do
-  build_store(SITES.first, stage: STORE_DIR,
-                           dont_prune: true,
-                           zip_path: File.join(ROOT, 'store-template.zip'))
+  opts = {
+    stage: STORE_DIR,
+    dont_prune: true,
+    zip_path: File.join(ROOT, 'store-template.zip') }
+  build_store(SITES.first, opts)
 end
 
 desc 'inspect the list of sites currently registered'
@@ -166,8 +167,10 @@ end
 
 desc 'publish all dirty sites, use force=1 to force publishing of all'
 task :publish do
-  publish_workspace(SITES, force: ENV['force'] == '1',
-                           dont_push: ENV['dont_push'] == '1')
+  opts = {
+    force: ENV['force'] == '1',
+    dont_push: ENV['dont_push'] == '1' }
+  publish_workspace(SITES, opts)
 end
 
 namespace :upgrade do
