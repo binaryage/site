@@ -49,9 +49,9 @@ def clean_names(names)
   names.collect(&:strip)
 end
 
-def lookup_site(sites, _name)
+def lookup_site(sites, name)
   # we are not too strict here and lookup by name or subdomain
-  sites.detect { |site| site.name == ame || site.subdomain == ame }
+  sites.detect { |site| site.name == name || site.subdomain == name }
 end
 
 def git_cwd_clean?

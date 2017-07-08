@@ -119,7 +119,7 @@ desc 'run dev server'
 task :serve do
   all_names = sites_subdomains(SITES).join(',')
   what = ENV['what']
-  if what.blank?
+  if what.to_s.strip.empty?
     error_msg = 'specify coma separated list of sites to serve, or `rake serve what=all`, '\
                 "full list:\n`rake serve what=#{all_names}`"
     die error_msg
