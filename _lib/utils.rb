@@ -4,9 +4,13 @@ require 'colored2'
 
 BASE_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 
-def die(msg, code=1)
+def die(msg, status=1)
   puts msg.red
-  exit(code)
+  puts
+  Signal.trap('EXIT') do
+    exit(status)
+  end
+  raise msg
 end
 
 def friendly_dir(dir)
@@ -18,7 +22,7 @@ def sys(cmd, check=true)
   workdir = friendly_dir(Dir.pwd)
   puts "(in #{workdir.yellow}) " + "> #{cmd}".blue
   res = system(cmd)
-  die 'something went wrong' if check && !res
+  die '^ something went wrong' if check && !res
 end
 
 def patch(path, replacers)
