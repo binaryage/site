@@ -111,6 +111,7 @@ task :proxy do
     exit 10
   end
   config_path = File.join(STAGE_DIR, '.proxy.config')
+  FileUtils.mkdir_p(STAGE_DIR) unless File.exist? STAGE_DIR
   sys("rake -s proxy:config > \"#{config_path}\"")
   sys("sudo nginx -c \"#{config_path}\"")
 end
