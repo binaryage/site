@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'utils.rb'
 require_relative 'build.rb'
 
@@ -51,7 +53,7 @@ def build_store(site, opts)
   build_site(site, opts) # no cache busters, no cdn
 
   build_path = File.join(stage, site.name)
-  template_path = File.join(build_path, (ENV['STORE_TEMPLATE'] or 'store-template.html'))
+  template_path = File.join(build_path, (ENV['STORE_TEMPLATE'] || 'store-template.html'))
   working_dir = File.join(stage, '_storetemplate')
   window_template = "#{working_dir}/window.xhtml"
 
@@ -67,21 +69,27 @@ def build_store(site, opts)
   patch(window_template, [
       ['<!DOCTYPE html>', ''],
       ['<html ', "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n      "],
-      [/<body(.*?)>/, "<body\\1><div id=\"page-store-template\">"],
+      [/<body(.*?)>/, '<body\\1><div id="page-store-template">'],
       ['</body>', '</div></body>'],
       [/<script(.*?)>/, "<script\\1>//<![CDATA[\n"],
       [/<\/script>/, "\n//]]></script>"],
-      [/href="\/([^\/])/, "href=\"\\1"],
-      [/src="\/([^\/])/, "src=\"\\1"],
+      [/href="\/([^\/])/, 'href="\\1'],
+      [/src="\/([^\/])/, 'src="\\1'],
       ['&nbsp;', '&#160;'],
       ['&copy;', '&#169;'],
       ['##INSERT STORE CONTENT HERE##', "\n<!-- TemplateBeginEditable name=\"Content\" -->\n\n<!-- TemplateEndEditable -->"],
-      ['</title>', "</title>\n<link title=\"main\" rel=\"stylesheet\" href=\"http://resource.fastspring.com/app/s/style/base.css\" media=\"screen,projection\" type=\"text/css\" />\n<link title=\"main\" rel=\"stylesheet\" href=\"http://resource.fastspring.com/app/store/style/base.css\" media=\"screen,projection\" type=\"text/css\" />"]
+      ['</title>', "</title>\n"\
+                   '<link title="main" rel="stylesheet" '\
+                   'href="http://resource.fastspring.com/app/s/style/base.css" '\
+                   "media=\"screen,projection\" type=\"text/css\" />\n"\
+                   '<link title="main" rel="stylesheet" '\
+                   'href="http://resource.fastspring.com/app/store/style/base.css" '\
+                   'media="screen,projection" type="text/css" />']
   ])
 
   content = File.read(window_template)
-  content.gsub!(/<!-- SCRIPTS START -->(.*?)<!-- SCRIPTS END -->(.*?)<body(.*?)>/m, "\\2<body\\3>\\1")
-  content.gsub!(/src="http:/m, "src=\"https:")
+  content.gsub!(/<!-- SCRIPTS START -->(.*?)<!-- SCRIPTS END -->(.*?)<body(.*?)>/m, '\\2<body\\3>\\1')
+  content.gsub!(/src="http:/m, 'src="https:')
 
   File.open(window_template, 'w') do |f|
     f << content
@@ -97,7 +105,7 @@ def build_store(site, opts)
 
   # zip it!
   zip_path = opts[:zip_path]
-  sys("rm \"#{zip_path}\"") if File.exists? zip_path
+  sys("rm \"#{zip_path}\"") if File.exist? zip_path
   Dir.chdir(working_dir) do
     sys("zip -r -du \"#{zip_path}\" .")
     sys("du -sh \"#{zip_path}\"")

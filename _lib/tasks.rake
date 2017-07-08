@@ -1,4 +1,6 @@
 # coding: utf-8
+# frozen_string_literal: true
+
 require 'colored2'
 
 require_relative 'utils.rb'
@@ -18,9 +20,9 @@ MIN_YARN_VERSION = '0.24.4'
 MIN_GEM_VERSION = '1.8.23'
 
 STATIC_CDN_URL = 'https://static.binaryage.com/'
-STATIC_CDN_PUSH_URL= 'user_ho054rw1@push-1.cdn77.com:/www/'
+STATIC_CDN_PUSH_URL = 'user_ho054rw1@push-1.cdn77.com:/www/'
 
-ROOT = File.expand_path(File.join(File.dirname(__FILE__)))
+ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 NODE_DIR = File.join(ROOT, '_node')
 STAGE_DIR = File.join(ROOT, '.stage')
 SERVE_DIR = File.join(STAGE_DIR, 'serve')
@@ -29,19 +31,21 @@ STORE_DIR = File.join(STAGE_DIR, 'store')
 
 ## SITES ####################################################################################################################
 
-$dirs = %w(
+DIRS = %w[
 www blog support
 totalfinder-web totalspaces-web
 asepsis-web totalterminal-web visor
 firequery firerainbow firelogger xrefresh
-drydrop hints restatic-web test-web hodlwallet)
+drydrop hints restatic-web test-web hodlwallet
+].freeze
 
-$sites = $dirs.each_with_index.collect { |dir, index| Site.new(File.join(ROOT, dir), BASE_PORT+index, LOCAL_DOMAIN) }
+SITES = DIRS.each_with_index.collect do |dir, index|
+  Site.new(File.join(ROOT, dir), BASE_PORT + index, LOCAL_DOMAIN)
+end
 
 ## TASKS ####################################################################################################################
 
 namespace :init do
-
   desc 'install yarn dependencies'
   task :yarn do
     unless Gem::Version.new(`yarn --version`) >= Gem::Version.new(MIN_YARN_VERSION)
@@ -56,20 +60,21 @@ namespace :init do
   desc 'install gem dependencies'
   task :gem do
     unless Gem::Version.new(`gem --version`) >= Gem::Version.new(MIN_GEM_VERSION)
-      die "install rubygems (>=v#{MIN_GEM_VERSION}, no sudo, consider rvm) => http://rubygems.org, http://beginrescueend.com"
+      error_msg = "install rubygems (>=v#{MIN_GEM_VERSION}, no sudo, consider rvm) "\
+                  '=> http://rubygems.org, http://beginrescueend.com'
+      die error_msg
     end
     sys('bundle install')
   end
 
   desc 'init submodules / hard-links'
   task :repo do
-    init_workspace($sites, get_writable_git_url)
+    init_workspace(SITES, writable_git_url)
   end
-
 end
 
 desc 'init workspace - needs special care'
-task :init => ['init:gem', 'init:yarn', 'init:repo']
+task init: ['init:gem', 'init:yarn', 'init:repo']
 
 desc 'clean stage'
 task :clean do
@@ -78,28 +83,26 @@ task :clean do
 end
 
 desc 'reset workspace to match remote changes - this will destroy your local changes!!!'
-task :reset => [:clean] do
-  reset_workspace($sites)
+task reset: [:clean] do
+  reset_workspace(SITES)
 end
 
 desc 'update workspace to point latest branch tips'
 task :update do
   puts "note: #{'to get remote changes'.green} you have to do #{'git fetch'.blue} first"
-  update_workspace($sites)
+  update_workspace(SITES)
 end
 
 desc 'prints info how to setup /etc/hosts'
 task :hosts do
-  puts prepare_hosts_template($sites)
+  puts prepare_hosts_template(SITES)
 end
 
 namespace :proxy do
-
   desc 'generate proxy config (for nginx)'
   task :config do
-    puts prepare_proxy_config($sites)
+    puts prepare_proxy_config(SITES)
   end
-
 end
 
 desc 'start proxy server'
@@ -114,56 +117,59 @@ end
 
 desc 'run dev server'
 task :serve do
-  all_names = sites_subdomains($sites).join(',')
-  what = ENV['what'] || die("specify coma separated list of sites to serve, or `rake serve what=all`, full list:\n`rake serve what=#{all_names}`")
-  if what=='all'
-    what = all_names
+  all_names = sites_subdomains(SITES).join(',')
+  what = ENV['what']
+  if what.blank?
+    error_msg = 'specify coma separated list of sites to serve, or `rake serve what=all`, '\
+                "full list:\n`rake serve what=#{all_names}`"
+    die error_msg
   end
+
+  what = all_names if what == 'all'
   names = clean_names(what.split(','))
 
   puts "note: #{'make sure you have'.green} #{'/etc/hosts'.yellow} #{'properly configured, see'.green} #{'rake hosts'.blue}"
-  serve_sites($sites, SERVE_DIR, names)
+  serve_sites(SITES, SERVE_DIR, names)
 end
 
 desc 'build site'
 task :build do
-  what = (ENV['what'] || sites_subdomains($sites).join(','))
+  what = (ENV['what'] || sites_subdomains(SITES).join(','))
   names = clean_names(what.split(','))
 
   # TODO: we could bring in more stuff from env
   build_opts = {
-      :stage => ENV['stage'] || BUILD_DIR,
-      :dev_mode => false,
-      :clean_stage => true,
-      :busters => true,
-      :cdn => true,
-      :static_cdn_url => STATIC_CDN_URL,
-      :static_cdn_push_url => STATIC_CDN_PUSH_URL
+    stage: ENV['stage'] || BUILD_DIR,
+    dev_mode: false,
+    clean_stage: true,
+    busters: true,
+    cdn: true,
+    static_cdn_url: STATIC_CDN_URL,
+    static_cdn_push_url: STATIC_CDN_PUSH_URL
   }
 
-  build_sites($sites, build_opts, names)
+  build_sites(SITES, build_opts, names)
 end
 
 desc 'generate store template zip' # see https://springboard.fastspring.com/site/configuration/template/doc/templateOverview.xml
 task :store do
-  build_store($sites.first, { :stage => STORE_DIR,
-                              :dont_prune => true,
-                              :zip_path => File.join(ROOT, 'store-template.zip') })
+  build_store(SITES.first, stage: STORE_DIR,
+                           dont_prune: true,
+                           zip_path: File.join(ROOT, 'store-template.zip'))
 end
 
 desc 'inspect the list of sites currently registered'
 task :inspect do
-  puts $sites
+  puts SITES
 end
 
 desc 'publish all dirty sites, use force=1 to force publishing of all'
 task :publish do
-  publish_workspace($sites, { :force => ENV['force']=='1',
-                              :dont_push => ENV['dont_push']=='1' })
+  publish_workspace(SITES, force: ENV['force'] == '1',
+                           dont_push: ENV['dont_push'] == '1')
 end
 
 namespace :upgrade do
-
   desc 'upgrade Ruby dependencies'
   task :ruby do
     sys('bundle update')
@@ -175,10 +181,9 @@ namespace :upgrade do
       sys('yarn upgrade')
     end
   end
-
 end
 
 desc 'upgrade dependencies (via Ruby\'s bundler and Node\'s yarn)'
-task :upgrade => ['upgrade:ruby', 'upgrade:node']
+task upgrade: ['upgrade:ruby', 'upgrade:node']
 
-task :default => :serve
+task default: :serve

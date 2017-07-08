@@ -1,20 +1,22 @@
+# frozen_string_literal: true
+
 # this is shared code for our plugins
 
-HTML_EXTENSIONS = %w(
+HTML_EXTENSIONS = %w[
       .html
       .xhtml
       .htm
-    ).freeze
+    ].freeze
 
 class SimpleLogger
   def error(msg)
     STDERR.puts(msg)
-    raise Jekyll::Errors::FatalException.new("HtmlPress: #{msg}")
+    raise Jekyll::Errors::FatalException, "HtmlPress: #{msg}"
   end
 end
 
 def relative_cache_file_path(full_path)
-  Pathname.new(full_path).relative_path_from(Pathname.new File.join(Dir.pwd, '..')).to_s
+  Pathname.new(full_path).relative_path_from(Pathname.new(File.join(Dir.pwd, '..'))).to_s
 end
 
 def do_html_press?(site)

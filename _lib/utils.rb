@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'colored2'
 
 BASE_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
@@ -9,16 +11,14 @@ end
 
 def friendly_dir(dir)
   return dir unless dir.start_with? BASE_DIR
-  dir[BASE_DIR.size+1..-1] or '.'
+  dir[BASE_DIR.size + 1..-1] || '.'
 end
 
 def sys(cmd, check=true)
   workdir = friendly_dir(Dir.pwd)
   puts "(in #{workdir.yellow}) " + "> #{cmd}".blue
   res = system(cmd)
-  if check and not res
-    die 'something went wrong'
-  end
+  die 'something went wrong' if check && !res
 end
 
 def patch(path, replacers)
@@ -38,18 +38,18 @@ def patch(path, replacers)
 end
 
 def sites_subdomains(sites)
-  sites.collect { |site| site.subdomain }
+  sites.collect(&:subdomain)
 end
 
 def clean_names(names)
-  names.collect { |name| name.strip }
+  names.collect(&:strip)
 end
 
-def lookup_site(sites, name)
+def lookup_site(sites, _name)
   # we are not too strict here and lookup by name or subdomain
-  sites.detect { |site| site.name==name or site.subdomain==name }
+  sites.detect { |site| site.name == ame || site.subdomain == ame }
 end
 
 def git_cwd_clean?
-  system("test -z \"$(git status --porcelain)\" > /dev/null")
+  system('test -z "$(git status --porcelain)" > /dev/null')
 end

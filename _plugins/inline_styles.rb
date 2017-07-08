@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'jekyll-contentblocks'
 
 module Jekyll
@@ -8,7 +10,7 @@ module Jekyll
       def render(context)
         @content_block_name = 'inline_styles'
         content = content_for_block(context)
-        return '' if not content or content.size==0
+        return '' if !content || content.empty?
         texts = ['<style>']
         content.each do |block|
           texts << block

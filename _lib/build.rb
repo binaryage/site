@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'digest/sha1'
 require 'pathname'
 require 'yaml'
@@ -9,7 +11,7 @@ def prepare_jekyll_config(site, opts)
   dev_mode = opts[:dev_mode]
   stage = opts[:stage]
   busters = opts[:busters]
-  domain = 'binaryage.'+(dev_mode ? 'org' : 'com')
+  domain = 'binaryage.' + (dev_mode ? 'org' : 'com')
 
   begin
     config = YAML.load_file('_config.yml')
@@ -27,38 +29,36 @@ def prepare_jekyll_config(site, opts)
   config['markdown'] = 'rdiscount'
   config['dev'] = dev_mode
   config['stylus'] = {
-      'compress' => (not dev_mode),
-      'debug' => dev_mode,
-      'path' => './shared/css/site.styl'
+    'compress' => !dev_mode,
+    'debug' => dev_mode,
+    'path' => './shared/css/site.styl'
   }
   config['combinejs'] = [{
-      'path' => './shared/js/code.list',
-      'minify' => (not dev_mode)
-  },{
-      'path' => './shared/js/changelog.list',
-      'minify' => (not dev_mode)
+    'path' => './shared/js/code.list',
+    'minify' => !dev_mode
+  }, {
+    'path' => './shared/js/changelog.list',
+    'minify' => !dev_mode
   }]
   config['html_press'] = {
-      'compress' => (not dev_mode),
-      'cache' => File.join(stage, '_cache')
+    'compress' => !dev_mode,
+    'cache' => File.join(stage, '_cache')
   }
   config['static_cdn'] = {
-      'enabled' => (not dev_mode and opts[:cdn]),
-      'zone' => File.join(stage, '_cdn'),
-      'url' => opts[:static_cdn_url],
-      'push_url' => opts[:static_cdn_push_url]
+    'enabled' => (!dev_mode && opts[:cdn]),
+    'zone' => File.join(stage, '_cdn'),
+    'url' => opts[:static_cdn_url],
+    'push_url' => opts[:static_cdn_push_url]
   }
   config['busterizer'] = {
-      'css' => (busters and (not dev_mode)),
-      'html' => (busters and (not dev_mode))
+    'css' => (busters && !dev_mode),
+    'html' => (busters && !dev_mode)
   }
   config['purge_cdn'] = true
   config['sass'] ||= {}
   config['sass']['load_paths'] = ['shared/css']
 
-  if opts[:dont_prune]
-    config.delete('prune_files')
-  end
+  config.delete('prune_files') if opts[:dont_prune]
 
   output = YAML.dump(config)
   sha = Digest::SHA1.hexdigest output
@@ -66,10 +66,10 @@ def prepare_jekyll_config(site, opts)
 
   configs_dir = File.join(stage, '.configs')
   FileUtils.mkdir_p(configs_dir)
-  config_path = File.join(configs_dir, site.name+'_jekyll_config_'+sha+'.yml')
+  config_path = File.join(configs_dir, site.name + '_jekyll_config_' + sha + '.yml')
   File.open(config_path, 'w') { |f| f.write(output) }
 
-  Pathname.new(config_path).relative_path_from(Pathname.new Dir.pwd).to_s
+  Pathname.new(config_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
 end
 
 def build_site(site, opts)
@@ -84,7 +84,7 @@ def build_site(site, opts)
   end
 
   # noinspection RubyResolve
-  puts '=> ' + "#{dest}".magenta
+  puts '=> ' + dest.to_s.magenta
 end
 
 def build_sites(sites, opts, names)
@@ -101,13 +101,21 @@ end
 def serve_site(site, base_dir)
   port = site.port
   Dir.chdir site.dir do
-    config_path = prepare_jekyll_config(site, {:dev_mode => true,
-                                               :stage => base_dir})
+    opts = { dev_mode: true,
+             stage: base_dir }
+    config_path = prepare_jekyll_config(site, opts)
     work_dir = File.join(base_dir, site.name)
     FileUtils.mkdir_p(work_dir)
     fork do
       trap('INT') { exit 11 }
-      sys("bundle exec jekyll serve --incremental --drafts --port 1#{port} -b / --config \"#{config_path}\" --destination \"#{work_dir}\"")
+      cmd = 'bundle exec jekyll serve '\
+            '--incremental '\
+            '--drafts '\
+            "--port 1#{port} "\
+            '-b / '\
+            "--config \"#{config_path}\" "\
+            "--destination \"#{work_dir}\""
+      sys(cmd)
     end
     sleep(0.2)
     fork do
@@ -116,11 +124,12 @@ def serve_site(site, base_dir)
       node_dir = File.join(Dir.pwd, '..', '_node')
       # we have to switch to _node dir with package.json and node_modules, node/browser-sync expectes it for loading plugins
       Dir.chdir node_dir do
-        verbosity = '--logLevel info' #'--logLevel debug'
+        verbosity = '--logLevel info' # '--logLevel debug'
         submisivity = '--no-ui --no-online --no-open'
         plugins = " --plugins \"bs-html-injector?files[]=#{work_dir}/**/*.html&prefix=#{work_dir}\""
         locations = "--port #{port} --proxy http://localhost:1#{port} --files \"#{work_dir}/**/*.css\""
-        sys("node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}")
+        cmd = "node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}"
+        sys(cmd)
       end
     end
     sleep(0.2)

@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 # based on code from: https://github.com/lyoshenka/jekyll-js-minify-plugin
 require 'closure-compiler' # https://github.com/documentcloud/closure-compiler
 require 'colored2'
 
 module Jekyll
   module JsCombinator
-
     class CombinedJsFile < StaticFile
       attr_accessor :list, :minify
 
@@ -14,8 +15,8 @@ module Jekyll
 
         content = []
         @list.each do |thing|
-          content << File.read(thing.path) if thing.kind_of?(Jekyll::StaticFile)
-          content << thing.output if thing.kind_of?(Jekyll::Page)
+          content << File.read(thing.path) if thing.is_a?(Jekyll::StaticFile)
+          content << thing.output if thing.is_a?(Jekyll::Page)
         end
 
         # if there is missing semicolon at the end of some file, new line is a safe delimiter
@@ -33,7 +34,7 @@ module Jekyll
               my_cache_dir = File.join(cache_dir, 'list')
               sha = Digest::SHA1.hexdigest content
               cache_hit = File.join(my_cache_dir, sha)
-              if File.exists? cache_hit
+              if File.exist? cache_hit
                 print "<= cache @ #{relative_cache_file_path(cache_hit).green}"
                 res = File.read(cache_hit)
               end
@@ -42,7 +43,7 @@ module Jekyll
               print '=> compiling'
               res = Closure::Compiler.new.compile(content)
             end
-            if cache_hit and not File.exists? cache_hit
+            if cache_hit && (!File.exist? cache_hit)
               print " @ #{relative_cache_file_path(cache_hit).red}"
               FileUtils.mkdir_p(my_cache_dir)
               File.open(cache_hit, 'w') { |f| f.write(res) }
@@ -56,7 +57,7 @@ module Jekyll
           end
         rescue => e
           STDERR.puts "Closure Compiler Exception: #{e.message}"
-          raise Jekyll::Errors::FatalException.new("Closure Compiler: #{e.message}")
+          raise Jekyll::Errors::FatalException, "Closure Compiler: #{e.message}"
         end
 
         true
@@ -73,11 +74,11 @@ module Jekyll
 
         # reject commented-out lines and empty lines
         list.reject! do |filename|
-          filename =~ /^\s*#/ or filename =~ /^\s*$/
+          filename =~ /^\s*#/ || filename =~ /^\s*$/
         end
 
         list.map! do |filename|
-          File.expand_path(File.join(list_file_dir, filename+'.js'))
+          File.expand_path(File.join(list_file_dir, filename + '.js'))
         end
 
         removed_files = []
@@ -90,25 +91,23 @@ module Jekyll
           found = false
           # remove listed file from static files (if present)
           site.static_files.each do |sf|
-            if file == sf.path
-              site.static_files.delete(sf)
-              removed_files << sf
-              found = true
-              break
-            end
+            next unless file == sf.path
+            site.static_files.delete(sf)
+            removed_files << sf
+            found = true
+            break
           end
           next if found
           # remove listed files from pages (if present)
           # note: some js files may be generated (coffeescript),
           #       that is why we have to go through pages
           site.pages.each do |page|
-            if page.destination(site.source).end_with? file
-              site.pages.delete(page)
-              # we need to pre-render the page, generate step goes prior page generation
-              page.render(site.layouts, site.site_payload)
-              removed_files << page
-              break
-            end
+            next unless page.destination(site.source).end_with? file
+            site.pages.delete(page)
+            # we need to pre-render the page, generate step goes prior page generation
+            page.render(site.layouts, site.site_payload)
+            removed_files << page
+            break
           end
         end
 
@@ -119,7 +118,6 @@ module Jekyll
         minified_file.list = removed_files
         minified_file.minify = minify
         site.static_files << minified_file
-
       end
 
       def generate(site)
@@ -128,6 +126,5 @@ module Jekyll
         end
       end
     end
-
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # A Jekyll plugin to convert .styl to .css
 # This plugin requires the stylus gem, do:
 # $ [sudo] gem install stylus
@@ -11,7 +13,6 @@
 #    See site.styl and individual.styl above.
 
 module Jekyll
-
   class StylusConverter < Converter
     safe true
 
@@ -28,10 +29,10 @@ module Jekyll
       Stylus.debug = stylus_config('debug') if stylus_config('debug')
       # noinspection RubyStringKeysInHashInspection
       @options = {
-          'include css' => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
+        'include css' => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
       }
     rescue => e
-      STDERR.puts $!
+      STDERR.puts $ERROR_INFO
       STDERR.puts 'You are missing a library required for Stylus. Please run:'
       STDERR.puts '  $ [sudo] gem install stylus'
       raise e
@@ -46,16 +47,13 @@ module Jekyll
     end
 
     def convert(content)
-      begin
-        setup_if_needed!
-        Dir.chdir File.dirname(Stylus.paths[0]) do
-          Stylus.compile content, @options
-        end
-      rescue => e
-        puts "Stylus Exception: #{e.message}"
-        raise e
+      setup_if_needed!
+      Dir.chdir File.dirname(Stylus.paths[0]) do
+        Stylus.compile content, @options
       end
+    rescue => e
+      puts "Stylus Exception: #{e.message}"
+      raise e
     end
   end
-
 end

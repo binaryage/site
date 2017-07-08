@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # this script is responsible for registering our plugins in correct order
 require 'pp'
 
@@ -18,11 +20,11 @@ Liquid::Template.register_tag('firstcontentblock', Jekyll::Tags::FirstContentBlo
 # -- hooks ------------------------------------------------------------------------------------------------------------------
 
 # note that coffescript conversion must be applied before pressing
-Jekyll::Hooks.register([:documents, :pages], :post_render) do |item|
+Jekyll::Hooks.register(%i[documents pages], :post_render) do |item|
   render_coffescript_blocks!(item)
 end
 
-Jekyll::Hooks.register([:documents, :pages], :post_render) do |item|
+Jekyll::Hooks.register(%i[documents pages], :post_render) do |item|
   press_html!(item.site, item)
 end
 

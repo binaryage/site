@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'utils.rb'
 require_relative 'site.rb'
 
@@ -106,16 +108,15 @@ def prepare_hosts_template(sites)
 end
 
 def prepare_proxy_config(sites)
-
   # header
-  config = <<eos
-daemon off;
-master_process off;
-error_log /dev/stdout info;
-events {
-  worker_connections 1024;
-}
-http {
+  config = <<~eos
+    daemon off;
+    master_process off;
+    error_log /dev/stdout info;
+    events {
+      worker_connections 1024;
+    }
+    http {
 eos
 
   # per-site configs
@@ -141,8 +142,8 @@ eos
   end
 
   # footer
-  config += <<eos
-}
+  config += <<~eos
+    }
 eos
 
   config
@@ -151,7 +152,7 @@ end
 def publish_workspace(sites, opts)
   sites.each do |site|
     Dir.chdir(site.dir) do
-      next if not opts[:force] and git_cwd_clean?
+      next if !(opts[:force]) && git_cwd_clean?
       if `git rev-parse --abbrev-ref HEAD`.strip != 'web'
         puts "#{friendly_dir(Dir.pwd).yellow} not on 'web' branch => #{'skipping'.red}"
         next

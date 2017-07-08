@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'utils.rb'
 
 class Site
@@ -8,14 +10,15 @@ class Site
     @port = port
     @name = extract_name(dir)
     @subdomain = extract_subdomain(dir)
-    @domain = @subdomain+'.'+domain
+    @domain = @subdomain + '.' + domain
   end
 
   def to_s
-    self.inspect
+    inspect
   end
 
   private
+
   # "some/path/to/repo" => "repo"
   def extract_name(path)
     path.split('/').last # get last component of the path
@@ -25,5 +28,4 @@ class Site
   def extract_subdomain(path)
     extract_name(path).split('-')[0] # strips -web postfixes
   end
-
 end
