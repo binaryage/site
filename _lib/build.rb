@@ -18,9 +18,9 @@ def prepare_jekyll_config(site, opts)
   rescue => _
     config = {}
   end
-  config['gems'] ||= []
-  config['gems'] << 'jekyll-coffeescript'
-  config['gems'] << 'jekyll-redirect-from' # see https://help.github.com/articles/redirects-on-github-pages/
+  config['plugins'] ||= []
+  config['plugins'] << 'jekyll-coffeescript'
+  config['plugins'] << 'jekyll-redirect-from' # see https://help.github.com/articles/redirects-on-github-pages/
   config['layouts_dir'] = 'shared/layouts'
   config['includes_dir'] = 'shared/includes'
   config['plugins_dir'] = '../_plugins'
