@@ -34,12 +34,12 @@ def prepare_jekyll_config(site, opts)
     'path' => './shared/css/site.styl'
   }
   config['combinejs'] = [{
-    'path' => './shared/js/code.list',
-    'minify' => !dev_mode
-  }, {
-    'path' => './shared/js/changelog.list',
-    'minify' => !dev_mode
-  }]
+                           'path' => './shared/js/code.list',
+                           'minify' => !dev_mode
+                         }, {
+                           'path' => './shared/js/changelog.list',
+                           'minify' => !dev_mode
+                         }]
   config['html_press'] = {
     'compress' => !dev_mode,
     'cache' => File.join(stage, '_cache')
@@ -72,6 +72,17 @@ def prepare_jekyll_config(site, opts)
   Pathname.new(config_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
 end
 
+def debugger_prefix
+  return '' unless ENV['debug_jekyll']
+  die 'you must have set RDEBUG_PREFIX env var' unless ENV['RDEBUG_PREFIX']
+  ENV['RDEBUG_PREFIX']
+end
+
+def bundle_exec
+  bundle_path = `which bundle`.strip
+  debugger_prefix + "\"#{bundle_path}\" exec "
+end
+
 def build_site(site, opts)
   dest = File.join(opts[:stage], site.name)
 
@@ -80,7 +91,12 @@ def build_site(site, opts)
   # build jekyll
   Dir.chdir site.dir do
     config_path = prepare_jekyll_config(site, opts)
-    sys("bundle exec jekyll build --config \"#{config_path}\" --destination \"#{dest}\" --trace")
+    cmd = bundle_exec +
+          'jekyll build '\
+          "--config \"#{config_path}\" "\
+          "--destination \"#{dest}\" "\
+          '--trace'
+    sys(cmd)
   end
 
   # noinspection RubyResolve
@@ -108,7 +124,8 @@ def serve_site(site, base_dir)
     FileUtils.mkdir_p(work_dir)
     fork do
       trap('INT') { exit 11 }
-      cmd = 'bundle exec jekyll serve '\
+      cmd = bundle_exec +
+            'jekyll serve '\
             '--incremental '\
             '--drafts '\
             "--port 1#{port} "\
