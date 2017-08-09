@@ -6,7 +6,7 @@ gem 'closure-compiler'
 gem 'coffee-script'
 gem 'colored2'
 gem 'html_press', git: 'https://github.com/binaryage/html_press'
-gem 'jekyll', git: 'https://github.com/jekyll/jekyll' # master has patch for https://github.com/jekyll/jekyll-redirect-from/issues/159
+gem 'jekyll'
 gem 'rdiscount'
 gem 'stylus'
 gem 'tilt'
