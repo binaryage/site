@@ -27,7 +27,7 @@ GEM
     ffi (1.9.18)
     forwardable-extended (2.6.0)
     htmlentities (4.3.4)
-    jekyll (3.5.1)
+    jekyll (3.5.2)
       addressable (~> 2.4)
       colorator (~> 1.0)
       jekyll-sass-converter (~> 1.0)
