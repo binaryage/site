@@ -1,6 +1,4 @@
-node_modules
 .stage/
 store-template.zip
-npm-debug*
 .idea
 .sass-cache
