@@ -3,95 +3,40 @@
 require_relative 'utils.rb'
 require_relative 'site.rb'
 
-def init_workspace(sites, git_url)
-  master = sites[0]
-  slaves = sites[1..-1]
-
-  sys("git remote set-url --push origin #{git_url}")
-
-  sys('git submodule init')
-  sys("git submodule update \"#{master.dir}\"")
-
-  # download submodules into master site
-  Dir.chdir(master.dir) do
-    sys('git checkout web')
-    sys('git submodule update --init shared')
-    Dir.chdir('shared') do
-      # fix push url in submodule
-      sys("git remote set-url --push origin #{git_url}")
-      sys('git checkout master')
-    end
-  end
-
-  # for each slave, "symlink" submodules from master repo
-  slaves.each do |slave|
-    sys("git submodule update \"#{slave.dir}\"")
-    sys("rmdir \"#{slave.dir}/shared\"") if File.directory?("#{slave.dir}/shared")
-    sys("./_bin/hlink/hlink \"#{master.dir}/shared\" \"#{slave.dir}/shared\"")
-  end
-
-  # fix push urls
+def pin_workspace(sites)
   sites.each do |site|
     Dir.chdir(site.dir) do
-      sys("git remote set-url --push origin #{git_url}")
-    end
-  end
-
-  # this is here for case there are additional submodules outside sites
-  sys('git submodule update --init --recursive')
-end
-
-def update_workspace(sites)
-  master = sites[0]
-  slaves = sites[1..-1]
-
-  # move to branch tips
-  Dir.chdir(master.dir) do
-    sys('git checkout web')
-    Dir.chdir('shared') do
-      # note this will reflect in all hard-linked shared folders
-      sys('git checkout master')
-    end
-  end
-
-  slaves.each do |slave|
-    Dir.chdir(slave.dir) do
       sys('git checkout web')
-      Dir.chdir('shared') do
-        # note this should be a no-op under hard-linked setup
-        sys('git checkout master')
+      if Dir.exist? 'shared'
+        Dir.chdir('shared') do
+          sys('git checkout master')
+        end
       end
     end
   end
 end
 
-# noinspection RubyResolve
+def init_workspace(sites)
+  sys('git submodule update --init --recursive --depth 42')
+  pin_workspace(sites)
+end
+
 def reset_workspace(sites)
-  master = sites[0]
-  slaves = sites[1..-1]
-  Dir.chdir(master.dir) do
-    sys('git checkout -f web')
-    sys('git reset --hard HEAD^') # be resilient to amends
-    sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-    sys('git pull origin web')
-    ['shared'].each do |submodule|
-      submodule = File.join(master.dir, submodule)
-      Dir.chdir(submodule) do
-        sys('git checkout -f master')
-        sys('git reset --hard HEAD^') # be resilient to amends
-        sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-        sys('git pull origin master')
-      end
-    end
-  end
-  slaves.each do |slave|
+  sites.each do |slave|
     Dir.chdir(slave.dir) do
       sys('git checkout -f web')
       sys('git reset --hard HEAD^') # be resilient to amends
       sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
       sys('git pull origin web')
+      if Dir.exist? 'shared'
+        Dir.chdir('shared') do
+          sys('git checkout -f master')
+          sys('git reset --hard HEAD^') # be resilient to amends
+          sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
+          sys('git pull origin master')
+        end
+      end
     end
-    # shared should be hard linked, so we got pull for free from master
   end
 end
 

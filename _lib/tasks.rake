@@ -5,7 +5,6 @@ require 'colored2'
 require_relative 'utils.rb'
 require_relative 'site.rb'
 require_relative 'workspace.rb'
-require_relative 'repo.rb'
 require_relative 'build.rb'
 require_relative 'store.rb'
 
@@ -66,9 +65,9 @@ namespace :init do
     sys('bundle install')
   end
 
-  desc 'init submodules / hard-links'
+  desc 'init submodules'
   task :repo do
-    init_workspace(SITES, writable_git_url)
+    init_workspace(SITES)
   end
 end
 
@@ -86,10 +85,10 @@ task reset: [:clean] do
   reset_workspace(SITES)
 end
 
-desc 'update workspace to point latest branch tips'
-task :update do
+desc 'pin submodules to point to latest branch tips'
+task :pin do
   puts "note: #{'to get remote changes'.green} you have to do #{'git fetch'.blue} first"
-  update_workspace(SITES)
+  pin_workspace(SITES)
 end
 
 desc 'prints info how to setup /etc/hosts'
