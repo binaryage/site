@@ -54,7 +54,7 @@ end
 
 def prepare_proxy_config(sites)
   # header
-  config = <<~eos
+  config = <<~CONFIG_SNIPPET
     daemon off;
     master_process off;
     error_log /dev/stdout info;
@@ -62,34 +62,34 @@ def prepare_proxy_config(sites)
       worker_connections 1024;
     }
     http {
-eos
+  CONFIG_SNIPPET
 
   # per-site configs
   sites.each do |site|
-    config += <<eos
-  server {
-    listen 80;
-    server_name #{site.domain};
+    config += <<~CONFIG_SNIPPET
+      server {
+        listen 80;
+        server_name #{site.domain};
 
-    location / {
-      proxy_buffering off;
-      rewrite ^(.*)/$ $1/ break;
-      rewrite ^([^.]*)$ $1.html break;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header Host $http_host;
-      proxy_set_header X-NginX-Proxy true;
-      proxy_pass http://0.0.0.0:#{site.port};
-      proxy_redirect off;
-    }
-  }
-eos
+        location / {
+          proxy_buffering off;
+          rewrite ^(.*)/$ $1/ break;
+          rewrite ^([^.]*)$ $1.html break;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header X-NginX-Proxy true;
+          proxy_pass http://0.0.0.0:#{site.port};
+          proxy_redirect off;
+        }
+      }
+    CONFIG_SNIPPET
   end
 
   # footer
-  config += <<~eos
+  config += <<~CONFIG_SNIPPET
     }
-eos
+  CONFIG_SNIPPET
 
   config
 end

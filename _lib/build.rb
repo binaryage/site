@@ -34,12 +34,12 @@ def prepare_jekyll_config(site, opts)
     'path' => './shared/css/site.styl'
   }
   config['combinejs'] = [{
-                           'path' => './shared/js/code.list',
-                           'minify' => !dev_mode
-                         }, {
-                           'path' => './shared/js/changelog.list',
-                           'minify' => !dev_mode
-                         }]
+    'path' => './shared/js/code.list',
+    'minify' => !dev_mode
+  }, {
+    'path' => './shared/js/changelog.list',
+    'minify' => !dev_mode
+  }]
   config['html_press'] = {
     'compress' => !dev_mode,
     'cache' => File.join(stage, '_cache')

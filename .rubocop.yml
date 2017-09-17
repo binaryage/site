@@ -48,3 +48,9 @@ Style/TernaryParentheses:
 
 Style/RegexpLiteral:
   Enabled: false
+
+Lint/RescueWithoutErrorClass:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
