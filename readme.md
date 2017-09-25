@@ -4,14 +4,14 @@ This is an umbrella project to organize sites under [*.binaryage.com](http://www
 
   * local development server
   * maintenance utilities
-  * mass deploying
+  * deploying utilities
 
 ### The idea
 
 The idea is to have one repo with all subdomains as separate repositories, each tracked as an individual git submodule. 
 Individual sites have usually a dependency on [shared](/binaryage/shared) - again tracked as a git submodule. 
-This should give us tools to reconstruct the whole site to any point in the history while having granular control of commit 
-rights to parts of the site. Nice transparency via GitHub is a bonus.
+This should give us tools to reconstruct the whole site to any point in history while having granular control of commit 
+rights to individual subdomains of the site. Transparency via GitHub is a bonus.
 
     .
     ├── www
@@ -50,7 +50,7 @@ Files which should be shared by all sites should go into [shared](/binaryage/sha
 
   * [nginx](http://nginx.org)
   * [ruby](http://www.ruby-lang.org), [rake](http://rake.rubyforge.org), [rubygems](http://rubygems.org)
-  * [node.js](http://nodejs.org), [npm](http://npmjs.org)
+  * [node.js](http://nodejs.org), [yarn](https://yarnpkg.com)
 
 **Recommended** (optional):
 
@@ -79,7 +79,7 @@ in one terminal session run nginx proxy:
 
     rake proxy
 
-in a second terminal session run the jekyll debug server:
+in another terminal session run the jekyll debug server:
 
     rake serve what=www,totalspaces,blog
 
