@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require 'colored2'
-
+require_relative 'colored2'
 require_relative 'utils.rb'
 require_relative 'site.rb'
 require_relative 'workspace.rb'
