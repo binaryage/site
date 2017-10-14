@@ -56,7 +56,7 @@ GEM
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
     mercenary (0.3.6)
-    pathutil (0.14.0)
+    pathutil (0.16.0)
       forwardable-extended (~> 2.6)
     public_suffix (3.0.0)
     rb-fsevent (0.10.2)
@@ -65,7 +65,7 @@ GEM
     rdiscount (2.2.0.1)
     rouge (2.2.1)
     safe_yaml (1.0.4)
-    sass (3.5.1)
+    sass (3.5.2)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
@@ -97,4 +97,4 @@ DEPENDENCIES
   yui-compressor
 
 BUNDLED WITH
-   1.15.4
+   1.16.0.pre.3
