@@ -112,9 +112,7 @@ module Jekyll
         return
       end
       puts "> #{cmd.blue}"
-      unless system(cmd)
-        raise Jekyll::Errors::FatalException, "rsync failed with code #{$CHILD_STATUS}"
-      end
+      raise Jekyll::Errors::FatalException, "rsync failed with code #{$CHILD_STATUS}" unless system(cmd)
     end
 
     def push_to_cdn!(generated_web_dir)
@@ -133,9 +131,7 @@ module Jekyll
         return
       end
       puts "> #{cmd.blue}"
-      unless system(cmd)
-        raise Jekyll::Errors::FatalException, "rsync failed with code #{$CHILD_STATUS}"
-      end
+      raise Jekyll::Errors::FatalException, "rsync failed with code #{$CHILD_STATUS}" unless system(cmd)
     end
 
     def target_url_to_stage(target_url)
@@ -146,9 +142,7 @@ module Jekyll
       cmd = "curl \"https://api.cdn77.com/v2.0/cdn-resource/list?login=#{api_login}&passwd=#{api_password}\""
       puts "> #{cmd.blue}"
       json_string = Open3.popen3(cmd) { |_stdin, stdout, _stderr, _wait_thr| stdout.read }
-      unless $CHILD_STATUS.success?
-        raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}"
-      end
+      raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless $CHILD_STATUS.success?
       stage = target_url_to_stage(target_url)
       begin
         data = JSON.parse(json_string)
@@ -176,9 +170,7 @@ module Jekyll
         cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" "\
               'https://api.cdn77.com/v2.0/data/purge-all'
         puts "> #{cmd.blue}"
-        unless system(cmd)
-          raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}"
-        end
+        raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless system(cmd)
       else
         puts 'set ENV variables CDN77_API_LOGIN and CDN77_API_PASSWORD for purging CDN'.red
         puts '  => https://client.cdn77.com/support/api/version/2.0/data'

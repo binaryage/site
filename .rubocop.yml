@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.4
+  TargetRubyVersion: 2.5
   Include:
     - '**/Gemfile'
     - '**/Rakefile'
@@ -49,7 +49,7 @@ Style/TernaryParentheses:
 Style/RegexpLiteral:
   Enabled: false
 
-Lint/RescueWithoutErrorClass:
+Style/RescueStandardError:
   Enabled: false
 
 Style/SafeNavigation:
