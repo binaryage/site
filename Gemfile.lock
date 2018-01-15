@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/binaryage/html_press
-  revision: 8bc6fcb8922e66b0781a28418d5fada8aeff6255
+  revision: d8e7e77859f88f61195ee4f2ca2d2bf990e2f504
   specs:
     html_press (0.7.1)
       css_press (>= 0.3.2)
@@ -87,7 +87,7 @@ GEM
       stylus-source
     stylus-source (0.54.5)
     tilt (2.0.8)
-    uglifier (4.1.2)
+    uglifier (4.1.3)
       execjs (>= 0.3.0, < 3)
     yui-compressor (0.12.0)
 
