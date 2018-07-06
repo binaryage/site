@@ -53,7 +53,7 @@ GEM
       coffee-script-source (~> 1.11.1)
     jekyll-contentblocks (1.2.0)
       jekyll
-    jekyll-redirect-from (0.13.0)
+    jekyll-redirect-from (0.14.0)
       jekyll (~> 3.3)
     jekyll-sass-converter (1.5.2)
       sass (~> 3.4)
@@ -87,7 +87,7 @@ GEM
       stylus-source
     stylus-source (0.54.5)
     tilt (2.0.8)
-    uglifier (4.1.11)
+    uglifier (4.1.14)
       execjs (>= 0.3.0, < 3)
     yui-compressor (0.12.0)
 
