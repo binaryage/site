@@ -149,8 +149,9 @@ module Jekyll
         resource = data['cdnResources'].find { |item| item['origin_url'] == stage }
         resource['id']
       rescue => e
-        STDERR.puts "Unable to parse JSON data: #{e.message}\n\n#{json_string}"
-        raise Jekyll::Errors::FatalException, "Unable to parse JSON data: #{e.message}\n\n#{json_string}"
+        err_msg = "Unable to parse JSON data (len=#{json_string.length}): #{e.message}\n\n#{json_string}"
+        STDERR.puts err_msg
+        raise Jekyll::Errors::FatalException, err_msg
       end
     end
 
