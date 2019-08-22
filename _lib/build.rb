@@ -26,7 +26,6 @@ def prepare_jekyll_config(site, opts)
   config['plugins_dir'] = '../_plugins'
   config['target_url'] = "https://#{site.subdomain}.#{domain}"
   config['enforce_ssl'] = "#{site.subdomain}.#{domain}"
-  config['markdown'] = 'rdiscount'
   config['dev'] = dev_mode
   config['stylus'] = {
     'compress' => !dev_mode,
