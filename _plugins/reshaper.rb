@@ -36,6 +36,9 @@ module Jekyll
         orig_path = path
         @dir = @dir.gsub('shared/root', '')
         @url = nil
+        @relative_path = File.join(*[@dir, @name].compact)
+        @cleaned_relative_path = nil
+        puts inspect
         new_path = destination(dest)
         if will_be_generated?(@site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
