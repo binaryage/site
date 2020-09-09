@@ -18,10 +18,10 @@ def friendly_dir(dir)
   dir[BASE_DIR.size + 1..-1] || '.'
 end
 
-def sys(cmd, check=true)
+def sys(cmd, check=true, env={})
   workdir = friendly_dir(Dir.pwd)
   puts "(in #{workdir.yellow}) " + "> #{cmd}".blue
-  res = system(cmd)
+  res = system(env, cmd)
   die '^ something went wrong' if check && !res
 end
 

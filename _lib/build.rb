@@ -95,7 +95,8 @@ def build_site(site, opts)
           "--config \"#{config_path}\" "\
           "--destination \"#{dest}\" "\
           '--trace'
-    sys(cmd)
+    # NODE_NO_WARNINGS is needed to silence stylus, https://github.com/stylus/stylus/issues/2534
+    sys(cmd, true, { 'NODE_NO_WARNINGS' => '1' })
   end
 
   # noinspection RubyResolve
@@ -127,11 +128,13 @@ def serve_site(site, base_dir)
             'jekyll serve '\
             '--incremental '\
             '--drafts '\
+            '--trace '\
             "--port 1#{port} "\
             '-b / '\
             "--config \"#{config_path}\" "\
             "--destination \"#{work_dir}\""
-      sys(cmd)
+      # NODE_NO_WARNINGS is needed to silence stylus, https://github.com/stylus/stylus/issues/2534
+      sys(cmd, true, { 'NODE_NO_WARNINGS' => '1' })
     end
     sleep(0.2)
     fork do
