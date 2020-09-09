@@ -1,13 +1,16 @@
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.7
   Include:
     - '**/Gemfile'
     - '**/Rakefile'
     - '**/rakefile'
+    - '_lib/*.rb'
+    - '_plugins/*.rb'
   Exclude:
     - '_node/**/*'
+    - 'firequery/rakefile'
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 126
 
 Layout/SpaceAroundEqualsInParameterDefault:
@@ -34,7 +37,7 @@ Metrics/ClassLength:
 Style/Documentation:
   Enabled: false
 
-Layout/IndentFirstArrayElement:
+Layout/FirstArrayElementIndentation:
   Enabled: false
 
 Style/GuardClause:
@@ -53,4 +56,13 @@ Style/RescueStandardError:
   Enabled: false
 
 Style/SafeNavigation:
+  Enabled: false
+
+Style/HashEachMethods:
+  Enabled: false
+
+Style/HashTransformKeys:
+  Enabled: false
+
+Style/HashTransformValues:
   Enabled: false
