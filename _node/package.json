@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "browser-sync": "^2.26.12",
-    "bs-html-injector": "git+https://github.com/darwin/html-injector.git",
-    "stylus": "^0.54.8"
+    "bs-html-injector": "git+https://github.com/darwin/html-injector.git"
   }
 }
