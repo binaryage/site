@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'utils.rb'
+require_relative 'utils'
 
 class Site
   attr_reader :dir, :port, :name, :subdomain, :domain
@@ -10,7 +10,7 @@ class Site
     @port = port
     @name = extract_name(dir)
     @subdomain = extract_subdomain(dir)
-    @domain = @subdomain + '.' + domain
+    @domain = "#{@subdomain}.#{domain}"
   end
 
   def to_s

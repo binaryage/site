@@ -10,7 +10,7 @@ HTML_EXTENSIONS = %w[
 
 class SimpleLogger
   def error(msg)
-    STDERR.puts(msg)
+    warn(msg)
     raise Jekyll::Errors::FatalException, "HtmlPress: #{msg}"
   end
 end

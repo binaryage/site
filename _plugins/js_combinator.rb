@@ -56,7 +56,7 @@ module Jekyll
             f.write(content)
           end
         rescue => e
-          STDERR.puts "Closure Compiler Exception: #{e.message}"
+          warn "Closure Compiler Exception: #{e.message}"
           raise Jekyll::Errors::FatalException, "Closure Compiler: #{e.message}"
         end
 
@@ -78,7 +78,7 @@ module Jekyll
         end
 
         list.map! do |filename|
-          File.expand_path(File.join(list_file_dir, filename + '.js'))
+          File.expand_path(File.join(list_file_dir, "#{filename}.js"))
         end
 
         removed_files = []
@@ -88,21 +88,25 @@ module Jekyll
 
         list.each do |file|
           next if file.strip.empty?
+
           found = false
           # remove listed file from static files (if present)
           site.static_files.each do |sf|
             next unless file == sf.path
+
             site.static_files.delete(sf)
             removed_files << sf
             found = true
             break
           end
           next if found
+
           # remove listed files from pages (if present)
           # note: some js files may be generated (coffeescript),
           #       that is why we have to go through pages
           site.pages.each do |page|
             next unless page.destination(site.source).end_with? file
+
             site.pages.delete(page)
             # we need to pre-render the page, generate step goes prior page generation
             page.render(site.layouts, site.site_payload)
@@ -112,7 +116,7 @@ module Jekyll
         end
 
         # something.list -> something.js (will contain final concatenated js files)
-        name = File.basename(list_file, '.list') + '.js'
+        name = "#{File.basename(list_file, '.list')}.js"
         destination = list_file_dir.sub(site.source, '')
         minified_file = CombinedJsFile.new(site, site.source, destination, name)
         minified_file.list = removed_files

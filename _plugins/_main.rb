@@ -19,7 +19,7 @@ Liquid::Template.register_tag('firstcontentblock', Jekyll::Tags::FirstContentBlo
 
 # -- hooks ------------------------------------------------------------------------------------------------------------------
 
-# note that coffescript conversion must be applied before pressing
+# NOTE: that coffescript conversion must be applied before pressing
 Jekyll::Hooks.register(%i[documents pages], :post_render) do |item|
   render_coffescript_blocks!(item)
 end

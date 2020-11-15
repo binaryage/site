@@ -22,6 +22,7 @@ module Jekyll
 
     def setup_if_needed!
       return if @setup_done
+
       @setup_done = true
       require 'stylus'
       Stylus.compress = stylus_config('compress') if stylus_config('compress')
@@ -32,9 +33,9 @@ module Jekyll
         'include css' => true # we want to inline css files into one, see https://github.com/LearnBoost/stylus/issues/448
       }
     rescue => e
-      STDERR.puts $ERROR_INFO
-      STDERR.puts 'You are missing a library required for Stylus. Please run:'
-      STDERR.puts '  $ [sudo] gem install stylus'
+      warn $ERROR_INFO
+      warn 'You are missing a library required for Stylus. Please run:'
+      warn '  $ [sudo] gem install stylus'
       raise e
     end
 

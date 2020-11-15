@@ -8,7 +8,7 @@ def generate_cname_file!(site)
     return
   end
 
-  cname = site.config['cname'] || 'stage.' + site.config['target_url'].gsub('http://', '').gsub('https://', '')
+  cname = site.config['cname'] || "stage.#{site.config['target_url'].gsub('http://', '').gsub('https://', '')}"
   cname_path = File.join(site.dest, 'CNAME')
   puts "#{'CNAME   '.magenta} generating #{cname.green} in #{cname_path.yellow}"
   FileUtils.mkdir_p(File.dirname(cname_path))

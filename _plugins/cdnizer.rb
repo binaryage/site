@@ -10,13 +10,14 @@ module Jekyll
     alias cdnizer_process process
 
     def flat_name(path)
-      path = path[1..-1] if path[0] == '/'
-      path.gsub(/[\/]/, '_').gsub('.._', '_')
+      path = path[1..] if path[0] == '/'
+      path.gsub(/\//, '_').gsub('.._', '_')
     end
 
     def generate_hash(file)
       return unless File.exist? file
       return if File.directory? file
+
       sha = Digest::SHA1.hexdigest File.read(file)
       sha[0..7]
     end
@@ -26,6 +27,7 @@ module Jekyll
       FileUtils.mkdir_p(zone_dir)
       zone_file = File.join(zone_dir, flat_name)
       return if File.exist? zone_file
+
       FileUtils.cp(file_path, zone_file)
       puts "#{'STATIC CDN     '.magenta} copied #{file_path.yellow} -> #{zone_file.yellow}"
     end
@@ -34,10 +36,12 @@ module Jekyll
       return m if m2[0..3] == 'http'
       return m if m2[0..1] == '//'
       return m if m2.nil? || m2 == '/' || m2 == ''
+
       m2 = m2.split('?')[0]
       file = (m2[0] == '/') ? File.join(dest, m2) : File.join(dir, m2)
       hash = generate_hash(file)
       return m if hash.nil?
+
       flat = "#{hash}_#{flat_name(m2)}".gsub(/_+/, '_')
       copy_into_zone(file, flat)
       m1 + config['static_cdn']['url'] + flat + m3
@@ -45,6 +49,7 @@ module Jekyll
 
     def cdnize_file(path)
       return unless File.exist? path # some files could be deleted by pruner
+
       puts "#{'STATIC CDN     '.magenta} redirecting asset urls in #{path.yellow} to #{(config['static_cdn']['url']).green}"
 
       content = File.read(path)
@@ -91,6 +96,7 @@ module Jekyll
     def clean_static_zone!
       zone_dir = config['static_cdn']['zone']
       raise Jekyll::Errors::FatalException, "CDN error: specify config['static_cdn']['zone']" unless zone_dir
+
       list = Dir.glob(File.join(zone_dir, '*'))
       puts "#{'STATIC CDN     '.magenta} cleaning #{"#{list.size} files".green} in zone folder: #{zone_dir.yellow}"
       FileUtils.rm(list)
@@ -135,7 +141,7 @@ module Jekyll
     end
 
     def target_url_to_stage(target_url)
-      'stage.' + target_url.gsub('http://', '').gsub('https://', '')
+      "stage.#{target_url.gsub('http://', '').gsub('https://', '')}"
     end
 
     def retrieve_cnd_id(api_login, api_password, target_url)
@@ -143,6 +149,7 @@ module Jekyll
       puts "> #{cmd.blue}"
       json_string = Open3.popen3(cmd) { |_stdin, stdout, _stderr, _wait_thr| stdout.read }
       raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless $CHILD_STATUS.success?
+
       stage = target_url_to_stage(target_url)
       begin
         data = JSON.parse(json_string)
@@ -150,7 +157,7 @@ module Jekyll
         resource['id']
       rescue => e
         err_msg = "Unable to parse JSON data (len=#{json_string.length}): #{e.message}\n\n#{json_string}"
-        STDERR.puts err_msg
+        warn err_msg
         raise Jekyll::Errors::FatalException, err_msg
       end
     end
@@ -181,7 +188,7 @@ module Jekyll
     def process
       cdnizer_process # call original process method
 
-      # note cdn is not used at this moment, we mirror gh-pages
+      # NOTE: cdn is not used at this moment, we mirror gh-pages
       push_to_cdn!(dest) if config['cdn'] && config['cdn']['enabled']
 
       if config['static_cdn'] && config['static_cdn']['enabled']

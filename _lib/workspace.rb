@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'utils.rb'
-require_relative 'site.rb'
+require_relative 'utils'
+require_relative 'site'
 
 def pin_workspace(sites)
   sites.each do |site|
@@ -98,6 +98,7 @@ def publish_workspace(sites, opts)
   sites.each do |site|
     Dir.chdir(site.dir) do
       next if !(opts[:force]) && git_cwd_clean?
+
       if `git rev-parse --abbrev-ref HEAD`.strip != 'web'
         puts "#{friendly_dir(Dir.pwd).yellow} not on 'web' branch => #{'skipping'.red}"
         next

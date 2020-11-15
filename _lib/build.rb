@@ -4,18 +4,18 @@ require 'digest/sha1'
 require 'pathname'
 require 'yaml'
 
-require_relative 'utils.rb'
+require_relative 'utils'
 
 # noinspection RubyStringKeysInHashInspection
 def prepare_jekyll_config(site, opts)
   dev_mode = opts[:dev_mode]
   stage = opts[:stage]
   busters = opts[:busters]
-  domain = 'binaryage.' + (dev_mode ? 'org' : 'com')
+  domain = "binaryage.#{dev_mode ? 'org' : 'com'}"
 
   begin
     config = YAML.load_file('_config.yml')
-  rescue => _
+  rescue => _e
     config = {}
   end
   config['plugins'] ||= []
@@ -65,7 +65,7 @@ def prepare_jekyll_config(site, opts)
 
   configs_dir = File.join(stage, '.configs')
   FileUtils.mkdir_p(configs_dir)
-  config_path = File.join(configs_dir, site.name + '_jekyll_config_' + sha + '.yml')
+  config_path = File.join(configs_dir, "#{site.name}_jekyll_config_#{sha}.yml")
   File.open(config_path, 'w') { |f| f.write(output) }
 
   Pathname.new(config_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
@@ -73,6 +73,7 @@ end
 
 def debugger_prefix
   return '' unless ENV['debug_jekyll']
+
   die 'you must have set RDEBUG_PREFIX env var' unless ENV['RDEBUG_PREFIX']
   ENV['RDEBUG_PREFIX']
 end
@@ -100,7 +101,7 @@ def build_site(site, opts)
   end
 
   # noinspection RubyResolve
-  puts '=> ' + dest.to_s.magenta
+  puts "=> #{dest.to_s.magenta}"
 end
 
 def build_sites(sites, opts, names)

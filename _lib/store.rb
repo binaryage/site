@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'utils.rb'
-require_relative 'build.rb'
+require_relative 'utils'
+require_relative 'build'
 
 def prune_shared(dir)
   img_dir = File.join(dir, 'img')
@@ -112,5 +112,5 @@ def build_store(site, opts)
   end
 
   # noinspection RubyResolve
-  puts 'Store template is in ' + zip_path.yellow + '. ' + "Don't forget to upload it to FastSpring".green
+  puts "Store template is in #{zip_path.yellow}. #{"Don't forget to upload it to FastSpring".green}"
 end

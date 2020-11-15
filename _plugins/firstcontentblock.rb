@@ -10,6 +10,7 @@ module Jekyll
       def render(context)
         block_content = content_for_block(context)[0] # take only the first one
         return '' unless block_content
+
         if convert_content?
           converted_content(block_content, context)
         else

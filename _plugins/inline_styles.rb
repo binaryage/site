@@ -11,6 +11,7 @@ module Jekyll
         @content_block_name = 'inline_styles'
         content = content_for_block(context)
         return '' if !content || content.empty?
+
         texts = ['<style>']
         content.each do |block|
           texts << block

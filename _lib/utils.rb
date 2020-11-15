@@ -15,7 +15,8 @@ end
 
 def friendly_dir(dir)
   return dir unless dir.start_with? BASE_DIR
-  dir[BASE_DIR.size + 1..-1] || '.'
+
+  dir[BASE_DIR.size + 1..] || '.'
 end
 
 def sys(cmd, check=true, env={})
@@ -26,7 +27,7 @@ def sys(cmd, check=true, env={})
 end
 
 def patch(path, replacers)
-  puts 'Patching ' + path.blue
+  puts "Patching #{path.blue}"
   lines = []
   File.open(path, 'r') do |f|
     f.each do |line|

@@ -8,6 +8,7 @@ require_relative '_shared'
 def press_html!(site, item)
   return unless do_html_press?(site)
   return unless HTML_EXTENSIONS.include?(item.output_ext)
+
   print "#{'COMPRESS'.magenta} generating #{item.inspect.yellow}"
 
   root_cache_dir = html_press_cache_dir(site)

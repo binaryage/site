@@ -6,6 +6,7 @@ require_relative '_shared'
 
 def render_coffescript_blocks!(item)
   return unless HTML_EXTENSIONS.include?(item.output_ext)
+
   counter = 0
   re = /(<script.*?>)(.*?)(<.*?\/script>)/m
   item.output.gsub! re do |_|
@@ -20,7 +21,7 @@ def render_coffescript_blocks!(item)
       begin
         code = CoffeeScript.compile code
       rescue => e
-        STDERR.puts 'CoffeeScript error:' + e.message
+        warn "CoffeeScript error:#{e.message}"
         raise e
       end
     end

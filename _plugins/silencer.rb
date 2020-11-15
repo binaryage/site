@@ -22,11 +22,9 @@ module Jekyll
             puts "Jekyll silencer: skipping write to #{path.blue} (same content)"
             return false
           end
-        # rubocop:disable Lint/HandleExceptions
         rescue
           # ignored
         end
-        # rubocop:enable Lint/HandleExceptions
       end
 
       true
