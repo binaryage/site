@@ -13,6 +13,7 @@ module Jekyll
       if @dir.match?(/shared\/root/)
         @dir = @dir.gsub('shared/root', '')
         @url = nil
+        @destination = nil # reset memoized destination in https://github.com/jekyll/jekyll/commit/920c6f4ddcb47399080204543efebbaa1ca4856d
         new_path = destination(dest)
         if will_be_generated?(@site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
@@ -38,7 +39,7 @@ module Jekyll
         @url = nil
         @relative_path = File.join(*[@dir, @name].compact)
         @cleaned_relative_path = nil
-        puts inspect
+        @destination = nil # reset memoized destination in https://github.com/jekyll/jekyll/commit/920c6f4ddcb47399080204543efebbaa1ca4856d
         new_path = destination(dest)
         if will_be_generated?(@site, self, dest, new_path)
           puts "#{'RESHAPER'.magenta} !skipped rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
