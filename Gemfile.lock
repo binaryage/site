@@ -20,7 +20,7 @@ GEM
     coffee-script-source (1.12.2)
     colorator (1.1.0)
     colored2 (3.1.2)
-    concurrent-ruby (1.1.8)
+    concurrent-ruby (1.1.9)
     css_press (0.3.2)
       csspool-st (= 3.1.2)
       json
@@ -30,7 +30,7 @@ GEM
       http_parser.rb (~> 0.6.0)
     eventmachine (1.2.7)
     execjs (2.8.1)
-    ffi (1.15.0)
+    ffi (1.15.1)
     forwardable-extended (2.6.0)
     htmlentities (4.3.4)
     http_parser.rb (0.6.0)
