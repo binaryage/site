@@ -12,6 +12,7 @@ gem 'jekyll'
 gem 'stylus'
 gem 'tilt'
 gem 'yui-compressor'
+gem 'webrick'
 
 group :jekyll_plugins do
   gem 'jekyll-coffeescript'
