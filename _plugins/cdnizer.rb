@@ -144,46 +144,46 @@ module Jekyll
       "stage.#{target_url.gsub('http://', '').gsub('https://', '')}"
     end
 
-#     def retrieve_cnd_id(api_login, api_password, target_url)
-#       cmd = "curl \"https://api.cdn77.com/v2.0/cdn-resource/list?login=#{api_login}&passwd=#{api_password}\""
-#       puts "> #{cmd.blue}"
-#       json_string = Open3.popen3(cmd) { |_stdin, stdout, _stderr, _wait_thr| stdout.read }
-#       raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless $CHILD_STATUS.success?
-#
-#       stage = target_url_to_stage(target_url)
-#       begin
-#         data = JSON.parse(json_string)
-#         resource = data['cdnResources'].find { |item| item['origin_url'] == stage }
-#         resource['id']
-#       rescue => e
-#         err_msg = "Unable to parse JSON data (len=#{json_string.length}): #{e.message}\n\n#{json_string}"
-#         warn err_msg
-#         raise Jekyll::Errors::FatalException, err_msg
-#       end
-#     end
+    #     def retrieve_cnd_id(api_login, api_password, target_url)
+    #       cmd = "curl \"https://api.cdn77.com/v2.0/cdn-resource/list?login=#{api_login}&passwd=#{api_password}\""
+    #       puts "> #{cmd.blue}"
+    #       json_string = Open3.popen3(cmd) { |_stdin, stdout, _stderr, _wait_thr| stdout.read }
+    #       raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless $CHILD_STATUS.success?
+    #
+    #       stage = target_url_to_stage(target_url)
+    #       begin
+    #         data = JSON.parse(json_string)
+    #         resource = data['cdnResources'].find { |item| item['origin_url'] == stage }
+    #         resource['id']
+    #       rescue => e
+    #         err_msg = "Unable to parse JSON data (len=#{json_string.length}): #{e.message}\n\n#{json_string}"
+    #         warn err_msg
+    #         raise Jekyll::Errors::FatalException, err_msg
+    #       end
+    #     end
 
     def purge_cdn!
       # we no longer purge CDN because this feature is no longer available in CDN API v3
       # CDN API v2 will be deprecated by the end of October 2021
 
       # see https://client.cdn77.com/support/api/version/2.0/data
-#       unless ENV['HUB_SERVER']
-#         puts 'set ENV variable HUB_SERVER=1 for purging CDN'.red
-#         return
-#       end
-#
-#       api_token = ENV['CDN77_API_TOKEN']
-#       if api_token
-#         cdn_id = retrieve_cnd_id(api_login, api_password, @config['target_url'])
-#         puts "#{'CDN     '.magenta} purging CDN(ID=#{cdn_id}) ...".blue
-#         cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" "\
-#               'https://api.cdn77.com/v2.0/data/purge-all'
-#         puts "> #{cmd.blue}"
-#         raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless system(cmd)
-#       else
-#         puts 'set ENV variables CDN77_API_TOKEN for purging CDN'.red
-#         puts '  => https://client.cdn77.com/support/api/version/2.0/data'
-#       end
+      #       unless ENV['HUB_SERVER']
+      #         puts 'set ENV variable HUB_SERVER=1 for purging CDN'.red
+      #         return
+      #       end
+      #
+      #       api_token = ENV['CDN77_API_TOKEN']
+      #       if api_token
+      #         cdn_id = retrieve_cnd_id(api_login, api_password, @config['target_url'])
+      #         puts "#{'CDN     '.magenta} purging CDN(ID=#{cdn_id}) ...".blue
+      #         cmd = "curl --data \"cdn_id=#{cdn_id}&login=#{api_login}&passwd=#{api_password}\" "\
+      #               'https://api.cdn77.com/v2.0/data/purge-all'
+      #         puts "> #{cmd.blue}"
+      #         raise Jekyll::Errors::FatalException, "curl failed with code #{$CHILD_STATUS}" unless system(cmd)
+      #       else
+      #         puts 'set ENV variables CDN77_API_TOKEN for purging CDN'.red
+      #         puts '  => https://client.cdn77.com/support/api/version/2.0/data'
+      #       end
     end
 
     def process

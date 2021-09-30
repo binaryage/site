@@ -11,8 +11,8 @@ gem 'html_press', git: 'https://github.com/binaryage/html_press', ref: '96bf0b6d
 gem 'jekyll'
 gem 'stylus'
 gem 'tilt'
-gem 'yui-compressor'
 gem 'webrick'
+gem 'yui-compressor'
 
 group :jekyll_plugins do
   gem 'jekyll-coffeescript'
