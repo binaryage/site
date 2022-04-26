@@ -1,51 +1,51 @@
 [submodule "www"]
 	path = www
-	url = git://github.com/binaryage/www.git
+	url = https://github.com/binaryage/www.git
 [submodule "blog"]
 	path = blog
-	url = git://github.com/binaryage/blog.git
+	url = https://github.com/binaryage/blog.git
 [submodule "support"]
 	path = support
-	url = git://github.com/binaryage/support.git
+	url = https://github.com/binaryage/support.git
 [submodule "totalfinder-web"]
 	path = totalfinder-web
-	url = git://github.com/binaryage/totalfinder-web.git
+	url = https://github.com/binaryage/totalfinder-web.git
 [submodule "totalterminal-web"]
 	path = totalterminal-web
-	url = git://github.com/binaryage/totalterminal-web.git
+	url = https://github.com/binaryage/totalterminal-web.git
 [submodule "asepsis-web"]
 	path = asepsis-web
-	url = git://github.com/binaryage/asepsis-web.git
+	url = https://github.com/binaryage/asepsis-web.git
 [submodule "firequery"]
 	path = firequery
-	url = git://github.com/binaryage/firequery.git
+	url = https://github.com/binaryage/firequery.git
 [submodule "firelogger"]
 	path = firelogger
-	url = git://github.com/binaryage/firelogger.git
+	url = https://github.com/binaryage/firelogger.git
 [submodule "firerainbow"]
 	path = firerainbow
-	url = git://github.com/binaryage/firerainbow.git
+	url = https://github.com/binaryage/firerainbow.git
 [submodule "drydrop"]
 	path = drydrop
-	url = git://github.com/binaryage/drydrop.git
+	url = https://github.com/binaryage/drydrop.git
 [submodule "xrefresh"]
 	path = xrefresh
-	url = git://github.com/binaryage/xrefresh.git
+	url = https://github.com/binaryage/xrefresh.git
 [submodule "hints"]
 	path = hints
-	url = git://github.com/binaryage/hints.git
+	url = https://github.com/binaryage/hints.git
 [submodule "restatic-web"]
 	path = restatic-web
-	url = git://github.com/binaryage/restatic-web.git
+	url = https://github.com/binaryage/restatic-web.git
 [submodule "totalspaces-web"]
 	path = totalspaces-web
-	url = git://github.com/binaryage/totalspaces-web.git
+	url = https://github.com/binaryage/totalspaces-web.git
 [submodule "test-web"]
 	path = test-web
-	url = git://github.com/binaryage/test-web.git
+	url = https://github.com/binaryage/test-web.git
 [submodule "visor"]
 	path = visor
-	url = git://github.com/binaryage/visor.git
+	url = https://github.com/binaryage/visor.git
 [submodule "hodlwallet"]
 	path = hodlwallet
-	url = git://github.com/binaryage/hodlwallet.git
+	url = https://github.com/binaryage/hodlwallet.git
