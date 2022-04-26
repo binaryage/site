@@ -62,6 +62,7 @@ def prepare_proxy_config(sites)
       worker_connections 1024;
     }
     http {
+      server_names_hash_bucket_size  64;
   CONFIG_SNIPPET
 
   # per-site configs
