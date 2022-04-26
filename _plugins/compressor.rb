@@ -28,7 +28,7 @@ def press_html!(site, item)
                                              cache: root_cache_dir)
 
   FileUtils.mkdir_p(html_cache_dir)
-  File.open(cache_file, 'w') { |f| f.write(item.output) }
+  File.write(cache_file, item.output)
   print " @ #{relative_cache_file_path(cache_file).red}\n"
   true
 end

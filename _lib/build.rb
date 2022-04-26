@@ -66,7 +66,7 @@ def prepare_jekyll_config(site, opts)
   configs_dir = File.join(stage, '.configs')
   FileUtils.mkdir_p(configs_dir)
   config_path = File.join(configs_dir, "#{site.name}_jekyll_config_#{sha}.yml")
-  File.open(config_path, 'w') { |f| f.write(output) }
+  File.write(config_path, output)
 
   Pathname.new(config_path).relative_path_from(Pathname.new(Dir.pwd)).to_s
 end

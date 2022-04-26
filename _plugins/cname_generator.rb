@@ -12,5 +12,5 @@ def generate_cname_file!(site)
   cname_path = File.join(site.dest, 'CNAME')
   puts "#{'CNAME   '.magenta} generating #{cname.green} in #{cname_path.yellow}"
   FileUtils.mkdir_p(File.dirname(cname_path))
-  File.open(cname_path, 'w') { |f| f.write(cname) }
+  File.write(cname_path, cname)
 end

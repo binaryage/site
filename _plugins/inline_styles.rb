@@ -17,7 +17,7 @@ module Jekyll
           texts << block
         end
         texts << '</style>'
-        texts.join('')
+        texts.join
       end
     end
   end

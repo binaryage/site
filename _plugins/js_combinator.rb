@@ -46,15 +46,13 @@ module Jekyll
             if cache_hit && (!File.exist? cache_hit)
               print " @ #{relative_cache_file_path(cache_hit).red}"
               FileUtils.mkdir_p(my_cache_dir)
-              File.open(cache_hit, 'w') { |f| f.write(res) }
+              File.write(cache_hit, res)
             end
             print "\n"
             content = res
           end
 
-          File.open(dest_path, 'w') do |f|
-            f.write(content)
-          end
+          File.write(dest_path, content)
         rescue => e
           warn "Closure Compiler Exception: #{e.message}"
           raise Jekyll::Errors::FatalException, "Closure Compiler: #{e.message}"
