@@ -52,12 +52,6 @@ Files which should be shared by all sites should go into [shared](/binaryage/sha
   * [ruby](http://www.ruby-lang.org), [rake](http://rake.rubyforge.org), [rubygems](http://rubygems.org)
   * [node.js](http://nodejs.org), [yarn](https://yarnpkg.com)
 
-**Recommended** (optional):
-
-  * [brew](http://mxcl.github.com/homebrew)
-  * [rvm](http://beginrescueend.com)
-  * [nvm](https://github.com/creationix/nvm)
-
 ### Bootstrap local development
 
     git clone git@github.com:binaryage/site.git
