@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # this script is responsible for registering our plugins in correct order
-require 'pp'
 
 require_relative 'compressor'
 require_relative 'reshaper'

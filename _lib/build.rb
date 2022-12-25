@@ -75,7 +75,7 @@ def debugger_prefix
   return '' unless ENV['debug_jekyll']
 
   die 'you must have set RDEBUG_PREFIX env var' unless ENV['RDEBUG_PREFIX']
-  ENV['RDEBUG_PREFIX']
+  ENV.fetch('RDEBUG_PREFIX', nil)
 end
 
 def bundle_exec
@@ -92,9 +92,9 @@ def build_site(site, opts)
   Dir.chdir site.dir do
     config_path = prepare_jekyll_config(site, opts)
     cmd = bundle_exec +
-          'jekyll build '\
-          "--config \"#{config_path}\" "\
-          "--destination \"#{dest}\" "\
+          'jekyll build ' \
+          "--config \"#{config_path}\" " \
+          "--destination \"#{dest}\" " \
           '--trace'
     # NODE_NO_WARNINGS is needed to silence stylus, https://github.com/stylus/stylus/issues/2534
     sys(cmd, true, { 'NODE_NO_WARNINGS' => '1' })
@@ -126,13 +126,13 @@ def serve_site(site, base_dir)
     fork do
       trap('INT') { exit 11 }
       cmd = bundle_exec +
-            'jekyll serve '\
-            '--incremental '\
-            '--drafts '\
-            '--trace '\
-            "--port 1#{port} "\
-            '-b / '\
-            "--config \"#{config_path}\" "\
+            'jekyll serve ' \
+            '--incremental ' \
+            '--drafts ' \
+            '--trace ' \
+            "--port 1#{port} " \
+            '-b / ' \
+            "--config \"#{config_path}\" " \
             "--destination \"#{work_dir}\""
       # NODE_NO_WARNINGS is needed to silence stylus, https://github.com/stylus/stylus/issues/2534
       sys(cmd, true, { 'NODE_NO_WARNINGS' => '1' })

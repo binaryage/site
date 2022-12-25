@@ -78,12 +78,12 @@ def build_store(site, opts)
       ['&nbsp;', '&#160;'],
       ['&copy;', '&#169;'],
       ['##INSERT STORE CONTENT HERE##', "\n<!-- TemplateBeginEditable name=\"Content\" -->\n\n<!-- TemplateEndEditable -->"],
-      ['</title>', "</title>\n"\
-                   '<link title="main" rel="stylesheet" '\
-                   'href="http://resource.fastspring.com/app/s/style/base.css" '\
-                   "media=\"screen,projection\" type=\"text/css\" />\n"\
-                   '<link title="main" rel="stylesheet" '\
-                   'href="http://resource.fastspring.com/app/store/style/base.css" '\
+      ['</title>', "</title>\n" \
+                   '<link title="main" rel="stylesheet" ' \
+                   'href="http://resource.fastspring.com/app/s/style/base.css" ' \
+                   "media=\"screen,projection\" type=\"text/css\" />\n" \
+                   '<link title="main" rel="stylesheet" ' \
+                   'href="http://resource.fastspring.com/app/store/style/base.css" ' \
                    'media="screen,projection" type="text/css" />']
   ])
 
