@@ -17,6 +17,25 @@ The repository contains 17 subdomain sites as git submodules:
 
 Each submodule has a `shared` subdirectory (also a git submodule) containing common layouts, includes, CSS (Stylus), and JavaScript (CoffeeScript) resources.
 
+## Prerequisites
+
+### Ruby Environment
+- **Ruby**: No specific version required, but use a modern Ruby version
+- **RubyGems**: Minimum version **1.8.23**
+- **Recommendation**: Use RVM (Ruby Version Manager) to manage Ruby versions without sudo
+  - Install RVM: https://rvm.io
+  - Install Ruby: `rvm install ruby`
+  - Use: `rvm use ruby`
+- Install bundler: `gem install bundler`
+
+### Node.js Environment
+- **Node.js**: Required for browser-sync and asset processing
+- **Yarn**: Minimum version **0.24.4**
+  - Install: https://yarnpkg.com
+
+### Other Requirements
+- **nginx**: Required for proxy server (`rake proxy`)
+
 ## Common Development Commands
 
 ### Initial Setup
