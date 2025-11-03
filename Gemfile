@@ -2,6 +2,12 @@
 
 source 'http://rubygems.org'
 
+# Ruby 3.x stdlib gems (extracted from core in Ruby 3.0+)
+gem 'base64'
+gem 'bigdecimal'
+gem 'csv'
+gem 'logger'
+
 gem 'closure-compiler'
 gem 'coffee-script'
 gem 'colored2'
