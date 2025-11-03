@@ -19,67 +19,65 @@ Each submodule has a `shared` subdirectory (also a git submodule) containing com
 
 ## Prerequisites
 
-### Ruby Environment (rbenv + direnv)
+### Development Environment (mise)
 
-This project uses **rbenv** (a simple Ruby version manager) with **direnv** for automatic environment management.
+This project uses **mise** (a modern polyglot version manager) for managing Ruby and Node.js versions.
 
-**Ruby Version**: 3.4.7 (specified in `.ruby-version`)
+**Versions**: Ruby 3.4.7, Node.js 22.21.1 (specified in `.tool-versions`)
 
 **Setup Instructions:**
 
-1. **Install rbenv and ruby-build**:
+1. **Install mise**:
    ```bash
-   brew install rbenv ruby-build
+   brew install mise
    ```
 
-2. **Install direnv**:
-   ```bash
-   brew install direnv
-   ```
-
-3. **Configure direnv for fish shell**:
+2. **Activate mise in fish shell**:
    ```bash
    # Add to ~/.config/fish/config.fish
+   echo '~/.local/bin/mise activate fish | source' >> ~/.config/fish/config.fish
+   source ~/.config/fish/config.fish
+   ```
+
+   Or mise may be automatically activated by Homebrew.
+
+3. **Install direnv** (optional, for project-specific env vars):
+   ```bash
+   brew install direnv
    echo 'direnv hook fish | source' >> ~/.config/fish/config.fish
    source ~/.config/fish/config.fish
    ```
 
-4. **Initialize rbenv in your shell**:
-   ```bash
-   # For fish shell, add to ~/.config/fish/config.fish
-   echo 'rbenv init - fish | source' >> ~/.config/fish/config.fish
-   source ~/.config/fish/config.fish
-   ```
-
-5. **Allow direnv in this project**:
+4. **Install project tools**:
    ```bash
    cd /path/to/site
-   direnv allow
+   mise install  # Reads .tool-versions and installs Ruby + Node.js
    ```
 
-6. **Install Ruby 3.4.7**:
-   ```bash
-   rbenv install 3.4.7
-   ```
-   This happens automatically when you `cd` into the project if direnv is configured.
-
-7. **Install bundler and gems**:
+5. **Install bundler and gems**:
    ```bash
    gem install bundler
    bundle install
    ```
 
-**Why rbenv?**
-- Simple and lightweight
-- Excellent IDE integration (RubyMine, VS Code, etc.)
-- Works seamlessly with direnv
-- Does not override shell commands or use shims in an intrusive way
-- Well-maintained and widely adopted in the Ruby community
+6. **Install Yarn** (for Node.js dependencies):
+   ```bash
+   npm install -g yarn  # Minimum version 0.24.4
+   ```
 
-### Node.js Environment
-- **Node.js**: Required for browser-sync and asset processing
-- **Yarn**: Minimum version **0.24.4**
-  - Install: https://yarnpkg.com
+**Why mise?**
+- **Polyglot**: Manages Ruby, Node.js, and 500+ other tools with one unified interface
+- **Fast**: Written in Rust for performance
+- **Simple**: rbenv-style philosophy - directory-based auto-switching
+- **Compatible**: Reads multiple version file formats (.ruby-version, .nvmrc, .tool-versions)
+- **Excellent IDE integration**: RubyMine, WebStorm, VS Code all work seamlessly
+- **Active development**: Modern tool with strong 2025+ momentum
+
+**How it works:**
+- Versions are defined in `.tool-versions` file
+- mise automatically switches versions when you `cd` into the project
+- No need for manual version switching or shims
+- Compatible with direnv for additional environment variables
 
 ### Other Requirements
 - **nginx**: Required for proxy server (`rake proxy`)
@@ -210,31 +208,44 @@ Use `git submodule foreach` for batch operations across all submodules.
 
 ## Troubleshooting
 
-### rbenv + direnv issues
+### mise issues
 
-**Problem**: direnv not activating Ruby or showing wrong version
+**Problem**: mise not activating Ruby/Node or showing wrong versions
 
 **Solution**:
-1. Check rbenv is installed: `rbenv --version`
-2. Check Ruby is installed: `rbenv versions`
-3. Install Ruby if needed: `rbenv install 3.4.7`
-4. Check direnv is working: `direnv status`
-5. Re-allow direnv: `direnv allow`
-6. Verify: `ruby --version` (should show 3.4.7)
+1. Check mise is installed: `mise --version`
+2. Check tools are installed: `mise list`
+3. Install tools if needed: `mise install`
+4. Check mise is activated in shell: `mise current`
+5. Verify: `ruby --version` (should show 3.4.7) and `node --version` (should show 22.21.1)
 
-**Problem**: rbenv init not working
+**Problem**: mise shell integration not working
 
-**Solution**: Make sure rbenv is initialized in your shell config:
+**Solution**: Make sure mise is activated in your shell config:
 ```bash
 # For fish shell
-echo 'rbenv init - fish | source' >> ~/.config/fish/config.fish
+echo '~/.local/bin/mise activate fish | source' >> ~/.config/fish/config.fish
+source ~/.config/fish/config.fish
 ```
+
+Or if installed via Homebrew, check if it's automatically activated:
+```bash
+mise doctor  # Shows mise configuration and any issues
+```
+
+**Problem**: Tools not auto-switching when cd'ing into project
+
+**Solution**:
+1. Check `.tool-versions` file exists: `cat .tool-versions`
+2. Run `mise install` to ensure all tools are installed
+3. Exit and re-enter the directory: `cd .. && cd site`
+4. Check active versions: `mise current`
 
 ### General Ruby issues
 
 **Problem**: `bundle install` fails with permission errors
 
-**Solution**: rbenv installs gems in user space. Never use `sudo`. If you still have issues:
+**Solution**: mise installs gems in user space. Never use `sudo`. If you still have issues:
 ```bash
 gem install bundler
 bundle install
@@ -243,10 +254,11 @@ bundle install
 **Problem**: Wrong Ruby version active
 
 **Solution**:
-1. Check `.ruby-version` file exists and contains `3.4.7`
-2. Check direnv is allowed: `direnv status`
-3. Re-enter directory: `cd .`
-4. Check Ruby version: `ruby --version`
+1. Check `.tool-versions` file exists and contains `ruby 3.4.7`
+2. Run `mise current` to see active versions
+3. Run `mise install` to ensure Ruby 3.4.7 is installed
+4. Exit and re-enter directory: `cd .. && cd site`
+5. Check Ruby version: `ruby --version`
 
 **Problem**: Jekyll fails with "cannot load such file -- csv (LoadError)" or similar errors
 
@@ -265,22 +277,26 @@ Common Ruby 3.x stdlib gems that may be needed:
 **Solution**: Ruby 3.2+ removed `File.exists?` (use `File.exist?` instead). The html_press gem in bundler cache needs to be patched:
 
 ```bash
+# Find mise Ruby gems directory
+MISE_RUBY_GEMS=$(mise where ruby@3.4.7)/lib/ruby/gems/3.4.0
+
 # Fix html_press uglifier.rb
-sed -i '' 's/File\.exists?/File.exist?/g' ~/.rbenv/versions/3.4.7/lib/ruby/gems/3.4.0/bundler/gems/html_press-*/lib/html_press/uglifier.rb
+sed -i '' 's/File\.exists?/File.exist?/g' "$MISE_RUBY_GEMS"/bundler/gems/html_press-*/lib/html_press/uglifier.rb
 
 # Fix html_press css_press.rb
-sed -i '' 's/File\.exists?/File.exist?/g' ~/.rbenv/versions/3.4.7/lib/ruby/gems/3.4.0/bundler/gems/html_press-*/lib/html_press/css_press.rb
+sed -i '' 's/File\.exists?/File.exist?/g' "$MISE_RUBY_GEMS"/bundler/gems/html_press-*/lib/html_press/css_press.rb
 ```
 
 **Note**: This fix is temporary and will be lost if you reinstall Ruby. A permanent solution would be to fork the html_press repository and update the Gemfile reference.
 
 ## RubyMine IDE Setup
 
-### Setting up Ruby SDK from rbenv
+### Setting up Ruby SDK from mise
 
-RubyMine has excellent support for rbenv. The IDE will automatically detect rbenv-installed Ruby versions.
+RubyMine has excellent support for mise. The IDE can detect mise-installed Ruby versions and use them directly.
 
-**Ruby interpreter path**: `/Users/darwin/.rbenv/versions/3.4.7/bin/ruby`
+**Ruby interpreter path**: Find it with: `mise where ruby@3.4.7`
+Typically: `/Users/darwin/.local/share/mise/installs/ruby/3.4.7/bin/ruby`
 
 **Method 1: Using RubyMine UI (Recommended)**
 
@@ -288,34 +304,35 @@ For RubyMine 2025.2+:
 
 1. Open **RubyMine → Settings/Preferences** (⌘,)
 2. Navigate to **Languages & Frameworks → Ruby Interpreters**
-3. RubyMine should automatically detect rbenv Ruby versions
-4. If not, click **+** → **Add Local Interpreter...**
-5. Choose **rbenv** tab (if available) or **System Interpreter**
-6. Select Ruby 3.4.7 from the list or browse to: `/Users/darwin/.rbenv/versions/3.4.7/bin/ruby`
-7. Click **OK** to add the interpreter
-8. Select `ruby-3.4.7` as the project interpreter
-9. Click **Apply** and **OK**
+3. Click **+** → **Add Local Interpreter...**
+4. Browse to the Ruby interpreter path (use `mise where ruby@3.4.7` to find it)
+5. The path should be: `$(mise where ruby@3.4.7)/bin/ruby`
+6. Click **OK** to add the interpreter
+7. Select the newly added `ruby-3.4.7` as the project interpreter
+8. Click **Apply** and **OK**
 
 For older RubyMine versions (pre-2025.2):
 
 1. Open **RubyMine → Settings/Preferences** (⌘,)
 2. Navigate to **Languages & Frameworks → Ruby SDK and Gems**
-3. RubyMine should automatically detect rbenv versions
-4. Select `rbenv: 3.4.7` from the list
-5. Click **Apply** and **OK**
+3. Click the **+** button → **New local...**
+4. Browse to: `$(mise where ruby@3.4.7)/bin/ruby`
+5. Click **OK** to add the SDK
+6. Select the newly added SDK as the project SDK
+7. Click **Apply** and **OK**
 
 **Method 2: Manual configuration**
 
 Edit `.idea/site.iml` and change the SDK line:
 ```xml
-<orderEntry type="jdk" jdkName="rbenv: 3.4.7" jdkType="RUBY_SDK" />
+<orderEntry type="jdk" jdkName="ruby-3.4.7" jdkType="RUBY_SDK" />
 ```
 
 Then restart RubyMine.
 
-### Using direnv Plugin
+### Setting Environment Variables (Optional)
 
-RubyMine has a direnv plugin that can automatically load environment variables from `.envrc`:
+If you need environment variables from `.envrc`, you can use the direnv plugin:
 
 1. Open **RubyMine → Settings/Preferences** (⌘,)
 2. Navigate to **Plugins**
@@ -324,7 +341,7 @@ RubyMine has a direnv plugin that can automatically load environment variables f
 5. Restart RubyMine
 6. The plugin will automatically detect `.envrc` and load environment variables
 
-**Note**: With rbenv, the direnv plugin should work perfectly since rbenv is well-supported.
+**Note**: mise handles Ruby environment setup automatically, so this is only needed if you have custom environment variables in `.envrc`.
 
 ### Verifying Setup
 
@@ -332,10 +349,12 @@ After configuration, verify the setup:
 
 1. Open the **Terminal** tool window in RubyMine (⌥F12)
 2. Run: `ruby --version`
-   - Should show: `ruby 3.4.7 (2025-10-08 revision 7a5688e2a2)`
+   - Should show: `ruby 3.4.7 (2025-07-16 revision 20cda200d3)`
 3. Run: `which ruby`
-   - Should show: `/Users/darwin/.rbenv/shims/ruby`
-4. Run: `bundle exec jekyll --version`
+   - Should show mise shim or direct path to mise Ruby
+4. Run: `mise current`
+   - Should show: `ruby 3.4.7` and `node 22.21.1`
+5. Run: `bundle exec jekyll --version`
    - Should work without errors
 
 ### Run Configurations
@@ -344,7 +363,7 @@ When creating Run/Debug configurations for Rake tasks:
 
 1. Go to **Run → Edit Configurations**
 2. For any Rake task configuration:
-   - **Ruby SDK**: Select `rbenv: 3.4.7`
+   - **Ruby SDK**: Select the mise-installed `ruby-3.4.7`
    - **Working directory**: `/Users/darwin/x/site`
    - RubyMine will automatically use the correct Ruby and gems
 
@@ -352,3 +371,25 @@ Common Rake tasks to configure:
 - `rake build what=www`
 - `rake serve what=www,totalfinder`
 - `rake clean`
+
+## WebStorm IDE Setup (for Node.js)
+
+### Setting up Node.js from mise
+
+WebStorm can use mise-installed Node.js for running JavaScript/TypeScript tools.
+
+**Node.js path**: Find it with: `mise where node@22`
+Typically: `/Users/darwin/.local/share/mise/installs/node/22.21.1/bin/node`
+
+**Setup Instructions:**
+
+1. Open **WebStorm → Settings/Preferences** (⌘,)
+2. Navigate to **Languages & Frameworks → Node.js**
+3. For **Node interpreter**, click **...** button
+4. Click **+** → **Add...**
+5. Browse to: `$(mise where node@22)/bin/node`
+6. Click **OK**
+7. Select the newly added Node.js interpreter
+8. Click **Apply** and **OK**
+
+WebStorm will now use the mise-installed Node.js for all JavaScript tooling (npm, yarn, etc.).
