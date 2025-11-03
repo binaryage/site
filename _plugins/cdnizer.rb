@@ -140,10 +140,6 @@ module Jekyll
       raise Jekyll::Errors::FatalException, "rsync failed with code #{$CHILD_STATUS}" unless system(cmd)
     end
 
-    def target_url_to_stage(target_url)
-      "stage.#{target_url.gsub('http://', '').gsub('https://', '')}"
-    end
-
     #     def retrieve_cnd_id(api_login, api_password, target_url)
     #       cmd = "curl \"https://api.cdn77.com/v2.0/cdn-resource/list?login=#{api_login}&passwd=#{api_password}\""
     #       puts "> #{cmd.blue}"

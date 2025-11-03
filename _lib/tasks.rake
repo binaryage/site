@@ -141,7 +141,7 @@ task :build do
     dev_mode: false,
     clean_stage: true,
     busters: true,
-    cdn: true,
+    cdn: false,  # Disable static CDN - serve assets locally from each repo
     static_cdn_url: STATIC_CDN_URL,
     static_cdn_push_url: STATIC_CDN_PUSH_URL
   }
