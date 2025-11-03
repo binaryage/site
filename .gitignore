@@ -4,3 +4,4 @@ store-template.zip
 .sass-cache
 .rubocop_todo.yml
 *.iml
+.claude/
