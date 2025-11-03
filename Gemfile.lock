@@ -1,7 +1,7 @@
 GIT
   remote: https://github.com/binaryage/html_press
-  revision: 96bf0b6db25aaf224da1d8b6620553c69fb069fb
-  ref: 96bf0b6db25aaf224da1d8b6620553c69fb069fb
+  revision: 874ddf8c2569dad0d35247e0ee06e4c121e69915
+  ref: 874ddf8c2569dad0d35247e0ee06e4c121e69915
   specs:
     html_press (0.7.1)
       css_press (>= 0.3.2)
@@ -67,7 +67,7 @@ GEM
       sass-embedded (~> 1.54)
     jekyll-watch (2.2.1)
       listen (~> 3.0)
-    json (2.6.3)
+    json (2.15.2)
     kramdown (2.4.0)
       rexml
     kramdown-parser-gfm (1.1.0)
@@ -98,7 +98,7 @@ GEM
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
     tilt (2.1.0)
-    uglifier (4.2.0)
+    uglifier (4.2.1)
       execjs (>= 0.3.0, < 3)
     unicode-display_width (2.4.2)
     webrick (1.8.1)
