@@ -206,7 +206,9 @@ rake store                   # Generate FastSpring store template zip
 3. Post-receive hook (`hookgun`) builds the site
 4. Static files pushed to `gh-pages` branch
 5. GitHub Pages deploys automatically
-6. Submodule pointer updated in this `site` repo
+6. **Submodule pointer AUTOMATICALLY updated in this `site` repo by hookgun**
+
+**IMPORTANT - DO NOT MANUALLY UPDATE SUBMODULE POINTERS**: The `hookgun` post-receive hook automatically updates the submodule pointer in the main `site` repository when you push to a submodule's `web` branch. **You should NEVER manually commit submodule pointer updates** in this `site` repo - the automation handles it for you.
 
 **Important**: Always push the `shared` submodule changes first if you modified shared resources. (See [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture) above for details on how the shared repository works.)
 
@@ -229,7 +231,8 @@ When making changes:
 2. Work on the `web` branch
 3. Commit and push changes
 4. If shared resources changed, commit and push `shared` first (remember: all `shared/` directories point to the same repository - see [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture))
-5. Return to parent repo and commit the submodule pointer update if needed
+
+**IMPORTANT**: When you push to a submodule's `web` branch, the `hookgun` post-receive hook will automatically update the submodule pointer in this `site` repository. **DO NOT manually commit submodule pointer updates** - they are handled automatically by the deployment system.
 
 Use `git submodule foreach` for batch operations across all submodules.
 
