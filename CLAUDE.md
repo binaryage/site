@@ -17,6 +17,40 @@ The repository contains 17 subdomain sites as git submodules:
 
 Each submodule has a `shared` subdirectory (also a git submodule) containing common layouts, includes, CSS (Stylus), and JavaScript (CoffeeScript) resources.
 
+### CRITICAL: Shared Submodule Architecture
+
+**All 17 `shared/` directories across all submodules are clones of the SAME git repository.**
+
+This is the most important architectural concept to understand:
+
+- **Single source of truth**: There is ONE shared repository (github.com/binaryage/shared) that contains layouts, includes, CSS, and JavaScript
+- **Make changes once**: When you need to modify shared resources (layouts, CSS, JS), you only need to edit them in ONE place
+- **Update submodule pointers**: After pushing changes to the shared repository, update the submodule pointer in each site that needs the changes
+- **DO NOT edit 17 times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
+- **Recommended workflow**: Make shared changes via `www/shared`, then update pointers in other sites
+
+**Example workflow:**
+
+```bash
+# 1. Make changes in the shared repository (via www/shared or any other)
+cd www/shared
+# ... edit files ...
+git add .
+git commit -m "Update shared layout"
+git push origin master
+
+# 2. Update the submodule pointer in sites that need the changes
+cd ../..  # Back to site root
+cd totalfinder-web
+git add shared  # Update pointer to new shared commit
+git commit -m "Update shared submodule"
+git push
+
+# Repeat step 2 for other sites as needed
+```
+
+**For AI agents**: This architecture means you should NEVER iterate through all 17 sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
+
 ## Prerequisites
 
 ### Development Environment (mise)
@@ -174,7 +208,7 @@ rake store                   # Generate FastSpring store template zip
 5. GitHub Pages deploys automatically
 6. Submodule pointer updated in this `site` repo
 
-**Important**: Always push the `shared` submodule changes first if you modified shared resources.
+**Important**: Always push the `shared` submodule changes first if you modified shared resources. (See [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture) above for details on how the shared repository works.)
 
 ## Configuration Files
 
@@ -194,7 +228,7 @@ When making changes:
 1. Navigate into the submodule directory (e.g., `cd totalfinder-web`)
 2. Work on the `web` branch
 3. Commit and push changes
-4. If shared resources changed, commit and push `shared` first
+4. If shared resources changed, commit and push `shared` first (remember: all `shared/` directories point to the same repository - see [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture))
 5. Return to parent repo and commit the submodule pointer update if needed
 
 Use `git submodule foreach` for batch operations across all submodules.
