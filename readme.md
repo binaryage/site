@@ -48,9 +48,11 @@ Files which should be shared by all sites should go into [shared](/binaryage/sha
 
 ### Prerequisities
 
-  * [nginx](http://nginx.org)
-  * [ruby](http://www.ruby-lang.org), [rake](http://rake.rubyforge.org), [rubygems](http://rubygems.org)
-  * [node.js](http://nodejs.org), [yarn](https://yarnpkg.com)
+  * **[nginx](http://nginx.org)** - proxy server for local development routing
+  * **[ruby](http://www.ruby-lang.org)**, **[rake](http://rake.rubyforge.org)**, **[rubygems](http://rubygems.org)** - Jekyll static site generator and build system
+  * **[node.js](http://nodejs.org)**, **[yarn](https://yarnpkg.com)** - JavaScript tooling for:
+    * Stylus CSS preprocessing (shared/css/)
+    * browser-sync live reloading during development
 
 ### Bootstrap local development
 
