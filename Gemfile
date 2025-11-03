@@ -7,6 +7,7 @@ gem 'base64'
 gem 'bigdecimal'
 gem 'csv'
 gem 'logger'
+gem 'stringio'
 
 gem 'closure-compiler'
 gem 'coffee-script'
