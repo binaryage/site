@@ -184,7 +184,6 @@ rake store                   # Generate FastSpring store template zip
   - `stylus_converter.rb` - Stylus CSS preprocessing
   - `js_combinator.rb` - JavaScript concatenation from .list files
   - `compressor.rb` - Asset compression
-  - `cdnizer.rb` - CDN integration
   - `pruner.rb`, `reshaper.rb`, `inline_styles.rb`, etc.
 - Configuration is dynamically generated per-site with dev/production modes
 - Build artifacts go to `.stage/` directory (gitignored)
@@ -198,7 +197,7 @@ rake store                   # Generate FastSpring store template zip
 
 ### Development vs Production
 - Dev mode (`dev: true`): Uses binaryage.org domain, no compression, debug enabled
-- Production mode: Uses binaryage.com, compression enabled, cache busting, CDN integration
+- Production mode: Uses binaryage.com, compression enabled, cache busting
 
 ### Deployment Flow
 1. Make changes in a subsite repository

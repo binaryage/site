@@ -43,17 +43,10 @@ def prepare_jekyll_config(site, opts)
     'compress' => !dev_mode,
     'cache' => File.join(stage, '_cache')
   }
-  config['static_cdn'] = {
-    'enabled' => (!dev_mode && opts[:cdn]),
-    'zone' => File.join(stage, '_cdn'),
-    'url' => opts[:static_cdn_url],
-    'push_url' => opts[:static_cdn_push_url]
-  }
   config['busterizer'] = {
     'css' => (busters && !dev_mode),
     'html' => (busters && !dev_mode)
   }
-  config['purge_cdn'] = true
 
   config.delete('prune_files') if opts[:dont_prune]
 

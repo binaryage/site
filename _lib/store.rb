@@ -50,7 +50,7 @@ def build_store(site, opts)
   # build the site using jekyll
   stage = opts[:stage]
   sys("rm -rf \"#{stage}\"")
-  build_site(site, opts) # no cache busters, no cdn
+  build_site(site, opts) # no cache busters for store template
 
   build_path = File.join(stage, site.name)
   template_path = File.join(build_path, (ENV['STORE_TEMPLATE'] || 'store-template.html'))

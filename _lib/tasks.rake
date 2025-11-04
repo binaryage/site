@@ -16,9 +16,6 @@ LOCAL_DOMAIN = 'binaryage.org' # this domain is for testing to be set in /etc/ho
 MIN_YARN_VERSION = '0.24.4'
 MIN_GEM_VERSION = '1.8.23'
 
-STATIC_CDN_URL = 'https://static.binaryage.com/'
-STATIC_CDN_PUSH_URL = 'user_ho054rw1@push-1.cdn77.com:/www/'
-
 ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 NODE_DIR = File.join(ROOT, '_node')
 STAGE_DIR = File.join(ROOT, '.stage')
@@ -139,10 +136,7 @@ task :build do
     stage: ENV['stage'] || BUILD_DIR,
     dev_mode: false,
     clean_stage: true,
-    busters: true,
-    cdn: false,  # Disable static CDN - serve assets locally from each repo
-    static_cdn_url: STATIC_CDN_URL,
-    static_cdn_push_url: STATIC_CDN_PUSH_URL
+    busters: true
   }
 
   build_sites(SITES, build_opts, names)
