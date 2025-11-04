@@ -65,25 +65,26 @@ def build_store(site, opts)
 
   # make our HTML valid XHTML
   patch(window_template, [
-      ['<!DOCTYPE html>', ''],
-      ['<html ', "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n      "],
-      [/<body(.*?)>/, '<body\\1><div id="page-store-template">'],
-      ['</body>', '</div></body>'],
-      [/<script(.*?)>/, "<script\\1>//<![CDATA[\n"],
-      [/<\/script>/, "\n//]]></script>"],
-      [/href="\/([^\/])/, 'href="\\1'],
-      [/src="\/([^\/])/, 'src="\\1'],
-      ['&nbsp;', '&#160;'],
-      ['&copy;', '&#169;'],
-      ['##INSERT STORE CONTENT HERE##', "\n<!-- TemplateBeginEditable name=\"Content\" -->\n\n<!-- TemplateEndEditable -->"],
-      ['</title>', "</title>\n" \
-                   '<link title="main" rel="stylesheet" ' \
-                   'href="http://resource.fastspring.com/app/s/style/base.css" ' \
-                   "media=\"screen,projection\" type=\"text/css\" />\n" \
-                   '<link title="main" rel="stylesheet" ' \
-                   'href="http://resource.fastspring.com/app/store/style/base.css" ' \
-                   'media="screen,projection" type="text/css" />']
-  ])
+          ['<!DOCTYPE html>', ''],
+          ['<html ', "<html xmlns=\"http://www.w3.org/1999/xhtml\"\n      "],
+          [/<body(.*?)>/, '<body\\1><div id="page-store-template">'],
+          ['</body>', '</div></body>'],
+          [/<script(.*?)>/, "<script\\1>//<![CDATA[\n"],
+          [%r{</script>}, "\n//]]></script>"],
+          [%r{href="/([^/])}, 'href="\\1'],
+          [%r{src="/([^/])}, 'src="\\1'],
+          ['&nbsp;', '&#160;'],
+          ['&copy;', '&#169;'],
+          ['##INSERT STORE CONTENT HERE##',
+           "\n<!-- TemplateBeginEditable name=\"Content\" -->\n\n<!-- TemplateEndEditable -->"],
+          ['</title>', "</title>\n" \
+                       '<link title="main" rel="stylesheet" ' \
+                       'href="http://resource.fastspring.com/app/s/style/base.css" ' \
+                       "media=\"screen,projection\" type=\"text/css\" />\n" \
+                       '<link title="main" rel="stylesheet" ' \
+                       'href="http://resource.fastspring.com/app/store/style/base.css" ' \
+                       'media="screen,projection" type="text/css" />']
+        ])
 
   content = File.read(window_template)
   content.gsub!(/<!-- SCRIPTS START -->(.*?)<!-- SCRIPTS END -->(.*?)<body(.*?)>/m, '\\2<body\\3>\\1')
@@ -95,8 +96,8 @@ def build_store(site, opts)
 
   # fix paths in CSS
   patch("#{working_dir}/shared/css/site.css", [
-      [/\/shared\//, '../']
-  ])
+          [%r{/shared/}, '../']
+        ])
 
   # clean up shared folder to reduce size
   prune_shared("#{working_dir}/shared")

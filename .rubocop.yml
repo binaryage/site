@@ -1,6 +1,11 @@
+# RuboCop configuration for BinaryAge Site project
+# Ruby version: 3.4.7
+# RuboCop version: 1.81.7+
+
 AllCops:
-  TargetRubyVersion: 3.1
+  TargetRubyVersion: 3.4
   NewCops: enable
+  SuggestExtensions: true
   Include:
     - '**/Gemfile'
     - '**/Rakefile'
@@ -11,14 +16,16 @@ AllCops:
     - '_node/**/*'
     - 'firequery/rakefile'
 
+# ==================== Layout ====================
+
 Layout/LineLength:
   Max: 126
 
 Layout/SpaceAroundEqualsInParameterDefault:
   EnforcedStyle: no_space
 
-Metrics/MethodLength:
-  Enabled: false
+# ==================== Metrics ====================
+# Disabled for small project - complex build logic is acceptable
 
 Metrics/AbcSize:
   Enabled: false
@@ -29,47 +36,39 @@ Metrics/BlockLength:
 Metrics/BlockNesting:
   Enabled: false
 
-Metrics/CyclomaticComplexity:
-  Enabled: false
-
 Metrics/ClassLength:
   Enabled: false
 
-Style/Documentation:
+Metrics/CyclomaticComplexity:
   Enabled: false
 
-Layout/FirstArrayElementIndentation:
-  Enabled: false
-
-Style/GuardClause:
+Metrics/MethodLength:
   Enabled: false
 
 Metrics/PerceivedComplexity:
   Enabled: false
 
-Style/TernaryParentheses:
-  Enabled: false
+# ==================== Style ====================
 
-Style/RegexpLiteral:
-  Enabled: false
-
-Style/RescueStandardError:
-  Enabled: false
-
-Style/SafeNavigation:
-  Enabled: false
-
-Style/HashEachMethods:
-  Enabled: false
-
-Style/HashTransformKeys:
-  Enabled: false
-
-Style/HashTransformValues:
+Style/Documentation:
+  Description: Build scripts don't require class/module documentation
   Enabled: false
 
 Style/OptionalBooleanParameter:
+  Description: Boolean parameters are acceptable in build utilities
   Enabled: false
 
+Style/RescueStandardError:
+  Description: Generic rescue is acceptable in build scripts
+  Enabled: false
+
+Style/StringLiterals:
+  Description: Enforce consistent string literal quotes (allow mixed quotes in multiline)
+  EnforcedStyle: single_quotes
+  ConsistentQuotesInMultiline: false
+
+# ==================== Naming ====================
+
 Naming/MethodParameterName:
+  Description: Short parameter names (e.g., 'e', 'f') are acceptable
   Enabled: false

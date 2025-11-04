@@ -3,10 +3,10 @@
 # this is shared code for our plugins
 
 HTML_EXTENSIONS = %w[
-      .html
-      .xhtml
-      .htm
-    ].freeze
+  .html
+  .xhtml
+  .htm
+].freeze
 
 class SimpleLogger
   def error(msg)

@@ -110,11 +110,11 @@ def publish_workspace(sites, opts)
       sys('git commit --allow-empty -m "publish"')
     end
   end
-  unless opts[:dont_push]
-    sites.each do |site|
-      Dir.chdir(site.dir) do
-        sys('git push origin web')
-      end
+  return if opts[:dont_push]
+
+  sites.each do |site|
+    Dir.chdir(site.dir) do
+      sys('git push origin web')
     end
   end
 end
