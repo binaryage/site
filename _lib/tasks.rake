@@ -28,13 +28,12 @@ STORE_DIR = File.join(STAGE_DIR, 'store')
 
 ## SITES ####################################################################################################################
 
-DIRS = %w[
-www blog support
-totalfinder-web totalspaces-web
-asepsis-web totalterminal-web visor
-firequery firerainbow firelogger xrefresh
-drydrop hints restatic-web test-web hodlwallet
-].freeze
+# Dynamically detect all git submodules at root level
+DIRS = `git config --file .gitmodules --get-regexp path`
+         .lines
+         .map { |line| line.split[1] }
+         .compact
+         .freeze
 
 SITES = DIRS.each_with_index.collect do |dir, index|
   Site.new(File.join(ROOT, dir), BASE_PORT + index, LOCAL_DOMAIN)
