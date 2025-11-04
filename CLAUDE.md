@@ -8,25 +8,25 @@ BinaryAge Site is an umbrella project that manages multiple subdomain sites unde
 
 ### Git Submodules Architecture
 
-The repository contains 17 subdomain sites as git submodules:
+The repository contains 12 subdomain sites as git submodules:
 - **www** - Main binaryage.com site
 - **blog** - Blog subdomain
 - **support** - Support site
-- **Product sites**: totalfinder-web, totalspaces-web, asepsis-web, totalterminal-web, visor, hodlwallet
-- **Tool sites**: firequery, firerainbow, firelogger, xrefresh, drydrop, hints, restatic-web, test-web
+- **Product sites**: totalfinder-web, totalspaces-web, asepsis-web, totalterminal-web, visor
+- **Tool sites**: firequery, firerainbow, firelogger, xrefresh
 
 Each submodule has a `shared` subdirectory (also a git submodule) containing common layouts, includes, CSS (Stylus), and JavaScript (CoffeeScript) resources.
 
 ### CRITICAL: Shared Submodule Architecture
 
-**All 17 `shared/` directories across all submodules are clones of the SAME git repository.**
+**All 12 `shared/` directories across all submodules are clones of the SAME git repository.**
 
 This is the most important architectural concept to understand:
 
 - **Single source of truth**: There is ONE shared repository (github.com/binaryage/shared) that contains layouts, includes, CSS, and JavaScript
 - **Make changes once**: When you need to modify shared resources (layouts, CSS, JS), you only need to edit them in ONE place
 - **Update submodule pointers**: After pushing changes to the shared repository, update the submodule pointer in each site that needs the changes
-- **DO NOT edit 17 times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
+- **DO NOT edit 12 times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
 - **Recommended workflow**: Make shared changes via `www/shared`, then update pointers in other sites
 
 **Example workflow:**
@@ -49,7 +49,7 @@ git push
 # Repeat step 2 for other sites as needed
 ```
 
-**For AI agents**: This architecture means you should NEVER iterate through all 17 sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
+**For AI agents**: This architecture means you should NEVER iterate through all 12 sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
 
 ## Prerequisites
 

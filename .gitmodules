@@ -25,27 +25,12 @@
 [submodule "firerainbow"]
 	path = firerainbow
 	url = https://github.com/binaryage/firerainbow.git
-[submodule "drydrop"]
-	path = drydrop
-	url = https://github.com/binaryage/drydrop.git
 [submodule "xrefresh"]
 	path = xrefresh
 	url = https://github.com/binaryage/xrefresh.git
-[submodule "hints"]
-	path = hints
-	url = https://github.com/binaryage/hints.git
-[submodule "restatic-web"]
-	path = restatic-web
-	url = https://github.com/binaryage/restatic-web.git
 [submodule "totalspaces-web"]
 	path = totalspaces-web
 	url = https://github.com/binaryage/totalspaces-web.git
-[submodule "test-web"]
-	path = test-web
-	url = https://github.com/binaryage/test-web.git
 [submodule "visor"]
 	path = visor
 	url = https://github.com/binaryage/visor.git
-[submodule "hodlwallet"]
-	path = hodlwallet
-	url = https://github.com/binaryage/hodlwallet.git
