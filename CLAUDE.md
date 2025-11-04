@@ -171,6 +171,53 @@ rake inspect                 # List all registered sites
 rake store                   # Generate FastSpring store template zip
 ```
 
+### Testing Build Changes
+
+When making significant changes to the build system, use the snapshot/diff system to verify that changes don't unexpectedly alter build output:
+
+```bash
+# 1. Create a baseline snapshot before making changes
+_scripts/snapshot.sh baseline "Before refactoring"
+
+# 2. Make your code changes
+
+# 3. Rebuild all sites
+rake build
+
+# 4. Compare current build with snapshot
+_scripts/diff-build.sh baseline
+
+# 5. For detailed file-level differences
+_scripts/diff-build.sh baseline --verbose
+```
+
+**Snapshot Management:**
+
+```bash
+# Create a snapshot with description
+_scripts/snapshot.sh <name> [description]
+
+# List all snapshots (shown after each snapshot creation)
+# Snapshots are stored in .snapshots/ (gitignored)
+
+# Compare snapshot with current build
+_scripts/diff-build.sh <name>           # Summary view
+_scripts/diff-build.sh <name> --verbose # Detailed file-level changes
+```
+
+**How it works:**
+- `snapshot.sh` builds all sites and copies `.stage/build/` to `.snapshots/<name>/`
+- Volatile artifacts (`_cache/`, `.configs/`) are excluded to save space
+- Metadata is saved (timestamp, git commit hash, description)
+- `diff-build.sh` compares snapshots excluding volatile directories
+- Exit codes: 0 (identical), 1 (differences found), 2 (error)
+
+**Use cases:**
+- Verifying refactoring doesn't change output
+- Testing build system modifications
+- Ensuring reproducible builds
+- Comparing output before/after dependency upgrades
+
 ## Architecture Details
 
 ### Site Structure (_lib/site.rb)
