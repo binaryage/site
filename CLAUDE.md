@@ -44,10 +44,15 @@ cd ../..  # Back to site root
 cd totalfinder-web
 git add shared  # Update pointer to new shared commit
 git commit -m "Update shared submodule"
-git push
+git push origin web  # Push to the web branch
 
 # Repeat step 2 for other sites as needed
 ```
+
+**Important note about submodule pointers:**
+- ✅ **DO commit** `shared` submodule pointer updates in each website (as shown above)
+- ❌ **DON'T commit** root-level submodule pointers (www, blog, etc.) in the main `site` repo
+- The hookgun deployment system handles root-level pointers automatically
 
 **For AI agents**: This architecture means you should NEVER iterate through all 12 sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
 
@@ -252,9 +257,22 @@ _scripts/diff-build.sh <name> --verbose # Detailed file-level changes
 3. Post-receive hook (`hookgun`) builds the site
 4. Static files pushed to `gh-pages` branch
 5. GitHub Pages deploys automatically
-6. **Submodule pointer AUTOMATICALLY updated in this `site` repo by hookgun**
+6. **Root-level submodule pointer AUTOMATICALLY updated in this `site` repo by hookgun**
 
-**IMPORTANT - DO NOT MANUALLY UPDATE SUBMODULE POINTERS**: The `hookgun` post-receive hook automatically updates the submodule pointer in the main `site` repository when you push to a submodule's `web` branch. **You should NEVER manually commit submodule pointer updates** in this `site` repo - the automation handles it for you.
+**IMPORTANT - Understanding Submodule Pointer Updates:**
+
+There are **two levels** of submodules in this project, each handled differently:
+
+1. **Root-level submodules** (www, blog, totalfinder-web, etc. in main `site` repo):
+   - **DO NOT manually commit** pointer updates in the `site` repository
+   - The `hookgun` post-receive hook automatically updates these pointers when you push to a submodule's `web` branch
+   - You will see "modified: www (new commits)" in git status - this is normal, **ignore and don't commit**
+
+2. **Shared submodule** (the `shared/` directory inside each website):
+   - **DO manually commit** pointer updates in each website repository
+   - Each website tracks which version of `shared` it uses
+   - When you update shared resources, commit the pointer update: `git add shared && git commit -m "Update shared submodule"`
+   - Push this to the website's `web` branch before pushing the website changes
 
 **Important**: Always push the `shared` submodule changes first if you modified shared resources. (See [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture) above for details on how the shared repository works.)
 
@@ -272,15 +290,32 @@ _scripts/diff-build.sh <name> --verbose # Detailed file-level changes
 
 ## Working with Submodules
 
-When making changes:
-1. Navigate into the submodule directory (e.g., `cd totalfinder-web`)
-2. Work on the `web` branch
-3. Commit and push changes
-4. If shared resources changed, commit and push `shared` first (remember: all `shared/` directories point to the same repository - see [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture))
+### Making Changes to Website Content
 
-**IMPORTANT**: When you push to a submodule's `web` branch, the `hookgun` post-receive hook will automatically update the submodule pointer in this `site` repository. **DO NOT manually commit submodule pointer updates** - they are handled automatically by the deployment system.
+When making changes to a website (e.g., totalfinder-web):
 
-Use `git submodule foreach` for batch operations across all submodules.
+1. Navigate into the website submodule: `cd totalfinder-web`
+2. Make sure you're on the `web` branch
+3. Make your changes and commit them
+4. **If you modified shared resources** (layouts, CSS, JS):
+   - First: `cd shared`, commit and push changes to shared repo
+   - Then: `cd ..`, `git add shared`, commit the pointer update
+5. Push changes to the website's `web` branch
+6. The `hookgun` hook will automatically build and update the root-level pointer
+
+### Understanding the Two Levels of Submodules
+
+**Level 1 - Root-level submodules** (in main `site` repo):
+- **DO NOT manually commit** these pointer updates
+- Hookgun automatically updates them when you push to `web` branch
+- Example: When you see "modified: www (new commits)" in the root repo, **ignore it**
+
+**Level 2 - Shared submodule** (inside each website):
+- **DO manually commit** these pointer updates in each website
+- Each website tracks its own version of shared
+- Example: After updating shared: `git add shared && git commit -m "Update shared"`
+
+**Tip**: Use `git submodule foreach` for batch operations across all submodules.
 
 ## Local Development Domains
 
