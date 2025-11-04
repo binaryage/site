@@ -21,7 +21,7 @@ module Jekyll
         else
           puts "#{'RESHAPER'.magenta} rewriting #{"/shared/root/#{@name}".yellow} -> #{new_path.yellow}"
         end
-        output.gsub!(/shared\/root\//, '')
+        output.gsub!('shared/root/', '')
       end
       reshaper_orig_write dest
     end

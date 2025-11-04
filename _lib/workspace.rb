@@ -99,7 +99,7 @@ end
 def publish_workspace(sites, opts)
   sites.each do |site|
     Dir.chdir(site.dir) do
-      next if !(opts[:force]) && git_cwd_clean?
+      next if !opts[:force] && git_cwd_clean?
 
       if `git rev-parse --abbrev-ref HEAD`.strip != 'web'
         puts "#{friendly_dir(Dir.pwd).yellow} not on 'web' branch => #{'skipping'.red}"

@@ -10,7 +10,9 @@ module Jekyll
       attr_accessor :list, :minify
 
       # noinspection RubyResolve
+      # rubocop:disable Naming/PredicateMethod
       def write(dest)
+        # rubocop:enable Naming/PredicateMethod
         dest_path = File.join(dest, @dir, @name)
 
         content = []

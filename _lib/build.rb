@@ -44,8 +44,8 @@ def prepare_jekyll_config(site, opts)
     'cache' => File.join(stage, '_cache')
   }
   config['busterizer'] = {
-    'css' => (busters && !dev_mode),
-    'html' => (busters && !dev_mode)
+    'css' => busters && !dev_mode,
+    'html' => busters && !dev_mode
   }
 
   config.delete('prune_files') if opts[:dont_prune]

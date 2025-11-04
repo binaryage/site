@@ -51,7 +51,7 @@ def build_store(site, opts)
   build_site(site, opts) # no cache busters for store template
 
   build_path = File.join(stage, site.name)
-  template_path = File.join(build_path, (ENV['STORE_TEMPLATE'] || 'store-template.html'))
+  template_path = File.join(build_path, ENV['STORE_TEMPLATE'] || 'store-template.html')
   working_dir = File.join(stage, '_storetemplate')
   window_template = "#{working_dir}/window.xhtml"
 

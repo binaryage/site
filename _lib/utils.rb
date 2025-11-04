@@ -16,7 +16,7 @@ end
 def friendly_dir(dir)
   return dir unless dir.start_with? BASE_DIR
 
-  dir[BASE_DIR.size + 1..] || '.'
+  dir[(BASE_DIR.size + 1)..] || '.'
 end
 
 def sys(cmd, check=true, env={})
