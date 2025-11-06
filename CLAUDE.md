@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## AI Agent Guidelines
+
+**Temporary Files and Testing:**
+- When AI agents need to create temporary files, run tests, or create proof-of-concept code, use the `_adhoc/` directory in the repository root instead of `/tmp`
+- You can create subdirectories within `_adhoc/` as needed for organization
+- The `_adhoc/` directory is gitignored and safe for experimentation
+- Example: `_adhoc/worktree-test/`, `_adhoc/proof-of-concept/`, etc.
+
 ## Project Overview
 
 BinaryAge Site is an umbrella project that manages multiple subdomain sites under *.binaryage.com as git submodules. Each subdomain (www, blog, totalfinder-web, totalspaces-web, etc.) is a separate git repository tracked as a submodule. All submodains share common resources through the `shared` submodule (layouts, includes, CSS, JavaScript).
