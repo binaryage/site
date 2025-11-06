@@ -455,23 +455,6 @@ Common Ruby 3.x stdlib gems that may be needed:
 - `mutex_m` - Mixin to extend objects with synchronization
 - `ostruct` - OpenStruct class
 
-**Problem**: Build fails with "undefined method 'exists?' for class File" in html_press gem
-
-**Solution**: Ruby 3.2+ removed `File.exists?` (use `File.exist?` instead). The html_press gem in bundler cache needs to be patched:
-
-```bash
-# Find mise Ruby gems directory
-MISE_RUBY_GEMS=$(mise where ruby@3.4.7)/lib/ruby/gems/3.4.0
-
-# Fix html_press uglifier.rb
-sed -i '' 's/File\.exists?/File.exist?/g' "$MISE_RUBY_GEMS"/bundler/gems/html_press-*/lib/html_press/uglifier.rb
-
-# Fix html_press css_press.rb
-sed -i '' 's/File\.exists?/File.exist?/g' "$MISE_RUBY_GEMS"/bundler/gems/html_press-*/lib/html_press/css_press.rb
-```
-
-**Note**: This fix is temporary and will be lost if you reinstall Ruby. A permanent solution would be to fork the html_press repository and update the Gemfile reference.
-
 ## RubyMine IDE Setup
 
 ### Setting up Ruby SDK from mise

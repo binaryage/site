@@ -2,7 +2,7 @@
 
 require 'html_press/version'
 require 'html_press/css_press'
-require 'html_press/uglifier'
+require 'html_press/js_compressor'
 require 'html_press/html'
 
 # HtmlPress - HTML compression library
@@ -10,7 +10,7 @@ require 'html_press/html'
 # This library compresses HTML by:
 # - Removing unnecessary whitespace
 # - Removing HTML comments (except IE conditional comments)
-# - Minifying inline JavaScript via Uglifier
+# - Minifying inline JavaScript via Terser
 # - Minifying inline CSS via YUI Compressor
 # - Preserving content in <code> and <pre> blocks
 # - Re-indenting output for readability
@@ -36,7 +36,7 @@ module HtmlPress
   # @option options [Boolean] :unquoted_attributes Remove quotes from HTML attributes
   # @option options [Boolean] :drop_empty_values Drop empty attribute values
   # @option options [Boolean] :strip_crlf Strip CRLF characters
-  # @option options [Hash, nil] :js_minifier_options Options passed to Uglifier
+  # @option options [Hash, nil] :js_minifier_options Options passed to Terser
   # @option options [String, nil] :cache Directory path for caching compressed JS/CSS
   #
   # @return [String] Compressed HTML

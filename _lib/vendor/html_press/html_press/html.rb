@@ -44,7 +44,7 @@ module HtmlPress
     # @option options [Boolean] :unquoted_attributes Remove quotes from HTML attributes
     # @option options [Boolean] :drop_empty_values Drop empty attribute values
     # @option options [Boolean] :strip_crlf Strip CRLF characters
-    # @option options [Hash, nil] :js_minifier_options Options passed to Uglifier
+    # @option options [Hash, nil] :js_minifier_options Options passed to Terser
     # @option options [String, nil] :cache Directory path for caching compressed JS/CSS
     #
     # @raise [ArgumentError] If logger doesn't respond to :error
@@ -285,7 +285,7 @@ module HtmlPress
 
     # Process inline <script> tags
     #
-    # Minifies JavaScript within <script> tags using Uglifier.
+    # Minifies JavaScript within <script> tags using Terser.
     #
     # @param out [String] HTML to process
     # @return [String] HTML with minified scripts
