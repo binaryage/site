@@ -53,7 +53,7 @@ def prepare_hosts_template(sites)
   io.string
 end
 
-def prepare_proxy_config(sites)
+def prepare_proxy_config(sites, mode: :serve, proxy_port: 80)
   # header
   config = <<~CONFIG_SNIPPET
     daemon off;
@@ -70,7 +70,7 @@ def prepare_proxy_config(sites)
   sites.each do |site|
     config += <<~CONFIG_SNIPPET
       server {
-        listen 80;
+        listen #{proxy_port};
         server_name #{site.domain};
 
         location / {
@@ -94,6 +94,50 @@ def prepare_proxy_config(sites)
   CONFIG_SNIPPET
 
   config
+end
+
+def create_build_sites(sites, build_base_port, domain)
+  # Create Site objects for built sites with different port range
+  sites.each_with_index.map do |site, index|
+    Site.new(site.path, build_base_port + index, domain)
+  end
+end
+
+def start_python_servers(sites, build_dir)
+  # Start Python HTTP servers for each built site
+  pids = []
+
+  sites.each do |site|
+    site_dir = File.join(build_dir, site.subdomain)
+    next unless File.directory?(site_dir)
+
+    puts "Starting Python HTTP server for #{site.subdomain.yellow} on port #{site.port.to_s.blue}..."
+
+    pid = spawn("python3 -m http.server #{site.port}",
+                chdir: site_dir,
+                out: '/dev/null',
+                err: '/dev/null')
+
+    pids << pid
+    Process.detach(pid)
+  end
+
+  # Give servers time to start
+  sleep 1
+
+  pids
+end
+
+def stop_python_servers(pids)
+  # Stop all Python HTTP servers
+  pids.each do |pid|
+    begin
+      Process.kill('TERM', pid)
+      Process.wait(pid, Process::WNOHANG)
+    rescue Errno::ESRCH, Errno::ECHILD
+      # Process already terminated, ignore
+    end
+  end
 end
 
 def publish_workspace(sites, opts)
