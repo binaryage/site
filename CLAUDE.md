@@ -194,6 +194,20 @@ rake hosts                   # Show required /etc/hosts entries
 
 The development server uses browser-sync for live reloading and CSS watching.
 
+### Testing Production Builds Locally
+```bash
+# Build sites for production first
+rake build what=www,blog     # Build specific sites
+
+# Serve the built static files via nginx proxy (no live reload)
+rake serve:build             # Default port 8080
+rake serve:build PORT=9000   # Custom port
+
+# Access sites at http://localhost:8080 (or custom port)
+```
+
+This is useful for testing production builds locally before deployment, including compression and cache busting.
+
 ### Building Sites
 ```bash
 rake build                   # Build all sites for production
