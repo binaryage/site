@@ -13,8 +13,8 @@ gem 'closure-compiler'
 gem 'coffee-script'
 gem 'colored2'
 # html_press dependencies (html_press is now vendored in _lib/vendor/html_press/)
-# Only uglifier and yui-compressor are actually used by html_press
-gem 'uglifier'
+# terser (modern ES6+ minifier) and yui-compressor are used by html_press
+gem 'terser'
 gem 'jekyll'
 gem 'stylus'
 gem 'tilt'

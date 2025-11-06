@@ -88,9 +88,9 @@ GEM
     stylus-source (0.54.5)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
-    tilt (2.6.1)
-    uglifier (4.2.1)
+    terser (1.2.6)
       execjs (>= 0.3.0, < 3)
+    tilt (2.6.1)
     unicode-display_width (2.6.0)
     webrick (1.9.1)
     yui-compressor (0.12.0)
@@ -112,8 +112,8 @@ DEPENDENCIES
   logger
   stringio
   stylus
+  terser
   tilt
-  uglifier
   webrick
   yui-compressor
 
