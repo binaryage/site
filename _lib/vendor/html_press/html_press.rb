@@ -3,7 +3,6 @@
 require 'html_press/version'
 require 'html_press/css_press'
 require 'html_press/uglifier'
-require 'html_press/html_entities'
 require 'html_press/html'
 
 # HtmlPress - HTML compression library
