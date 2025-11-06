@@ -20,6 +20,23 @@ module HtmlPress
       js_minifier_options: false
     }.freeze
 
+    # Regex patterns (compiled once for performance)
+    REGEX_CODE_BLOCK = /<code>(.*?)<\/code>/mi.freeze
+    REGEX_PRE_BLOCK = /<pre>(.*?)<\/pre>/mi.freeze
+    REGEX_CARRIAGE_RETURN = /\r/.freeze
+    REGEX_EMPTY_LINE = /^$\n/.freeze
+    REGEX_SCRIPT_TAG = /(<script.*?>)(.*?)(<\/script>)/im.freeze
+    REGEX_STYLE_TAG = /(<style.*?>)(.*?)(<\/style>)/im.freeze
+    REGEX_EMPTY_COMMENT = /<!--([ \t]*?)-->/.freeze
+    REGEX_LINE_WHITESPACE = /^[ \t]+|[ \t]+$/m.freeze
+    REGEX_TAG_WITH_ATTRS = /<([a-z\-:]+)([^>]*?)([\/]*?)>/i.freeze
+    REGEX_TAG_SCAN = /<([\/]?[a-z\-:]+)([^>]*?)>/i.freeze
+    REGEX_NEWLINES = /[\r\n]+/.freeze
+    REGEX_WHITESPACE = /[ \t]+/.freeze
+    REGEX_ATTR_NEWLINES = /[\n]+/.freeze
+    REGEX_ATTR_SPACES = /[ ]+/.freeze
+    REGEX_BETWEEN_TAGS = />([^<]+)</.freeze
+
     # Initialize HTML compressor
     #
     # @param options [Hash] Compression options
@@ -53,9 +70,9 @@ module HtmlPress
     # @api private
     def extract_code_blocks(html)
       @code_blocks = []
-      html.gsub(/<code>(.*?)<\/code>/mi) do
+      html.gsub(REGEX_CODE_BLOCK) do
         @code_blocks << Regexp.last_match(1)
-        '<code>##HTMLPRESSCODEBLOCK##</code>'
+        "<code>##HTMLPRESSCODEBLOCK#{@code_blocks.size - 1}##</code>"
       end
     end
 
@@ -65,10 +82,8 @@ module HtmlPress
     # @return [String] HTML with restored <code> blocks
     # @api private
     def return_code_blocks(html)
-      counter = 0
-      html.gsub('##HTMLPRESSCODEBLOCK##') do
-        counter += 1
-        @code_blocks[counter - 1]
+      html.gsub(/##HTMLPRESSCODEBLOCK(\d+)##/) do
+        @code_blocks[Regexp.last_match(1).to_i]
       end
     end
 
@@ -79,9 +94,9 @@ module HtmlPress
     # @api private
     def extract_pre_blocks(html)
       @pre_blocks = []
-      html.gsub(/<pre>(.*?)<\/pre>/mi) do
+      html.gsub(REGEX_PRE_BLOCK) do
         @pre_blocks << Regexp.last_match(1)
-        '<pre>##HTMLPRESSPREBLOCK##</pre>'
+        "<pre>##HTMLPRESSPREBLOCK#{@pre_blocks.size - 1}##</pre>"
       end
     end
 
@@ -91,10 +106,8 @@ module HtmlPress
     # @return [String] HTML with restored <pre> blocks
     # @api private
     def return_pre_blocks(html)
-      counter = 0
-      html.gsub('##HTMLPRESSPREBLOCK##') do
-        counter += 1
-        @pre_blocks[counter - 1]
+      html.gsub(/##HTMLPRESSPREBLOCK(\d+)##/) do
+        @pre_blocks[Regexp.last_match(1).to_i]
       end
     end
 
@@ -118,14 +131,19 @@ module HtmlPress
     #   # => "<html>\n  <body>Hello</body>\n</html>"
     def press(html)
       # Handle both String and IO objects
-      out = html.respond_to?(:read) ? html.read : html.dup
+      # Only dup if necessary (frozen strings or to avoid mutating input)
+      out = html.respond_to?(:read) ? html.read : html.to_s
+      out = out.dup if out.frozen?
+
+      # Early return for empty input
+      return '' if out.empty?
 
       # Extract blocks that should not be compressed
       out = extract_pre_blocks(out)
       out = extract_code_blocks(out)
 
       # Remove carriage returns
-      out.gsub!("\r", '')
+      out.gsub!(REGEX_CARRIAGE_RETURN, '')
 
       # Process inline scripts and styles
       out = process_scripts(out)
@@ -142,7 +160,7 @@ module HtmlPress
       out = fixup_void_elements(out)
 
       # Remove empty lines
-      out.gsub!(/^$\n/, '')
+      out.gsub!(REGEX_EMPTY_LINE, '')
 
       # Format and restore preserved blocks
       out = reindent(out)
@@ -177,7 +195,7 @@ module HtmlPress
         pre_level = level
 
         # Track nesting level by scanning tags
-        line.scan(/<([\/]?[a-z\-:]+)([^>]*?)>/i) do
+        line.scan(REGEX_TAG_SCAN) do
           tag = Regexp.last_match(1)
           full_match = Regexp.last_match(0)
 
@@ -206,11 +224,11 @@ module HtmlPress
 
           # Adjust level for opening/closing tags
           tag[0] == '/' ? level -= 1 : level += 1
-          level = 0 if level < 0
+          level = 0 if level.negative?
         end
 
         # Use the smaller indentation level to avoid over-indenting closing tags
-        indent_level = level < pre_level ? level : pre_level
+        indent_level = [level, pre_level].min
         indent_level = 0 if (in_code > 0 || in_pre > 0) && level <= pre_level
 
         result << (('  ' * indent_level) + line)
@@ -230,10 +248,12 @@ module HtmlPress
     # @return [String] HTML with processed attributes
     # @api private
     def process_attributes(out)
-      out.gsub(/<([a-z\-:]+)([^>]*?)([\/]*?)>/i) do
+      out.gsub(REGEX_TAG_WITH_ATTRS) do
         tag = Regexp.last_match(1)
         attrs = Regexp.last_match(2)
-        normalized_attrs = attrs.gsub(/[\n]+/, ' ').gsub(/[ ]+/, ' ').rstrip
+        normalized_attrs = attrs.gsub(REGEX_ATTR_NEWLINES, ' ')
+                               .gsub(REGEX_ATTR_SPACES, ' ')
+                               .rstrip
         "<#{tag}#{normalized_attrs}>"
       end
     end
@@ -255,7 +275,10 @@ module HtmlPress
         meta param source track wbr path rect
       ].join('|')
 
-      out.gsub(/<(#{void_elements})([^>]*?)[\/]*>/i) do
+      # Cache regex (frozen constant would be better but pattern is dynamic)
+      @void_elements_regex ||= /<(#{void_elements})([^>]*?)[\/]*>/i
+
+      out.gsub(@void_elements_regex) do
         "<#{Regexp.last_match(1)}#{Regexp.last_match(2)}/>"
       end
     end
@@ -268,7 +291,7 @@ module HtmlPress
     # @return [String] HTML with minified scripts
     # @api private
     def process_scripts(out)
-      out.gsub(/(<script.*?>)(.*?)(<\/script>)/im) do
+      out.gsub(REGEX_SCRIPT_TAG) do
         pre = Regexp.last_match(1)
         script_content = Regexp.last_match(2)
         post = Regexp.last_match(3)
@@ -291,7 +314,7 @@ module HtmlPress
     # @return [String] HTML with minified styles
     # @api private
     def process_styles(out)
-      out.gsub(/(<style.*?>)(.*?)(<\/style>)/im) do
+      out.gsub(REGEX_STYLE_TAG) do
         pre = Regexp.last_match(1)
         style_content = Regexp.last_match(2)
         post = Regexp.last_match(3)
@@ -311,7 +334,7 @@ module HtmlPress
     # @return [String] HTML with comments removed
     # @api private
     def process_html_comments(out)
-      out.gsub(/<!--([ \t]*?)-->/, '')
+      out.gsub(REGEX_EMPTY_COMMENT, '')
     end
 
     # Trim leading and trailing whitespace from each line
@@ -320,7 +343,7 @@ module HtmlPress
     # @return [String] HTML with trimmed lines
     # @api private
     def trim_lines(out)
-      out.gsub(/^[ \t]+|[ \t]+$/m, '')
+      out.gsub(REGEX_LINE_WHITESPACE, '')
     end
 
     # Remove whitespace outside of block elements
@@ -339,12 +362,14 @@ module HtmlPress
                        'ol|opt(?:group|ion)|p|param|' \
                        't(?:able|body|head|d|h|r|foot|itle)|ul)'
 
+      # Cache the block elements regex
+      @block_elements_regex ||= /[ \t]+(<\/?#{block_elements}\b[^>]*>)/
+
       # Remove whitespace before and after block element tags
-      pattern = /[ \t]+(<\/?#{block_elements}\b[^>]*>)/
-      out.gsub!(pattern, '\\1')
+      out.gsub!(@block_elements_regex, '\\1')
 
       # Trim whitespace between elements
-      out.gsub!(/>([^<]+)</) do |match|
+      out.gsub!(REGEX_BETWEEN_TAGS) do |match|
         match.gsub(/^[ \t]+|[ \t]+$/, ' ')
       end
 
@@ -361,7 +386,7 @@ module HtmlPress
     # @api private
     def process_whitespaces(out)
       # Normalize newlines
-      out.gsub!(/[\r\n]+/, "\n")
+      out.gsub!(REGEX_NEWLINES, "\n")
 
       in_code = 0
       in_pre = 0
@@ -369,7 +394,7 @@ module HtmlPress
 
       out.split("\n").each do |line|
         # Track <code> and <pre> blocks
-        line.scan(/<([\/]?[a-z\-:]+)([^>]*?)>/i) do
+        line.scan(REGEX_TAG_SCAN) do
           tag = Regexp.last_match(1)
           in_code += 1 if tag == 'code'
           in_code -= 1 if tag == '/code'
@@ -378,7 +403,7 @@ module HtmlPress
         end
 
         # Collapse whitespace unless in preserved block
-        line.gsub!(/[ \t]+/, ' ') unless in_code > 0 || in_pre > 0
+        line.gsub!(REGEX_WHITESPACE, ' ') unless in_code > 0 || in_pre > 0
         result << line
       end
 
