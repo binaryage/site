@@ -1,220 +1,396 @@
+# frozen_string_literal: true
+
 module HtmlPress
-
+  # Main HTML compression engine
+  #
+  # This class handles the core HTML compression logic including:
+  # - Extracting and preserving <code> and <pre> blocks
+  # - Processing inline <script> and <style> tags
+  # - Removing HTML comments
+  # - Trimming whitespace
+  # - Processing block elements
+  # - Re-indenting output for readability
   class Html
-
+    # Default compression options
     DEFAULTS = {
-      :logger => false,
-      :unquoted_attributes => false,
-      :drop_empty_values => false,
-      :strip_crlf => false,
-      :js_minifier_options => false
-    }
+      logger: false,
+      unquoted_attributes: false,
+      drop_empty_values: false,
+      strip_crlf: false,
+      js_minifier_options: false
+    }.freeze
 
-    def initialize (options = {})
+    # Initialize HTML compressor
+    #
+    # @param options [Hash] Compression options
+    # @option options [Logger, nil] :logger Logger instance for error reporting
+    # @option options [Boolean] :unquoted_attributes Remove quotes from HTML attributes
+    # @option options [Boolean] :drop_empty_values Drop empty attribute values
+    # @option options [Boolean] :strip_crlf Strip CRLF characters
+    # @option options [Hash, nil] :js_minifier_options Options passed to Uglifier
+    # @option options [String, nil] :cache Directory path for caching compressed JS/CSS
+    #
+    # @raise [ArgumentError] If logger doesn't respond to :error
+    def initialize(options = {})
       @options = DEFAULTS.merge(options)
-      if @options.keys.include? :dump_empty_values
+
+      # Handle deprecated option name
+      if @options.key?(:dump_empty_values)
         @options[:drop_empty_values] = @options.delete(:dump_empty_values)
-        warn "dump_empty_values deprecated use drop_empty_values"
+        warn 'dump_empty_values deprecated use drop_empty_values'
       end
+
+      # Validate logger interface
       if @options[:logger] && !@options[:logger].respond_to?(:error)
         raise ArgumentError, 'Logger has no error method'
       end
     end
-    
+
+    # Extract <code> blocks and replace with placeholders
+    #
+    # @param html [String] HTML content
+    # @return [String] HTML with <code> blocks replaced by placeholders
+    # @api private
     def extract_code_blocks(html)
       @code_blocks = []
-      counter = 0
-      html.gsub /<code>(.*?)<\/code>/mi do |_|
-        counter+=1
-        @code_blocks << $1
-        "<code>##HTMLPRESSCODEBLOCK##</code>"
+      html.gsub(/<code>(.*?)<\/code>/mi) do
+        @code_blocks << Regexp.last_match(1)
+        '<code>##HTMLPRESSCODEBLOCK##</code>'
       end
     end
 
+    # Restore <code> blocks from placeholders
+    #
+    # @param html [String] HTML with placeholders
+    # @return [String] HTML with restored <code> blocks
+    # @api private
     def return_code_blocks(html)
       counter = 0
-      html.gsub "##HTMLPRESSCODEBLOCK##" do |_|
-        counter+=1
-        @code_blocks[counter-1]
+      html.gsub('##HTMLPRESSCODEBLOCK##') do
+        counter += 1
+        @code_blocks[counter - 1]
       end
     end
 
+    # Extract <pre> blocks and replace with placeholders
+    #
+    # @param html [String] HTML content
+    # @return [String] HTML with <pre> blocks replaced by placeholders
+    # @api private
     def extract_pre_blocks(html)
       @pre_blocks = []
-      counter = 0
-      html.gsub /<pre>(.*?)<\/pre>/mi do |_|
-        counter+=1
-        @pre_blocks << $1
-        "<pre>##HTMLPRESSPREBLOCK##</pre>"
+      html.gsub(/<pre>(.*?)<\/pre>/mi) do
+        @pre_blocks << Regexp.last_match(1)
+        '<pre>##HTMLPRESSPREBLOCK##</pre>'
       end
     end
 
+    # Restore <pre> blocks from placeholders
+    #
+    # @param html [String] HTML with placeholders
+    # @return [String] HTML with restored <pre> blocks
+    # @api private
     def return_pre_blocks(html)
       counter = 0
-      html.gsub "##HTMLPRESSPREBLOCK##" do |_|
-        counter+=1
-        @pre_blocks[counter-1]
+      html.gsub('##HTMLPRESSPREBLOCK##') do
+        counter += 1
+        @pre_blocks[counter - 1]
       end
     end
 
-    def press (html)
+    # Compress HTML content
+    #
+    # This is the main compression method that orchestrates all compression steps:
+    # 1. Extract <pre> and <code> blocks
+    # 2. Process inline scripts and styles
+    # 3. Remove HTML comments
+    # 4. Trim whitespace
+    # 5. Process block elements
+    # 6. Re-indent output
+    # 7. Restore preserved blocks
+    #
+    # @param html [String, IO] HTML content to compress
+    # @return [String] Compressed HTML
+    #
+    # @example
+    #   compressor = HtmlPress::Html.new
+    #   compressor.press("<html>\n  <body>Hello</body>\n</html>")
+    #   # => "<html>\n  <body>Hello</body>\n</html>"
+    def press(html)
+      # Handle both String and IO objects
       out = html.respond_to?(:read) ? html.read : html.dup
 
-      out = extract_pre_blocks out
-      out = extract_code_blocks out
-      out.gsub! "\r", ''
+      # Extract blocks that should not be compressed
+      out = extract_pre_blocks(out)
+      out = extract_code_blocks(out)
 
-      out = process_scripts out
-      out = process_styles out
+      # Remove carriage returns
+      out.gsub!("\r", '')
 
-      out = process_html_comments out
-      out = trim_lines out
-      out = process_block_elements out
-      out = process_whitespaces out
+      # Process inline scripts and styles
+      out = process_scripts(out)
+      out = process_styles(out)
 
-      out = process_attributes out
-      out = fixup_void_elements out
+      # Compress HTML structure
+      out = process_html_comments(out)
+      out = trim_lines(out)
+      out = process_block_elements(out)
+      out = process_whitespaces(out)
 
-      out.gsub! /^$\n/, '' # remove empty lines
+      # Clean up attributes and void elements
+      out = process_attributes(out)
+      out = fixup_void_elements(out)
 
-      out = reindent out
-      out = return_code_blocks out
-      out = return_pre_blocks out
+      # Remove empty lines
+      out.gsub!(/^$\n/, '')
+
+      # Format and restore preserved blocks
+      out = reindent(out)
+      out = return_code_blocks(out)
+      out = return_pre_blocks(out)
       out
     end
 
-    # for backward compatibility
-    alias :compile :press
+    # Backward compatibility alias for {#press}
+    # @deprecated Use {#press} instead
+    alias compile press
 
     protected
 
-    def reindent (out)
+    # Re-indent HTML for readability
+    #
+    # Adds 2-space indentation based on tag nesting level.
+    # Handles special cases for <script>, <style>, <code>, and <pre> tags.
+    #
+    # @param out [String] HTML to re-indent
+    # @return [String] Re-indented HTML
+    # @api private
+    def reindent(out)
       level = 0
       in_script = 0
       in_style = 0
       in_code = 0
       in_pre = 0
-      res = []
+      result = []
+
       out.split("\n").each do |line|
         pre_level = level
 
-        line.gsub /<([\/]*[a-z\-:]+)([^>]*?)>/i do |m|
-          in_code+=1 if $1 == "code"
-          in_code-=1 if $1 == "/code"
-          in_pre+=1 if $1 == "pre"
-          in_pre-=1 if $1 == "/pre"
-          if $1 == "script"
+        # Track nesting level by scanning tags
+        line.scan(/<([\/]?[a-z\-:]+)([^>]*?)>/i) do
+          tag = Regexp.last_match(1)
+          full_match = Regexp.last_match(0)
+
+          # Track special blocks that affect indentation
+          in_code += 1 if tag == 'code'
+          in_code -= 1 if tag == '/code'
+          in_pre += 1 if tag == 'pre'
+          in_pre -= 1 if tag == '/pre'
+
+          if tag == 'script'
             level += 1
             in_script += 1
           end
-          in_script -= 1 if $1 == "/script"
-          if $1 == "style"
+          in_script -= 1 if tag == '/script'
+
+          if tag == 'style'
             level += 1
             in_style += 1
           end
-          in_style -= 1 if $1 == "/style"
+          in_style -= 1 if tag == '/style'
 
-          next if m[1]=="!"
-          next if m[-2]=="/"
-          next if in_style > 0 or in_script > 0
+          # Skip comments and self-closing tags
+          next if full_match[1] == '!'
+          next if full_match[-2] == '/'
+          next if in_style > 0 || in_script > 0
 
-          m[1]=="/" ? level -= 1 : level += 1
+          # Adjust level for opening/closing tags
+          tag[0] == '/' ? level -= 1 : level += 1
           level = 0 if level < 0
         end
 
-        level < pre_level ? i = level : i = pre_level
-        i = 0 if (in_code>0 or in_pre>0) and level <= pre_level
-        res << (("  " * i) + line)
+        # Use the smaller indentation level to avoid over-indenting closing tags
+        indent_level = level < pre_level ? level : pre_level
+        indent_level = 0 if (in_code > 0 || in_pre > 0) && level <= pre_level
+
+        result << (('  ' * indent_level) + line)
       end
 
-      res.join("\n")
+      result.join("\n")
     end
 
-    def process_attributes (out)
-      out.gsub /<([a-z\-:]+)([^>]*?)([\/]*?)>/i do |_|
-        "<"+$1+($2.gsub(/[\n]+/, ' ').gsub(/[ ]+/, ' ').rstrip)+">"
+    # Process HTML attributes
+    #
+    # Normalizes whitespace in attributes:
+    # - Replaces newlines with spaces
+    # - Collapses multiple spaces into one
+    # - Trims trailing whitespace
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with processed attributes
+    # @api private
+    def process_attributes(out)
+      out.gsub(/<([a-z\-:]+)([^>]*?)([\/]*?)>/i) do
+        tag = Regexp.last_match(1)
+        attrs = Regexp.last_match(2)
+        normalized_attrs = attrs.gsub(/[\n]+/, ' ').gsub(/[ ]+/, ' ').rstrip
+        "<#{tag}#{normalized_attrs}>"
       end
     end
 
-    def fixup_void_elements (out)
-      # http://dev.w3.org/html5/spec/syntax.html#void-elements
-      out.gsub /<(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|source|track|wbr|path|rect)([^>]*?)[\/]*>/i do |_|
-        "<"+$1+$2+"/>"
+    # Fix void elements to have proper self-closing syntax
+    #
+    # Ensures void elements (like <br>, <img>, <input>) have the proper
+    # self-closing tag format with trailing slash.
+    #
+    # @see http://dev.w3.org/html5/spec/syntax.html#void-elements
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with fixed void elements
+    # @api private
+    def fixup_void_elements(out)
+      # List of HTML5 void elements (including SVG path, rect)
+      void_elements = %w[
+        area base br col command embed hr img input keygen link
+        meta param source track wbr path rect
+      ].join('|')
+
+      out.gsub(/<(#{void_elements})([^>]*?)[\/]*>/i) do
+        "<#{Regexp.last_match(1)}#{Regexp.last_match(2)}/>"
       end
     end
 
-    def process_scripts (out)
-      out.gsub /(<script.*?>)(.*?)(<\/script>)/im do |_|
-        pre = $1
-        post = $3
-        compressed_js = HtmlPress.js_compressor $2, @options[:js_minifier_options], @options[:cache]
+    # Process inline <script> tags
+    #
+    # Minifies JavaScript within <script> tags using Uglifier.
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with minified scripts
+    # @api private
+    def process_scripts(out)
+      out.gsub(/(<script.*?>)(.*?)(<\/script>)/im) do
+        pre = Regexp.last_match(1)
+        script_content = Regexp.last_match(2)
+        post = Regexp.last_match(3)
+
+        compressed_js = HtmlPress.js_compressor(
+          script_content,
+          @options[:js_minifier_options],
+          @options[:cache]
+        )
+
         "#{pre}#{compressed_js}#{post}"
       end
     end
 
-    def process_styles (out)
-      out.gsub /(<style.*?>)(.*?)(<\/style>)/im do |_|
-        pre = $1
-        post = $3
-        compressed_css = HtmlPress.style_compressor $2, @options[:cache]
+    # Process inline <style> tags
+    #
+    # Minifies CSS within <style> tags using YUI Compressor.
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with minified styles
+    # @api private
+    def process_styles(out)
+      out.gsub(/(<style.*?>)(.*?)(<\/style>)/im) do
+        pre = Regexp.last_match(1)
+        style_content = Regexp.last_match(2)
+        post = Regexp.last_match(3)
+
+        compressed_css = HtmlPress.style_compressor(style_content, @options[:cache])
+
         "#{pre}#{compressed_css}#{post}"
       end
     end
-    
-    # remove html comments (not IE conditional comments)
-    def process_html_comments (out)
-      out.gsub /<!--([ \t]*?)-->/, ''
+
+    # Remove HTML comments (except IE conditional comments)
+    #
+    # Only removes empty comments (<!-- -->). IE conditional comments
+    # like <!--[if IE]> are preserved.
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with comments removed
+    # @api private
+    def process_html_comments(out)
+      out.gsub(/<!--([ \t]*?)-->/, '')
     end
 
-    # trim each line
-    def trim_lines (out)
+    # Trim leading and trailing whitespace from each line
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with trimmed lines
+    # @api private
+    def trim_lines(out)
       out.gsub(/^[ \t]+|[ \t]+$/m, '')
     end
 
-    # remove whitespaces outside of block elements
-    def process_block_elements (out)
-      re = '[ \t]+(<\\/?(?:area|base(?:font)?|blockquote|body' +
-        '|caption|center|cite|col(?:group)?|dd|dir|div|dl|dt|fieldset|form' +
-        '|frame(?:set)?|h[1-6]|head|hr|html|legend|li|link|map|menu|meta' +
-        '|ol|opt(?:group|ion)|p|param|t(?:able|body|head|d|h|r|foot|itle)' +
-        '|ul)\\b[^>]*>)'
+    # Remove whitespace outside of block elements
+    #
+    # Removes unnecessary whitespace around block-level elements while
+    # preserving whitespace within inline elements.
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with optimized whitespace
+    # @api private
+    def process_block_elements(out)
+      # List of block-level elements
+      block_elements = '(?:area|base(?:font)?|blockquote|body|caption|center|cite|' \
+                       'col(?:group)?|dd|dir|div|dl|dt|fieldset|form|frame(?:set)?|' \
+                       'h[1-6]|head|hr|html|legend|li|link|map|menu|meta|' \
+                       'ol|opt(?:group|ion)|p|param|' \
+                       't(?:able|body|head|d|h|r|foot|itle)|ul)'
 
-      re = Regexp.new(re)
-      out.gsub!(re, '\\1')
+      # Remove whitespace before and after block element tags
+      pattern = /[ \t]+(<\/?#{block_elements}\b[^>]*>)/
+      out.gsub!(pattern, '\\1')
 
-      # remove whitespaces outside of all elements
-      out.gsub! />([^<]+)</ do |m|
-        m.gsub(/^[ \t]+|[ \t]+$/, ' ')
+      # Trim whitespace between elements
+      out.gsub!(/>([^<]+)</) do |match|
+        match.gsub(/^[ \t]+|[ \t]+$/, ' ')
       end
 
       out
     end
 
-    # replace two or more whitespaces with one
-    def process_whitespaces (out)
+    # Replace multiple whitespaces with single space
+    #
+    # Collapses consecutive whitespace characters (spaces, tabs, newlines)
+    # into a single space, except within <code> and <pre> blocks.
+    #
+    # @param out [String] HTML to process
+    # @return [String] HTML with collapsed whitespace
+    # @api private
+    def process_whitespaces(out)
+      # Normalize newlines
       out.gsub!(/[\r\n]+/, "\n")
 
       in_code = 0
       in_pre = 0
-      res = []
+      result = []
+
       out.split("\n").each do |line|
-        line.gsub /<([\/]*[a-z\-:]+)([^>]*?)>/i do |_|
-          in_code+=1 if $1 == "code"
-          in_code-=1 if $1 == "/code"
-          in_pre+=1 if $1 == "pre"
-          in_pre-=1 if $1 == "/pre"
+        # Track <code> and <pre> blocks
+        line.scan(/<([\/]?[a-z\-:]+)([^>]*?)>/i) do
+          tag = Regexp.last_match(1)
+          in_code += 1 if tag == 'code'
+          in_code -= 1 if tag == '/code'
+          in_pre += 1 if tag == 'pre'
+          in_pre -= 1 if tag == '/pre'
         end
 
-        line.gsub!(/[ \t]+/, ' ') unless in_code>0 or in_pre>0
-        res << line
+        # Collapse whitespace unless in preserved block
+        line.gsub!(/[ \t]+/, ' ') unless in_code > 0 || in_pre > 0
+        result << line
       end
 
-      res.join("\n")
+      result.join("\n")
     end
 
-    def log (text)
-      @options[:logger].error text if @options[:logger]
+    # Log error message if logger is configured
+    #
+    # @param text [String] Error message to log
+    # @api private
+    def log(text)
+      @options[:logger].error(text) if @options[:logger]
     end
-
   end
 end

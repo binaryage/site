@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
 module HtmlPress
-  VERSION = "0.7.1"
+  # Current version of the HtmlPress library
+  VERSION = '0.7.1'
 end
