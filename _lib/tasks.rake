@@ -183,4 +183,181 @@ end
 desc 'upgrade dependencies (via Ruby\'s bundler and Node\'s yarn)'
 task upgrade: ['upgrade:ruby', 'upgrade:node']
 
+## SHARED SUBMODULE SYNC ####################################################################################################
+
+namespace :shared do
+  HOOK_SOURCE = File.join(ROOT, '_scripts', 'shared-sync-hook.sh')
+  SYNC_ENABLED_FLAG = File.join(ROOT, '.shared-autosync-enabled')
+
+  desc 'Show status of shared submodule sync hooks'
+  task :status do
+    puts "Shared Submodule Sync Status"
+    puts "=" * 80
+    puts
+
+    enabled = File.exist?(SYNC_ENABLED_FLAG)
+    puts "Auto-sync: #{enabled ? 'enabled'.green : 'disabled'.red}"
+    puts
+
+    if !enabled
+      puts "Run #{'rake shared:enable'.blue} to enable automatic synchronization"
+      puts
+    end
+
+    # Check each shared directory for hook installation
+    hook_count = 0
+    SITES.each do |site|
+      shared_dir = File.join(site.dir, 'shared')
+      next unless Dir.exist?(shared_dir)
+
+      # Get the git directory
+      git_dir = Dir.chdir(shared_dir) do
+        `git rev-parse --git-dir 2>/dev/null`.strip
+      end
+
+      next if git_dir.empty?
+
+      hook_path = File.join(git_dir, 'hooks', 'post-commit')
+
+      if File.exist?(hook_path)
+        puts "  #{'✅'.green} #{site.name.yellow}/shared - hook installed"
+        hook_count += 1
+      else
+        puts "  #{'❌'.red} #{site.name.yellow}/shared - no hook"
+      end
+    end
+
+    puts
+    puts "Hooks installed: #{hook_count}/#{SITES.size}"
+  end
+
+  desc 'Enable automatic shared submodule synchronization'
+  task :enable do
+    unless File.exist?(HOOK_SOURCE)
+      die "Hook script not found: #{HOOK_SOURCE}"
+    end
+
+    puts "Installing shared sync hooks..."
+    puts
+
+    hook_content = File.read(HOOK_SOURCE)
+    installed_count = 0
+
+    SITES.each do |site|
+      shared_dir = File.join(site.dir, 'shared')
+
+      unless Dir.exist?(shared_dir)
+        puts "  #{'⏭️ '.yellow} #{site.name.yellow}/shared - directory not found"
+        next
+      end
+
+      # Get the git directory
+      git_dir = Dir.chdir(shared_dir) do
+        `git rev-parse --git-dir 2>/dev/null`.strip
+      end
+
+      if git_dir.empty?
+        puts "  #{'⏭️ '.yellow} #{site.name.yellow}/shared - not a git repository"
+        next
+      end
+
+      hooks_dir = File.join(git_dir, 'hooks')
+      hook_path = File.join(hooks_dir, 'post-commit')
+
+      # Create hooks directory if it doesn't exist
+      FileUtils.mkdir_p(hooks_dir) unless Dir.exist?(hooks_dir)
+
+      # Write the hook
+      File.write(hook_path, hook_content)
+
+      # Make it executable
+      FileUtils.chmod(0755, hook_path)
+
+      puts "  #{'✅'.green} #{site.name.yellow}/shared - hook installed"
+      installed_count += 1
+    end
+
+    # Create the enabled flag
+    FileUtils.touch(SYNC_ENABLED_FLAG)
+
+    puts
+    puts "#{'✨'.green} Installed hooks in #{installed_count} site(s)"
+    puts
+    puts "Now when you commit in #{'any'.yellow} shared directory, changes will"
+    puts "automatically sync to all other shared directories."
+    puts
+    puts "To disable: #{'rake shared:disable'.blue}"
+  end
+
+  desc 'Disable automatic shared submodule synchronization'
+  task :disable do
+    puts "Removing shared sync hooks..."
+    puts
+
+    removed_count = 0
+
+    SITES.each do |site|
+      shared_dir = File.join(site.dir, 'shared')
+      next unless Dir.exist?(shared_dir)
+
+      git_dir = Dir.chdir(shared_dir) do
+        `git rev-parse --git-dir 2>/dev/null`.strip
+      end
+
+      next if git_dir.empty?
+
+      hook_path = File.join(git_dir, 'hooks', 'post-commit')
+
+      if File.exist?(hook_path)
+        FileUtils.rm(hook_path)
+        puts "  #{'✅'.green} #{site.name.yellow}/shared - hook removed"
+        removed_count += 1
+      else
+        puts "  #{'⏭️ '.yellow} #{site.name.yellow}/shared - no hook found"
+      end
+    end
+
+    # Remove the enabled flag
+    FileUtils.rm(SYNC_ENABLED_FLAG) if File.exist?(SYNC_ENABLED_FLAG)
+
+    puts
+    puts "#{'✨'.green} Removed hooks from #{removed_count} site(s)"
+  end
+
+  desc 'Remove old www-shared remote configuration from shared submodules'
+  task :cleanup_remotes do
+    puts "Removing www-shared remotes..."
+    puts
+
+    removed_count = 0
+
+    SITES.each do |site|
+      shared_dir = File.join(site.dir, 'shared')
+      next unless Dir.exist?(shared_dir)
+
+      # Check if www-shared remote exists
+      has_remote = Dir.chdir(shared_dir) do
+        system('git remote | grep -q "^www-shared$" 2>/dev/null')
+      end
+
+      if has_remote
+        Dir.chdir(shared_dir) do
+          system('git remote remove www-shared 2>/dev/null')
+        end
+        puts "  #{'✅'.green} #{site.name.yellow}/shared - removed www-shared remote"
+        removed_count += 1
+      else
+        puts "  #{'⏭️ '.yellow} #{site.name.yellow}/shared - no www-shared remote"
+      end
+    end
+
+    puts
+    if removed_count > 0
+      puts "#{'✨'.green} Removed www-shared remote from #{removed_count} site(s)"
+    else
+      puts "No www-shared remotes found"
+    end
+  end
+end
+
 task default: :serve

@@ -6,3 +6,4 @@ store-template.zip
 .rubocop_todo.yml
 *.iml
 .claude/
+.shared-autosync-enabled

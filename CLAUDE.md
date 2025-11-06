@@ -29,25 +29,68 @@ This is the most important architectural concept to understand:
 - **DO NOT edit 12 times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
 - **Recommended workflow**: Make shared changes via `www/shared`, then update pointers in other sites
 
-**Example workflow:**
+### Automatic Shared Synchronization
+
+The repository includes an **automated shared sync system** that propagates shared commits across all sites using local filesystem git fetch operations.
+
+**What is automatic:**
+- ✅ Local sync between shared directories after commit (~450ms)
+- ✅ Git fetch and checkout in all other shared directories
+
+**What is MANUAL (requires explicit user action):**
+- ❌ Push to remote repositories (never automatic)
+- ❌ Deployment to production (only when you push to `web` branch)
+
+**How it works:**
+- Post-commit hooks installed in all shared directories
+- When you commit in ANY shared directory, it automatically fetches and checks out the same commit in ALL other shared directories
+- Uses local filesystem paths (`git fetch ../../source/shared`) - no network required
+- Fast: ~450ms to sync all 11 other sites
+- Preserves independent version tracking per website
+- **Does NOT push** - all remote pushes are manual and controlled by you
+
+**Enable/disable:**
+```bash
+rake shared:enable    # Install hooks in all shared directories
+rake shared:disable   # Remove hooks
+rake shared:status    # Show installation status
+```
+
+**Example workflow with auto-sync enabled:**
 
 ```bash
-# 1. Make changes in the shared repository (via www/shared or any other)
+# Enable auto-sync (one-time setup)
+rake shared:enable
+
+# 1. Make changes in ANY shared directory (www, blog, totalfinder-web, etc.)
 cd www/shared
 # ... edit files ...
 git add .
 git commit -m "Update shared layout"
-git push origin master
 
-# 2. Update the submodule pointer in sites that need the changes
+# Hook automatically syncs to all other shared directories (~450ms):
+# 🔄 Syncing from www/shared (abc1234)...
+# ✅ blog/shared
+# ✅ totalfinder-web/shared
+# ... (all 11 other sites)
+# ✨ Synced 11 sites in 0.45s
+
+# 2. (OPTIONAL) Push shared changes to remote when ready
+# git push origin master
+
+# 3. (OPTIONAL) Update the submodule pointer in sites that need the changes
 cd ../..  # Back to site root
 cd totalfinder-web
 git add shared  # Update pointer to new shared commit
 git commit -m "Update shared submodule"
-git push origin web  # Push to the web branch
+# git push origin web  # (OPTIONAL) Push to web branch when ready to deploy
 
-# Repeat step 2 for other sites as needed
+# Repeat step 3 for other sites as needed
 ```
+
+**Manual workflow (without auto-sync):**
+
+If you prefer to control synchronization manually, keep auto-sync disabled and use the same workflow as before, updating each site's shared pointer individually.
 
 **Important note about submodule pointers:**
 - ✅ **DO commit** `shared` submodule pointer updates in each website (as shown above)
@@ -272,9 +315,9 @@ There are **two levels** of submodules in this project, each handled differently
    - **DO manually commit** pointer updates in each website repository
    - Each website tracks which version of `shared` it uses
    - When you update shared resources, commit the pointer update: `git add shared && git commit -m "Update shared submodule"`
-   - Push this to the website's `web` branch before pushing the website changes
+   - Push is OPTIONAL and should only be done when ready to deploy
 
-**Important**: Always push the `shared` submodule changes first if you modified shared resources. (See [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture) above for details on how the shared repository works.)
+**Important**: When pushing, always push the `shared` submodule changes to origin (master branch) first before pushing website changes, if you modified shared resources. (See [CRITICAL: Shared Submodule Architecture](#critical-shared-submodule-architecture) above for details on how the shared repository works.)
 
 ## Configuration Files
 
