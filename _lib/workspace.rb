@@ -99,7 +99,7 @@ end
 def create_build_sites(sites, build_base_port, domain)
   # Create Site objects for built sites with different port range
   sites.each_with_index.map do |site, index|
-    Site.new(site.path, build_base_port + index, domain)
+    Site.new(site.dir, build_base_port + index, domain)
   end
 end
 
