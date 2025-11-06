@@ -12,9 +12,10 @@ gem 'stringio'
 gem 'closure-compiler'
 gem 'coffee-script'
 gem 'colored2'
-# we mention explicit ref to fight "bundle install" caching logic (affects hookgun not picking up latest version)
-# => https://stackoverflow.com/a/13851020/84283
-gem 'html_press', git: 'https://github.com/binaryage/html_press', ref: '874ddf8c2569dad0d35247e0ee06e4c121e69915'
+# html_press dependencies (html_press is now vendored in _lib/vendor/html_press/)
+gem 'css_press', '>= 0.3.2'
+gem 'htmlentities'
+gem 'uglifier'
 gem 'jekyll'
 gem 'stylus'
 gem 'tilt'

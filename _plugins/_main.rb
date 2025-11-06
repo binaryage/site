@@ -2,6 +2,9 @@
 
 # this script is responsible for registering our plugins in correct order
 
+# Load vendored libraries before plugins
+require_relative '../_lib/vendor'
+
 require_relative 'compressor'
 require_relative 'reshaper'
 require_relative 'pruner'
