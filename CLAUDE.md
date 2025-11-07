@@ -269,7 +269,7 @@ When making significant changes to the build system, use the snapshot/diff syste
 
 ```bash
 # 1. Create a baseline snapshot before making changes
-_scripts/snapshot.sh baseline "Before refactoring"
+rake snapshot:create name=baseline desc="Before refactoring"
 
 # 2. Make your code changes
 
@@ -277,31 +277,31 @@ _scripts/snapshot.sh baseline "Before refactoring"
 rake build
 
 # 4. Compare current build with snapshot
-_scripts/diff-build.sh baseline
+rake snapshot:diff name=baseline
 
 # 5. For detailed file-level differences
-_scripts/diff-build.sh baseline --verbose
+rake snapshot:diff name=baseline verbose=1
 ```
 
 **Snapshot Management:**
 
 ```bash
 # Create a snapshot with description
-_scripts/snapshot.sh <name> [description]
+rake snapshot:create name=<name> desc="<description>"
 
-# List all snapshots (shown after each snapshot creation)
-# Snapshots are stored in .snapshots/ (gitignored)
+# List all snapshots
+rake snapshot:list
 
 # Compare snapshot with current build
-_scripts/diff-build.sh <name>           # Summary view
-_scripts/diff-build.sh <name> --verbose # Detailed file-level changes
+rake snapshot:diff name=<name>           # Summary view
+rake snapshot:diff name=<name> verbose=1 # Detailed file-level changes
 ```
 
 **How it works:**
-- `snapshot.sh` builds all sites and copies `.stage/build/` to `.snapshots/<name>/`
+- `snapshot:create` builds all sites and copies `.stage/build/` to `.snapshots/<name>/`
 - Volatile artifacts (`_cache/`, `.configs/`) are excluded to save space
 - Metadata is saved (timestamp, git commit hash, description)
-- `diff-build.sh` compares snapshots excluding volatile directories
+- `snapshot:diff` compares snapshots excluding volatile directories
 - Exit codes: 0 (identical), 1 (differences found), 2 (error)
 
 **Use cases:**

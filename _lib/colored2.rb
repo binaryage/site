@@ -35,4 +35,9 @@ class String
   def self.underline
     Colored2.underline(self)
   end
+
+  # Custom gray color (bright black / dark gray)
+  def gray
+    "\033[90m#{self}\033[0m"
+  end
 end
