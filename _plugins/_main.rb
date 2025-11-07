@@ -9,7 +9,6 @@ require_relative 'compressor'
 require_relative 'reshaper'
 require_relative 'pruner'
 require_relative 'cname_generator'
-require_relative 'coffeescript_blocks'
 
 require_relative 'inline_styles'
 require_relative 'firstcontentblock'
@@ -20,11 +19,6 @@ Liquid::Template.register_tag('inline_styles', Jekyll::Tags::InlineStyles)
 Liquid::Template.register_tag('firstcontentblock', Jekyll::Tags::FirstContentBlock)
 
 # -- hooks ------------------------------------------------------------------------------------------------------------------
-
-# NOTE: that coffescript conversion must be applied before pressing
-Jekyll::Hooks.register(%i[documents pages], :post_render) do |item|
-  render_coffescript_blocks!(item)
-end
 
 Jekyll::Hooks.register(%i[documents pages], :post_render) do |item|
   press_html!(item.site, item)

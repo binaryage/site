@@ -19,7 +19,6 @@ def prepare_jekyll_config(site, opts)
     config = {}
   end
   config['plugins'] ||= []
-  config['plugins'] << 'jekyll-coffeescript'
   config['plugins'] << 'jekyll-redirect-from' # see https://help.github.com/articles/redirects-on-github-pages/
   config['layouts_dir'] = 'shared/layouts'
   config['includes_dir'] = 'shared/includes'

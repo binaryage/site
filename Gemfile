@@ -10,7 +10,6 @@ gem 'logger'
 gem 'stringio'
 
 gem 'closure-compiler'
-gem 'coffee-script'
 gem 'colored2'
 # html_press dependencies (html_press is now vendored in _lib/vendor/html_press/)
 # terser (modern ES6+ minifier) is used for JS
@@ -22,7 +21,6 @@ gem 'tilt'
 gem 'webrick'
 
 group :jekyll_plugins do
-  gem 'jekyll-coffeescript'
   gem 'jekyll-contentblocks'
   gem 'jekyll-redirect-from'
 end
