@@ -37,68 +37,61 @@ This is the most important architectural concept to understand:
 - **DO NOT edit 12 times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
 - **Recommended workflow**: Make shared changes via `www/shared`, then update pointers in other sites
 
-### Automatic Shared Synchronization
+### Manual Shared Synchronization
 
-The repository includes an **automated shared sync system** that propagates shared commits across all sites using local filesystem git fetch operations.
+When you make changes to the shared repository, use the **manual sync command** to propagate commits across all sites.
 
-**What is automatic:**
-- ✅ Local sync between shared directories after commit (~450ms)
-- ✅ Git fetch and checkout in all other shared directories
-
-**What is MANUAL (requires explicit user action):**
-- ❌ Push to remote repositories (never automatic)
-- ❌ Deployment to production (only when you push to `web` branch)
-
-**How it works:**
-- Post-commit hooks installed in all shared directories
-- When you commit in ANY shared directory, it automatically fetches and checks out the same commit in ALL other shared directories
-- Uses local filesystem paths (`git fetch ../../source/shared`) - no network required
-- Fast: ~450ms to sync all 11 other sites
-- Preserves independent version tracking per website
-- **Does NOT push** - all remote pushes are manual and controlled by you
-
-**Enable/disable:**
+**Sync command:**
 ```bash
-rake shared:enable    # Install hooks in all shared directories
-rake shared:disable   # Remove hooks
-rake shared:status    # Show installation status
+rake shared:sync          # Sync from www/shared (default)
+rake shared:sync from=blog  # Sync from specific site's shared directory
 ```
 
-**Example workflow with auto-sync enabled:**
+**How it works:**
+- Fetches the HEAD commit from source shared directory
+- Uses local filesystem paths (no network required)
+- Updates all other shared directories to the same commit
+- Skips directories with uncommitted changes
+- Fast and reliable (~1 second for all 11 sites)
+- **Does NOT push** - all remote pushes are manual and controlled by you
+
+**Example workflow:**
 
 ```bash
-# Enable auto-sync (one-time setup)
-rake shared:enable
-
-# 1. Make changes in ANY shared directory (www, blog, totalfinder-web, etc.)
+# 1. Make changes in ANY shared directory (typically www/shared)
 cd www/shared
 # ... edit files ...
 git add .
 git commit -m "Update shared layout"
 
-# Hook automatically syncs to all other shared directories (~450ms):
-# 🔄 Syncing from www/shared (abc1234)...
-# ✅ blog/shared
-# ✅ totalfinder-web/shared
-# ... (all 11 other sites)
-# ✨ Synced 11 sites in 0.45s
+# 2. Manually sync to all other shared directories
+cd ../..  # Back to site root
+rake shared:sync
 
-# 2. (OPTIONAL) Push shared changes to remote when ready
+# Output:
+# Syncing from www/shared (abc1234)
+#   ✅ blog/shared → abc1234
+#   ✅ totalfinder-web/shared → abc1234
+#   ... (all 11 other sites)
+# ✨ Synced 11 site(s)
+
+# 3. (OPTIONAL) Push shared changes to remote when ready
+# cd www/shared
 # git push origin master
 
-# 3. (OPTIONAL) Update the submodule pointer in sites that need the changes
-cd ../..  # Back to site root
+# 4. (OPTIONAL) Update the submodule pointer in sites that need the changes
 cd totalfinder-web
 git add shared  # Update pointer to new shared commit
 git commit -m "Update shared submodule"
 # git push origin web  # (OPTIONAL) Push to web branch when ready to deploy
 
-# Repeat step 3 for other sites as needed
+# Repeat step 4 for other sites as needed
 ```
 
-**Manual workflow (without auto-sync):**
-
-If you prefer to control synchronization manually, keep auto-sync disabled and use the same workflow as before, updating each site's shared pointer individually.
+**Why manual sync?**
+- Git's submodule architecture prevents reliable automatic synchronization from post-commit hooks
+- Manual sync is fast, explicit, and always works correctly
+- Gives you control over when synchronization happens
 
 **Important note about submodule pointers:**
 - ✅ **DO commit** `shared` submodule pointer updates in each website (as shown above)
