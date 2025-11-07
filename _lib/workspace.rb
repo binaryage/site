@@ -53,7 +53,7 @@ def prepare_hosts_template(sites)
   io.string
 end
 
-def prepare_proxy_config(sites, mode: :serve, proxy_port: 80)
+def prepare_proxy_config(sites, _mode: :serve, proxy_port: 80)
   # header
   config = <<~CONFIG_SNIPPET
     daemon off;
@@ -131,12 +131,10 @@ end
 def stop_python_servers(pids)
   # Stop all Python HTTP servers
   pids.each do |pid|
-    begin
-      Process.kill('TERM', pid)
-      Process.wait(pid, Process::WNOHANG)
-    rescue Errno::ESRCH, Errno::ECHILD
-      # Process already terminated, ignore
-    end
+    Process.kill('TERM', pid)
+    Process.wait(pid, Process::WNOHANG)
+  rescue Errno::ESRCH, Errno::ECHILD
+    # Process already terminated, ignore
   end
 end
 

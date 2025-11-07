@@ -62,7 +62,7 @@ module HtmlPress
     #     { compress: { unused: false } },
     #     '/tmp/cache'
     #   )
-    def self.js_compressor(text, options = nil, cache_dir = nil)
+    def self.js_compressor(text, options=nil, cache_dir=nil)
       options ||= {}
 
       # Check cache if directory provided
@@ -97,13 +97,13 @@ module HtmlPress
         raise e
       end
     end
-  rescue LoadError => e
+  rescue LoadError
     # Graceful degradation if Terser is not available
     # @param text [String] JavaScript text (returned unmodified)
     # @param options [Hash, nil] Ignored
     # @param cache_dir [String, nil] Ignored
     # @return [String] Original JavaScript text
-    def self.js_compressor(text, options = nil, cache_dir = nil)
+    def self.js_compressor(text, _options=nil, _cache_dir=nil)
       text
     end
   end
@@ -128,7 +128,7 @@ module HtmlPress
   #   HtmlPress.style_compressor(css, '/tmp/cache')
   #   # First call: compresses and caches
   #   # Second call: returns from cache
-  def self.style_compressor(text, cache_dir = nil)
+  def self.style_compressor(text, cache_dir=nil)
     # Check cache if directory provided
     if cache_dir
       my_cache_dir = File.join(cache_dir, 'css')
@@ -193,8 +193,8 @@ module HtmlPress
 
       File.read(result_file.path)
     ensure
-      source_file.unlink if source_file
-      result_file.unlink if result_file
+      source_file&.unlink
+      result_file&.unlink
     end
   end
 
@@ -220,21 +220,21 @@ module HtmlPress
     }.freeze
 
     # Regex patterns (compiled once for performance)
-    REGEX_CODE_BLOCK = /<code>(.*?)<\/code>/mi.freeze
-    REGEX_PRE_BLOCK = /<pre>(.*?)<\/pre>/mi.freeze
-    REGEX_CARRIAGE_RETURN = /\r/.freeze
-    REGEX_EMPTY_LINE = /^$\n/.freeze
-    REGEX_SCRIPT_TAG = /(<script.*?>)(.*?)(<\/script>)/im.freeze
-    REGEX_STYLE_TAG = /(<style.*?>)(.*?)(<\/style>)/im.freeze
-    REGEX_EMPTY_COMMENT = /<!--([ \t]*?)-->/.freeze
-    REGEX_LINE_WHITESPACE = /^[ \t]+|[ \t]+$/m.freeze
-    REGEX_TAG_WITH_ATTRS = /<([a-z\-:]+)([^>]*?)([\/]*?)>/i.freeze
-    REGEX_TAG_SCAN = /<([\/]?[a-z\-:]+)([^>]*?)>/i.freeze
-    REGEX_NEWLINES = /[\r\n]+/.freeze
-    REGEX_WHITESPACE = /[ \t]+/.freeze
-    REGEX_ATTR_NEWLINES = /[\n]+/.freeze
-    REGEX_ATTR_SPACES = /[ ]+/.freeze
-    REGEX_BETWEEN_TAGS = />([^<]+)</.freeze
+    REGEX_CODE_BLOCK = %r{<code>(.*?)</code>}mi
+    REGEX_PRE_BLOCK = %r{<pre>(.*?)</pre>}mi
+    REGEX_CARRIAGE_RETURN = /\r/
+    REGEX_EMPTY_LINE = /^$\n/
+    REGEX_SCRIPT_TAG = %r{(<script.*?>)(.*?)(</script>)}im
+    REGEX_STYLE_TAG = %r{(<style.*?>)(.*?)(</style>)}im
+    REGEX_EMPTY_COMMENT = /<!--([ \t]*?)-->/
+    REGEX_LINE_WHITESPACE = /^[ \t]+|[ \t]+$/m
+    REGEX_TAG_WITH_ATTRS = %r{<([a-z\-:]+)([^>]*?)(/*?)>}i
+    REGEX_TAG_SCAN = %r{<(/?[a-z\-:]+)([^>]*?)>}i
+    REGEX_NEWLINES = /[\r\n]+/
+    REGEX_WHITESPACE = /[ \t]+/
+    REGEX_ATTR_NEWLINES = /\n+/
+    REGEX_ATTR_SPACES = / +/
+    REGEX_BETWEEN_TAGS = />([^<]+)</
 
     # Initialize HTML compressor
     #
@@ -247,7 +247,7 @@ module HtmlPress
     # @option options [String, nil] :cache Directory path for caching compressed JS/CSS
     #
     # @raise [ArgumentError] If logger doesn't respond to :error
-    def initialize(options = {})
+    def initialize(options={})
       @options = DEFAULTS.merge(options)
 
       # Handle deprecated option name
@@ -257,9 +257,9 @@ module HtmlPress
       end
 
       # Validate logger interface
-      if @options[:logger] && !@options[:logger].respond_to?(:error)
-        raise ArgumentError, 'Logger has no error method'
-      end
+      return unless @options[:logger] && !@options[:logger].respond_to?(:error)
+
+      raise ArgumentError, 'Logger has no error method'
     end
 
     # Extract <code> blocks and replace with placeholders
@@ -364,8 +364,7 @@ module HtmlPress
       # Format and restore preserved blocks
       out = reindent(out)
       out = return_code_blocks(out)
-      out = return_pre_blocks(out)
-      out
+      return_pre_blocks(out)
     end
 
     # Backward compatibility alias for {#press}
@@ -419,7 +418,7 @@ module HtmlPress
           # Skip comments and self-closing tags
           next if full_match[1] == '!'
           next if full_match[-2] == '/'
-          next if in_style > 0 || in_script > 0
+          next if in_style.positive? || in_script.positive?
 
           # Adjust level for opening/closing tags
           tag[0] == '/' ? level -= 1 : level += 1
@@ -428,7 +427,7 @@ module HtmlPress
 
         # Use the smaller indentation level to avoid over-indenting closing tags
         indent_level = [level, pre_level].min
-        indent_level = 0 if (in_code > 0 || in_pre > 0) && level <= pre_level
+        indent_level = 0 if (in_code.positive? || in_pre.positive?) && level <= pre_level
 
         result << (('  ' * indent_level) + line)
       end
@@ -451,8 +450,8 @@ module HtmlPress
         tag = Regexp.last_match(1)
         attrs = Regexp.last_match(2)
         normalized_attrs = attrs.gsub(REGEX_ATTR_NEWLINES, ' ')
-                               .gsub(REGEX_ATTR_SPACES, ' ')
-                               .rstrip
+                                .gsub(REGEX_ATTR_SPACES, ' ')
+                                .rstrip
         "<#{tag}#{normalized_attrs}>"
       end
     end
@@ -475,7 +474,7 @@ module HtmlPress
       ].join('|')
 
       # Cache regex (frozen constant would be better but pattern is dynamic)
-      @void_elements_regex ||= /<(#{void_elements})([^>]*?)[\/]*>/i
+      @void_elements_regex ||= %r{<(#{void_elements})([^>]*?)/*>}i
 
       out.gsub(@void_elements_regex) do
         "<#{Regexp.last_match(1)}#{Regexp.last_match(2)}/>"
@@ -562,7 +561,7 @@ module HtmlPress
                        't(?:able|body|head|d|h|r|foot|itle)|ul)'
 
       # Cache the block elements regex
-      @block_elements_regex ||= /[ \t]+(<\/?#{block_elements}\b[^>]*>)/
+      @block_elements_regex ||= %r{[ \t]+(</?#{block_elements}\b[^>]*>)}
 
       # Remove whitespace before and after block element tags
       out.gsub!(@block_elements_regex, '\\1')
@@ -602,7 +601,7 @@ module HtmlPress
         end
 
         # Collapse whitespace unless in preserved block
-        line.gsub!(REGEX_WHITESPACE, ' ') unless in_code > 0 || in_pre > 0
+        line.gsub!(REGEX_WHITESPACE, ' ') unless in_code.positive? || in_pre.positive?
         result << line
       end
 
@@ -614,7 +613,7 @@ module HtmlPress
     # @param text [String] Error message to log
     # @api private
     def log(text)
-      @options[:logger].error(text) if @options[:logger]
+      @options[:logger]&.error(text)
     end
   end
 
@@ -634,7 +633,7 @@ module HtmlPress
   # @example
   #   HtmlPress.press("<html>\n  <body>Hello</body>\n</html>")
   #   # => "<html>\n  <body>Hello</body>\n</html>"
-  def self.press(text, options = {})
+  def self.press(text, options={})
     HtmlPress::Html.new(options).press(text)
   end
 
@@ -644,7 +643,7 @@ module HtmlPress
   # @param text [String, IO] HTML content to compress
   # @param options [Hash] Compression options (see {.press})
   # @return [String] Compressed HTML
-  def self.compress(text, options = {})
+  def self.compress(text, options={})
     HtmlPress::Html.new(options).press(text)
   end
 end
