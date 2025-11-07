@@ -61,6 +61,17 @@ namespace :init do
     sys('bundle install')
   end
 
+  desc 'verify lightningcss-cli installation'
+  task :lightningcss do
+    lightningcss_bin = File.join(NODE_DIR, 'node_modules/.bin/lightningcss')
+
+    unless File.exist?(lightningcss_bin)
+      die "lightningcss-cli not found. Run 'rake init:yarn' first."
+    end
+
+    puts "✓ lightningcss-cli found at #{lightningcss_bin}".green
+  end
+
   desc 'init submodules'
   task :repo do
     init_workspace(SITES)
@@ -68,7 +79,7 @@ namespace :init do
 end
 
 desc 'init workspace - needs special care'
-task init: ['init:gem', 'init:yarn', 'init:repo']
+task init: ['init:gem', 'init:yarn', 'init:lightningcss', 'init:repo']
 
 desc 'clean stage'
 task :clean do

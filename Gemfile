@@ -13,8 +13,8 @@ gem 'closure-compiler'
 gem 'coffee-script'
 gem 'colored2'
 # html_press dependencies (html_press is now vendored in _lib/vendor/html_press/)
-# terser (modern ES6+ minifier) is used for JS, lightningcss_rails for CSS
-gem 'lightningcss_rails'
+# terser (modern ES6+ minifier) is used for JS
+# lightningcss-cli (npm package) is used for CSS (installed via _node/package.json)
 gem 'terser'
 gem 'jekyll'
 gem 'stylus'

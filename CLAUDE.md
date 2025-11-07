@@ -455,6 +455,32 @@ Common Ruby 3.x stdlib gems that may be needed:
 - `mutex_m` - Mixin to extend objects with synchronization
 - `ostruct` - OpenStruct class
 
+### CSS Minification Issues
+
+**Problem**: Build shows warning "Lightning CSS binary not found" or CSS is not minified
+
+**Solution**: The build system uses `lightningcss-cli` (npm package) for CSS minification. Make sure it's installed:
+
+```bash
+# Option 1: Run rake init (recommended for new setup)
+rake init
+
+# Option 2: Just install node dependencies
+cd _node
+npm install
+
+# Option 3: Install globally (not recommended, but works)
+npm install -g lightningcss-cli
+```
+
+**Verification**: Check that lightningcss-cli is available:
+```bash
+ls -la _node/node_modules/.bin/lightningcss
+# Should show a symlink to ../lightningcss-cli/lightningcss
+```
+
+**How it works**: The build system uses the local `_node/node_modules/.bin/lightningcss` binary for CSS compression. If the binary is not found, a warning is shown and uncompressed CSS is used as a fallback.
+
 ## RubyMine IDE Setup
 
 ### Setting up Ruby SDK from mise
