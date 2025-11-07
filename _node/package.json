@@ -10,5 +10,8 @@
   "dependencies": {
     "browser-sync": "^2.26.12",
     "bs-html-injector": "git+https://github.com/darwin/html-injector.git"
+  },
+  "devDependencies": {
+    "lightningcss-cli": "^1.30.2"
   }
 }

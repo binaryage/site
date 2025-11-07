@@ -4,9 +4,9 @@ require 'digest/sha1'
 require 'fileutils'
 
 module HtmlPress
-  require 'yui/compressor'
+  require 'lightningcss_rails'
 
-  # Compress CSS using YUI Compressor
+  # Compress CSS using Lightning CSS
   #
   # This method compresses CSS and optionally caches the result.
   # Cache uses SHA1 hashing of the input to determine cache hits.
@@ -38,8 +38,8 @@ module HtmlPress
       return cached_content if cached_content
     end
 
-    # Compress CSS using YUI Compressor
-    compressor = YUI::CssCompressor.new
+    # Compress CSS using Lightning CSS
+    compressor = LightningcssRails::Compressor.new
     result = compressor.compress(text)
 
     # Write to cache if directory provided

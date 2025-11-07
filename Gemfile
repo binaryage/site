@@ -13,13 +13,13 @@ gem 'closure-compiler'
 gem 'coffee-script'
 gem 'colored2'
 # html_press dependencies (html_press is now vendored in _lib/vendor/html_press/)
-# terser (modern ES6+ minifier) and yui-compressor are used by html_press
+# terser (modern ES6+ minifier) is used for JS, lightningcss_rails for CSS
+gem 'lightningcss_rails'
 gem 'terser'
 gem 'jekyll'
 gem 'stylus'
 gem 'tilt'
 gem 'webrick'
-gem 'yui-compressor'
 
 group :jekyll_plugins do
   gem 'jekyll-coffeescript'
