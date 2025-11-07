@@ -201,6 +201,50 @@ rake serve:build PORT=9000   # Custom port
 
 This is useful for testing production builds locally before deployment, including compression and cache busting.
 
+### Smoke Testing
+
+After building sites, you can run automated smoke tests to verify all sites load correctly without errors:
+
+```bash
+# Build sites first
+rake build what=all
+
+# Terminal 1: Start the build server (if not already running)
+rake serve:build             # Default port 8080
+rake serve:build PORT=9000   # Custom port
+
+# Terminal 2: Run smoke tests
+rake test:smoke              # Uses port 8080 by default
+PORT=9000 rake test:smoke    # Custom port
+
+# Or run without server already running (auto-starts and stops)
+rake test:smoke              # Starts server, tests, then stops
+```
+
+**What it tests:**
+- HTTP status codes (accepts 2xx-3xx, fails on 4xx-5xx)
+- JavaScript console errors (filters out non-critical warnings)
+- Page loads successfully without timeouts
+- Handles redirects gracefully (e.g., support → discuss.binaryage.com)
+
+**Features:**
+- Automatically detects all built sites from `.stage/build/` directory
+- Uses Playwright for headless browser testing
+- Auto-installs Playwright on first run
+- Can start/stop `rake serve:build` automatically if needed
+- Exits with status code 0 (all passed) or 1 (failures)
+- Provides detailed error output for failed tests
+
+**Dependencies:**
+- Playwright (`@playwright/test`) - installed via `_node/package.json`
+- Chromium browser (~210 MB, auto-downloaded on first run)
+
+**Use cases:**
+- CI/CD pipeline integration
+- Pre-deployment verification
+- Regression testing after build system changes
+- Quick sanity check after major changes
+
 ### Building Sites
 ```bash
 rake build                   # Build all sites for production
@@ -367,13 +411,15 @@ There are **two levels** of submodules in this project, each handled differently
 
 - `rakefile` - Main entry point, imports `_lib/tasks.rake`
 - `_lib/tasks.rake` - All rake task definitions and site configuration
+- `_lib/tasks/*.rb` - Organized rake task files (config, build, server, test, workspace, etc.)
 - `_lib/build.rb` - Jekyll build logic and configuration generation
 - `_lib/workspace.rb` - Git submodule management functions
 - `_lib/site.rb` - Site class definition
 - `_lib/utils.rb` - Utility functions
 - `_lib/store.rb` - FastSpring store template generation
 - `Gemfile` - Ruby dependencies (Jekyll, Stylus, CoffeeScript, compression tools)
-- `_node/package.json` - Node dependencies (browser-sync)
+- `_node/package.json` - Node dependencies (browser-sync, Playwright for testing)
+- `_node/smoke-test.mjs` - Playwright-based smoke test script
 
 ## Working with Submodules
 
