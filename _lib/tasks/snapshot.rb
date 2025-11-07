@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-## SNAPSHOT MANAGEMENT ######################################################################################################
-
 # Helper methods for snapshot functionality
 def validate_snapshot_name(name)
   unless name =~ /^[a-zA-Z0-9_-]+$/

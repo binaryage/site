@@ -17,8 +17,6 @@ task :pin do
   pin_workspace(SITES)
 end
 
-## STATUS CHECK ############################################################################################################
-
 # Helper method to check shared submodule status
 def check_shared_submodule(shared_path, verbose)
   issues = 0

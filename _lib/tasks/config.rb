@@ -7,8 +7,6 @@ require_relative '../workspace'
 require_relative '../build'
 require_relative '../store'
 
-## CONFIG ###################################################################################################################
-
 BASE_PORT = 4101
 BUILD_BASE_PORT = 8000 # base port for serving built static sites
 MAIN_PORT = 80 # we will need admin rights to bind to this port when running `rake proxy`
@@ -25,8 +23,6 @@ BUILD_DIR = File.join(STAGE_DIR, 'build')
 STORE_DIR = File.join(STAGE_DIR, 'store')
 SNAPSHOTS_DIR = File.join(ROOT, '.snapshots')
 SNAPSHOT_EXCLUDES = ['_cache', '.configs', 'atom.xml']
-
-## SITES ####################################################################################################################
 
 # Dynamically detect all git submodules at root level
 DIRS = `git config --file .gitmodules --get-regexp path`

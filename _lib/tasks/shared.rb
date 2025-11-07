@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-## SHARED SUBMODULE SYNC ####################################################################################################
-
 namespace :shared do
   desc 'Manually sync shared submodules (from=www to sync from specific site)'
   task :sync do
