@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
 namespace :init do
-  desc 'install yarn dependencies'
-  task :yarn do
-    unless Gem::Version.new(`yarn --version`) >= Gem::Version.new(MIN_YARN_VERSION)
-      die "install yarn (>=v#{MIN_YARN_VERSION}) => https://yarnpkg.com"
-    end
+  desc 'install Node.js dependencies'
+  task :node do
     Dir.chdir NODE_DIR do
       sys('rm -rf node_modules')
-      sys('yarn install')
+      sys("#{NODE_PKG_MANAGER} install")
     end
   end
 
@@ -27,7 +24,7 @@ namespace :init do
     lightningcss_bin = File.join(NODE_DIR, 'node_modules/.bin/lightningcss')
 
     unless File.exist?(lightningcss_bin)
-      die "lightningcss-cli not found. Run 'rake init:yarn' first."
+      die "lightningcss-cli not found. Run 'rake init:node' first."
     end
 
     puts "✓ lightningcss-cli found at #{lightningcss_bin}".green
@@ -40,4 +37,4 @@ namespace :init do
 end
 
 desc 'init workspace - needs special care'
-task init: ['init:gem', 'init:yarn', 'init:lightningcss', 'init:repo']
+task init: ['init:gem', 'init:node', 'init:lightningcss', 'init:repo']

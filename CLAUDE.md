@@ -143,11 +143,6 @@ This project uses **mise** (a modern polyglot version manager) for managing Ruby
    bundle install
    ```
 
-6. **Install Yarn** (for Node.js dependencies):
-   ```bash
-   npm install -g yarn  # Minimum version 0.24.4
-   ```
-
 **Why mise?**
 - **Polyglot**: Manages Ruby, Node.js, and 500+ other tools with one unified interface
 - **Fast**: Written in Rust for performance
@@ -165,11 +160,53 @@ This project uses **mise** (a modern polyglot version manager) for managing Ruby
 ### Other Requirements
 - **nginx**: Required for proxy server (`rake proxy`)
 
+### Node.js Package Manager
+
+The project uses **npm** by default (ships with Node.js), but you can optionally use **yarn** or **bun** by setting the `NODE_PKG_MANAGER` environment variable.
+
+**Default (npm):**
+```bash
+rake init                    # Uses npm automatically
+rake upgrade:node            # Uses npm update
+```
+
+**Using yarn:**
+```bash
+# Install yarn first
+npm install -g yarn
+
+# Use yarn for this project
+export NODE_PKG_MANAGER=yarn
+rake init                    # Uses yarn install
+rake upgrade:node            # Uses yarn upgrade
+```
+
+**Using bun (fastest):**
+```bash
+# Install bun via mise
+mise use bun@latest
+
+# Use bun for this project
+export NODE_PKG_MANAGER=bun
+rake init                    # Uses bun install
+rake upgrade:node            # Uses bun update
+```
+
+**Why npm is the default:**
+- Already available (ships with Node.js, no installation needed)
+- Universally compatible
+- More than fast enough for this project's minimal dependencies (3 packages)
+- Simplifies onboarding
+
+**When to use alternatives:**
+- **bun**: If you want maximum speed (6-16x faster than npm)
+- **yarn**: If you prefer yarn's CLI or have it installed already
+
 ## Common Development Commands
 
 ### Initial Setup
 ```bash
-rake init                    # First-time setup: installs gems, yarn deps, and inits/updates all git submodules
+rake init                    # First-time setup: installs gems, Node deps, and inits/updates all git submodules
 ```
 
 ### Development Server
@@ -295,7 +332,7 @@ rake publish dont_push=1     # Build but don't push
 
 ### Dependency Management
 ```bash
-rake upgrade                 # Upgrade both Ruby (bundler) and Node (yarn) dependencies
+rake upgrade                 # Upgrade both Ruby (bundler) and Node dependencies
 rake upgrade:ruby            # Upgrade Ruby dependencies only
 rake upgrade:node            # Upgrade Node dependencies only
 ```
@@ -652,4 +689,4 @@ Typically: `/Users/darwin/.local/share/mise/installs/node/22.21.1/bin/node`
 7. Select the newly added Node.js interpreter
 8. Click **Apply** and **OK**
 
-WebStorm will now use the mise-installed Node.js for all JavaScript tooling (npm, yarn, etc.).
+WebStorm will now use the mise-installed Node.js for all JavaScript tooling (npm, or your configured package manager).

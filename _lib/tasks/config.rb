@@ -12,8 +12,10 @@ BUILD_BASE_PORT = 8000 # base port for serving built static sites
 MAIN_PORT = 80 # we will need admin rights to bind to this port when running `rake proxy`
 LOCAL_DOMAIN = 'binaryage.org' # this domain is for testing to be set in /etc/hosts, see `rake hosts`
 
-MIN_YARN_VERSION = '0.24.4'
 MIN_GEM_VERSION = '1.8.23'
+
+# Node.js package manager (npm, yarn, or bun)
+NODE_PKG_MANAGER = ENV.fetch('NODE_PKG_MANAGER', 'npm')
 
 ROOT = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
 NODE_DIR = File.join(ROOT, '_node')
