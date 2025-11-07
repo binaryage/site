@@ -24,7 +24,7 @@ SERVE_DIR = File.join(STAGE_DIR, 'serve')
 BUILD_DIR = File.join(STAGE_DIR, 'build')
 STORE_DIR = File.join(STAGE_DIR, 'store')
 SNAPSHOTS_DIR = File.join(ROOT, '.snapshots')
-SNAPSHOT_EXCLUDES = ['_cache', '.configs']
+SNAPSHOT_EXCLUDES = ['_cache', '.configs', 'atom.xml']
 
 ## SITES ####################################################################################################################
 

@@ -112,7 +112,7 @@ def diff_directories(dir1, dir2, excludes)
     end
 
     # Compare directories using system diff command
-    if system("diff -rq --exclude='_cache' --exclude='.configs' '#{snapshot_site}' '#{current_site}' >/dev/null 2>&1")
+    if system("diff -rq --exclude='_cache' --exclude='.configs' --exclude='atom.xml' '#{snapshot_site}' '#{current_site}' >/dev/null 2>&1")
       result[:unchanged] << site
     else
       result[:changed] << site
@@ -129,7 +129,7 @@ def diff_directories(dir1, dir2, excludes)
 end
 
 def show_verbose_diff(snapshot_site, current_site)
-  output = `diff -rq --exclude='_cache' --exclude='.configs' '#{snapshot_site}' '#{current_site}' 2>/dev/null`
+  output = `diff -rq --exclude='_cache' --exclude='.configs' --exclude='atom.xml' '#{snapshot_site}' '#{current_site}' 2>/dev/null`
   output.lines.each do |line|
     puts "     #{line.strip}"
   end
@@ -306,7 +306,7 @@ namespace :snapshot do
       unless verbose
         puts "  #{"rake snapshot:diff name=#{name} verbose=1".gray}"
       end
-      puts "  #{"diff -ru --exclude='_cache' --exclude='.configs' #{snapshot_path(name)}/ #{BUILD_DIR}/".gray}"
+      puts "  #{"diff -ru --exclude='_cache' --exclude='.configs' --exclude='atom.xml' #{snapshot_path(name)}/ #{BUILD_DIR}/".gray}"
       puts
 
       # List changed sites
