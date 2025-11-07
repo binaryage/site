@@ -3,6 +3,7 @@
 require 'digest/sha1'
 require 'fileutils'
 require 'tempfile'
+require 'open3'
 
 module HtmlPress
   # Compress CSS using Lightning CSS
@@ -77,10 +78,15 @@ module HtmlPress
       source_file.close
 
       cmd = "#{lightningcss_bin} --minify --bundle --targets '>= 0.25%' #{source_file.path} -o #{result_file.path}"
-      success = system(cmd, out: File::NULL, err: File::NULL)
 
-      unless success
-        raise 'Lightning CSS compression failed. Check that lightningcss-cli is properly installed.'
+      # Capture stderr to provide useful error messages
+      _stdout, stderr, status = Open3.capture3(cmd)
+
+      unless status.success?
+        error_msg = "Lightning CSS compression failed.\n"
+        error_msg += "Command: #{cmd}\n"
+        error_msg += "Error output:\n#{stderr}" unless stderr.empty?
+        raise error_msg
       end
 
       File.read(result_file.path)
