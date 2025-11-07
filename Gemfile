@@ -9,7 +9,6 @@ gem 'csv'
 gem 'logger'
 gem 'stringio'
 
-gem 'closure-compiler'
 gem 'colored2'
 # html_press dependencies (html_press is now vendored in _lib/vendor/html_press/)
 # terser (modern ES6+ minifier) is used for JS

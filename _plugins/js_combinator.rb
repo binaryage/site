@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # based on code from: https://github.com/lyoshenka/jekyll-js-minify-plugin
-require 'closure-compiler' # https://github.com/documentcloud/closure-compiler
+require 'terser'
 require 'colored2'
 
 module Jekyll
@@ -43,7 +43,7 @@ module Jekyll
             end
             unless res
               print '=> compiling'
-              res = Closure::Compiler.new.compile(content)
+              res = Terser.new.compile(content).gsub(/;$/, '')
             end
             if cache_hit && (!File.exist? cache_hit)
               print " @ #{relative_cache_file_path(cache_hit).red}"
@@ -56,8 +56,8 @@ module Jekyll
 
           File.write(dest_path, content)
         rescue => e
-          warn "Closure Compiler Exception: #{e.message}"
-          raise Jekyll::Errors::FatalException, "Closure Compiler: #{e.message}"
+          warn "Terser Exception: #{e.message}"
+          raise Jekyll::Errors::FatalException, "Terser: #{e.message}"
         end
 
         true
