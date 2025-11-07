@@ -209,9 +209,38 @@ rake build what=www,blog     # Build specific sites
 
 ### Git Submodule Management
 ```bash
+rake status                  # Check status of all submodules (shows issues only)
+rake status verbose=1        # Check status with full details for all submodules
 rake pin                     # Pin all submodules to latest branch tips
 rake reset                   # DESTRUCTIVE: Reset workspace to remote state (destroys local changes)
 ```
+
+**Status Command Details:**
+
+The `rake status` command provides a comprehensive overview of all git submodules and their `shared/` submodules:
+
+**What it checks:**
+- Current branch (main submodules should be on `web`, shared should be on `master`)
+- Working directory cleanliness (uncommitted changes)
+- Ahead/behind status relative to remote
+- Shared submodule commit hashes and status
+
+**Output modes:**
+- **Default** (`rake status`): Shows only submodules with issues, plus ahead/behind info
+- **Verbose** (`rake status verbose=1`): Shows detailed status for all submodules
+
+**Visual indicators:**
+- ✓ (green) - Clean, no issues
+- ● (yellow) - Has issues (uncommitted changes, wrong branch, etc.)
+- ✗ (red) - Missing or critical error
+- ↑N (green) - N commits ahead of remote
+- ↓N (red) - N commits behind remote
+- ⚠ (yellow) - Uncommitted changes warning
+- ↔ (blue) - Remote status indicator
+
+**Exit codes:**
+- 0 - All clean
+- 1 - Issues found (behind remote or shared issues)
 
 ### Publishing
 ```bash
