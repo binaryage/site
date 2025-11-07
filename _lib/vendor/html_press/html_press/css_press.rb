@@ -52,10 +52,11 @@ module HtmlPress
   # Compress CSS using Lightning CSS CLI
   #
   # Uses the lightningcss-cli binary from _node/node_modules/.bin/
-  # Falls back to uncompressed CSS if binary is not found.
+  # Raises an error if binary is not found or compression fails.
   #
   # @param css_text [String] CSS text to compress
-  # @return [String] Compressed CSS or original text if compression fails
+  # @return [String] Compressed CSS
+  # @raise [RuntimeError] if lightningcss binary is not found or compression fails
   #
   # @api private
   def self.compress_with_lightningcss(css_text)
@@ -64,9 +65,8 @@ module HtmlPress
     lightningcss_bin = File.join(root, '_node/node_modules/.bin/lightningcss')
 
     unless File.exist?(lightningcss_bin)
-      warn "⚠️  Lightning CSS binary not found at: #{lightningcss_bin}"
-      warn "    Run 'rake init' or 'npm install' in _node/ to install dependencies."
-      return css_text # Return uncompressed
+      raise "Lightning CSS binary not found at: #{lightningcss_bin}\n" \
+            "Run 'rake init' or 'npm install' in _node/ to install dependencies."
     end
 
     source_file = Tempfile.new(['source', '.css'])
@@ -79,12 +79,11 @@ module HtmlPress
       cmd = "#{lightningcss_bin} --minify --bundle --targets '>= 0.25%' #{source_file.path} -o #{result_file.path}"
       success = system(cmd, out: File::NULL, err: File::NULL)
 
-      if success
-        File.read(result_file.path)
-      else
-        warn '⚠️  Lightning CSS compression failed, using uncompressed CSS'
-        css_text
+      unless success
+        raise 'Lightning CSS compression failed. Check that lightningcss-cli is properly installed.'
       end
+
+      File.read(result_file.path)
     ensure
       source_file.unlink if source_file
       result_file.unlink if result_file
