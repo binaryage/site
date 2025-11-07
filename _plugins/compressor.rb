@@ -2,7 +2,6 @@
 
 require 'colored2'
 require 'pathname'
-require 'html_press'
 require_relative '_shared'
 
 def press_html!(site, item)

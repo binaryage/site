@@ -1,6 +1,205 @@
 # frozen_string_literal: true
 
+require 'digest/sha1'
+require 'fileutils'
+require 'tempfile'
+require 'open3'
+
+# HtmlPress - HTML compression library
+#
+# This library compresses HTML by:
+# - Removing unnecessary whitespace
+# - Removing HTML comments (except IE conditional comments)
+# - Minifying inline JavaScript via Terser
+# - Minifying inline CSS via YUI Compressor
+# - Preserving content in <code> and <pre> blocks
+# - Re-indenting output for readability
+#
+# @example Basic usage
+#   html = "<html>\n  <body>  <p>Hello</p>  </body>\n</html>"
+#   compressed = HtmlPress.press(html)
+#   # => "<html>\n  <body>\n    <p>Hello</p>\n  </body>\n</html>"
+#
+# @example With options
+#   HtmlPress.press(html,
+#     unquoted_attributes: true,
+#     drop_empty_values: true,
+#     js_minifier_options: { compress: { unused: false } },
+#     cache: '/tmp/cache'
+#   )
 module HtmlPress
+  # Current version of the HtmlPress library
+  VERSION = '0.7.1'
+
+  begin
+    require 'terser'
+
+    # Compress JavaScript using Terser
+    #
+    # This method compresses JavaScript and optionally caches the result.
+    # Cache uses SHA1 hashing of the input to determine cache hits.
+    #
+    # Terser is a modern JavaScript minifier that supports ES6+ syntax.
+    # It is the successor to UglifyJS and is actively maintained.
+    #
+    # @param text [String] JavaScript text to compress
+    # @param options [Hash, nil] Options passed to Terser
+    #   See https://github.com/ahorek/terser-ruby#options for available options
+    # @param cache_dir [String, nil] Directory path for caching compressed JS
+    #   If nil, no caching is performed
+    #
+    # @return [String] Compressed JavaScript (with trailing semicolon removed)
+    #
+    # @raise [StandardError] If Terser fails to compile the JavaScript
+    #
+    # @example Without caching
+    #   js = "function foo() { return 42; }"
+    #   HtmlPress.js_compressor(js)
+    #   # => "function foo(){return 42}"
+    #
+    # @example With options and caching
+    #   HtmlPress.js_compressor(js,
+    #     { compress: { unused: false } },
+    #     '/tmp/cache'
+    #   )
+    def self.js_compressor(text, options = nil, cache_dir = nil)
+      options ||= {}
+
+      # Check cache if directory provided
+      if cache_dir
+        my_cache_dir = File.join(cache_dir, 'js')
+        sha = Digest::SHA1.hexdigest(text)
+        cache_hit = File.join(my_cache_dir, sha)
+
+        # Return cached result if available
+        cached_content = File.read(cache_hit) if File.exist?(cache_hit)
+        return cached_content if cached_content
+      end
+
+      # Compress JavaScript using Terser
+      begin
+        # Remove trailing semicolon for cleaner output
+        result = Terser.new(options).compile(text).gsub(/;$/, '')
+
+        # Write to cache if directory provided
+        if cache_hit
+          FileUtils.mkdir_p(my_cache_dir)
+          File.write(cache_hit, result)
+        end
+
+        result
+      rescue => e
+        # Output problematic code for debugging
+        warn "\nTerser problem with code snippet:"
+        warn '---'
+        warn text
+        warn '---'
+        raise e
+      end
+    end
+  rescue LoadError => e
+    # Graceful degradation if Terser is not available
+    # @param text [String] JavaScript text (returned unmodified)
+    # @param options [Hash, nil] Ignored
+    # @param cache_dir [String, nil] Ignored
+    # @return [String] Original JavaScript text
+    def self.js_compressor(text, options = nil, cache_dir = nil)
+      text
+    end
+  end
+
+  # Compress CSS using Lightning CSS
+  #
+  # This method compresses CSS and optionally caches the result.
+  # Cache uses SHA1 hashing of the input to determine cache hits.
+  #
+  # @param text [String] CSS text to compress
+  # @param cache_dir [String, nil] Directory path for caching compressed CSS
+  #   If nil, no caching is performed
+  #
+  # @return [String] Compressed CSS
+  #
+  # @example Without caching
+  #   css = "body { color: red; }"
+  #   HtmlPress.style_compressor(css)
+  #   # => "body{color:red}"
+  #
+  # @example With caching
+  #   HtmlPress.style_compressor(css, '/tmp/cache')
+  #   # First call: compresses and caches
+  #   # Second call: returns from cache
+  def self.style_compressor(text, cache_dir = nil)
+    # Check cache if directory provided
+    if cache_dir
+      my_cache_dir = File.join(cache_dir, 'css')
+      sha = Digest::SHA1.hexdigest(text)
+      cache_hit = File.join(my_cache_dir, sha)
+
+      # Return cached result if available
+      cached_content = File.read(cache_hit) if File.exist?(cache_hit)
+      return cached_content if cached_content
+    end
+
+    # Compress CSS using Lightning CSS
+    result = compress_with_lightningcss(text)
+
+    # Write to cache if directory provided
+    if cache_hit
+      FileUtils.mkdir_p(my_cache_dir)
+      File.write(cache_hit, result)
+    end
+
+    result
+  end
+
+  # Compress CSS using Lightning CSS CLI
+  #
+  # Uses the lightningcss-cli binary from _node/node_modules/.bin/
+  # Raises an error if binary is not found or compression fails.
+  #
+  # @param css_text [String] CSS text to compress
+  # @return [String] Compressed CSS
+  # @raise [RuntimeError] if lightningcss binary is not found or compression fails
+  #
+  # @api private
+  def self.compress_with_lightningcss(css_text)
+    # Get path to lightningcss binary from _node/node_modules
+    root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    lightningcss_bin = File.join(root, '_node/node_modules/.bin/lightningcss')
+
+    unless File.exist?(lightningcss_bin)
+      raise "Lightning CSS binary not found at: #{lightningcss_bin}\n" \
+            "Run 'rake init' or 'npm install' in _node/ to install dependencies."
+    end
+
+    source_file = Tempfile.new(['source', '.css'])
+    result_file = Tempfile.new(['result', '.css'])
+
+    begin
+      source_file.write(css_text)
+      source_file.close
+
+      cmd = "#{lightningcss_bin} --minify --bundle --targets '>= 0.25%' #{source_file.path} -o #{result_file.path}"
+
+      # Capture stderr to provide useful error messages
+      _stdout, stderr, status = Open3.capture3(cmd)
+
+      unless status.success?
+        error_msg = "Lightning CSS compression failed.\n"
+        error_msg += "Command: #{cmd}\n"
+        error_msg += "Error output:\n#{stderr}" unless stderr.empty?
+        raise error_msg
+      end
+
+      File.read(result_file.path)
+    ensure
+      source_file.unlink if source_file
+      result_file.unlink if result_file
+    end
+  end
+
+  private_class_method :compress_with_lightningcss
+
   # Main HTML compression engine
   #
   # This class handles the core HTML compression logic including:
@@ -417,5 +616,35 @@ module HtmlPress
     def log(text)
       @options[:logger].error(text) if @options[:logger]
     end
+  end
+
+  # Compress HTML content
+  #
+  # @param text [String, IO] HTML content to compress
+  # @param options [Hash] Compression options
+  # @option options [Logger, nil] :logger Logger instance for error reporting
+  # @option options [Boolean] :unquoted_attributes Remove quotes from HTML attributes
+  # @option options [Boolean] :drop_empty_values Drop empty attribute values
+  # @option options [Boolean] :strip_crlf Strip CRLF characters
+  # @option options [Hash, nil] :js_minifier_options Options passed to Terser
+  # @option options [String, nil] :cache Directory path for caching compressed JS/CSS
+  #
+  # @return [String] Compressed HTML
+  #
+  # @example
+  #   HtmlPress.press("<html>\n  <body>Hello</body>\n</html>")
+  #   # => "<html>\n  <body>Hello</body>\n</html>"
+  def self.press(text, options = {})
+    HtmlPress::Html.new(options).press(text)
+  end
+
+  # Compress HTML content (backward compatibility alias)
+  #
+  # @deprecated Use {.press} instead
+  # @param text [String, IO] HTML content to compress
+  # @param options [Hash] Compression options (see {.press})
+  # @return [String] Compressed HTML
+  def self.compress(text, options = {})
+    HtmlPress::Html.new(options).press(text)
   end
 end
