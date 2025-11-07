@@ -2,40 +2,11 @@
 
 require 'colored2'
 
-# this is here just IntelliJ to understand colors
+# colored2 gem provides standard ANSI colors via instance methods:
+# "text".red, "text".green, "text".blue, "text".bold, etc.
+#
+# We only extend it with a custom gray color, which the gem doesn't provide.
 class String
-  def self.blue
-    Colored2.blue(self)
-  end
-
-  def self.red
-    Colored2.red(self)
-  end
-
-  def self.yellow
-    Colored2.yellow(self)
-  end
-
-  def self.green
-    Colored2.green(self)
-  end
-
-  def self.cyan
-    Colored2.cyan(self)
-  end
-
-  def self.magenta
-    Colored2.magenta(self)
-  end
-
-  def self.bold
-    Colored2.bold(self)
-  end
-
-  def self.underline
-    Colored2.underline(self)
-  end
-
   # Custom gray color (bright black / dark gray)
   def gray
     "\033[90m#{self}\033[0m"
