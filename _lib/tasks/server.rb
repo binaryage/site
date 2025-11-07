@@ -67,7 +67,7 @@ namespace :serve do
     build_sites = create_build_sites(SITES, BUILD_BASE_PORT, LOCAL_DOMAIN)
 
     # Filter to only include actually built sites
-    build_sites = build_sites.select { |site| built_sites.include?(site.subdomain) }
+    build_sites = build_sites.select { |site| built_sites.include?(site.name) }
 
     if build_sites.empty?
       die "No matching sites found. Built sites: #{built_sites.join(', ')}"

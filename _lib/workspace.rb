@@ -108,10 +108,10 @@ def start_python_servers(sites, build_dir)
   pids = []
 
   sites.each do |site|
-    site_dir = File.join(build_dir, site.subdomain)
+    site_dir = File.join(build_dir, site.name)
     next unless File.directory?(site_dir)
 
-    puts "Starting Python HTTP server for #{site.subdomain.yellow} on port #{site.port.to_s.blue}..."
+    puts "Starting Python HTTP server for #{site.name.yellow} on port #{site.port.to_s.blue}..."
 
     pid = spawn("python3 -m http.server #{site.port}",
                 chdir: site_dir,
