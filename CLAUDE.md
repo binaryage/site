@@ -10,6 +10,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - The `_adhoc/` directory is gitignored and safe for experimentation
 - Example: `_adhoc/worktree-test/`, `_adhoc/proof-of-concept/`, etc.
 
+---
+
+## Essential Information
+
+This document (CLAUDE.md) extends README.md with detailed technical information specifically for AI agents working with this codebase.
+
+@README.md
+
+---
+
 ## Project Overview
 
 BinaryAge Site is an umbrella project that manages multiple subdomain sites under *.binaryage.com as git submodules. Each subdomain (www, blog, totalfinder-web, totalspaces-web, etc.) is a separate git repository tracked as a submodule. All submodains share common resources through the `shared` submodule (layouts, includes, CSS, JavaScript).
@@ -100,367 +110,104 @@ git commit -m "Update shared submodule"
 
 **For AI agents**: This architecture means you should NEVER iterate through all 12 sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
 
-## Prerequisites
+## Detailed Rake Task Reference
 
-### Development Environment (mise)
+See [README.md](README.md) for common usage. This section provides additional technical details.
 
-This project uses **mise** (a modern polyglot version manager) for managing Ruby and Node.js versions.
+### Complete Task List
 
-**Versions**: Ruby 3.4.7, Node.js 22.21.1 (specified in `.tool-versions`)
+**Setup & Initialization:**
+- `rake init` - First-time setup: installs gems, Node deps, inits/updates all git submodules
+- `rake hosts` - Show required /etc/hosts entries
 
-**Setup Instructions:**
+**Development:**
+- `rake proxy` - Start nginx proxy (requires sudo for port 80)
+- `rake serve what=www,blog` - Start Jekyll dev server with LiveReload (port 35729+)
+- `rake serve what=all` - Serve all sites
+- `rake serve:build` - Serve production builds (port 8080)
 
-1. **Install mise**:
-   ```bash
-   brew install mise
-   ```
+**Building:**
+- `rake build` - Build all sites for production
+- `rake build what=www,blog` - Build specific sites
+- `rake clean` - Clean staging directories
 
-2. **Activate mise in fish shell**:
-   ```bash
-   # Add to ~/.config/fish/config.fish
-   echo '~/.local/bin/mise activate fish | source' >> ~/.config/fish/config.fish
-   source ~/.config/fish/config.fish
-   ```
+**Git Submodule Management:**
+- `rake status` - Check submodule status (issues only)
+- `rake status verbose=1` - Full status for all submodules
+- `rake pin` - Pin all submodules to latest branch tips
+- `rake reset` - DESTRUCTIVE: Reset workspace to remote state
+- `rake shared:sync` - Sync shared commits across all sites
+- `rake shared:sync from=blog` - Sync from specific site
 
-   Or mise may be automatically activated by Homebrew.
+**Testing:**
+- `rake test:smoke` - Run automated smoke tests (Playwright)
+- `rake snapshot:create name=X desc="..."` - Create build snapshot
+- `rake snapshot:diff name=X` - Compare with snapshot
+- `rake snapshot:list` - List all snapshots
+- `rake screenshot:create name=X desc="..."` - Create screenshot baseline
+- `rake screenshot:diff name=X` - Compare screenshots with visual diff
+- `rake screenshot:list` - List all screenshot sets
 
-3. **Install direnv** (optional, for project-specific env vars):
-   ```bash
-   brew install direnv
-   echo 'direnv hook fish | source' >> ~/.config/fish/config.fish
-   source ~/.config/fish/config.fish
-   ```
+**Publishing:**
+- `rake publish` - Publish all dirty sites
+- `rake publish force=1` - Force publish all sites
+- `rake publish dont_push=1` - Build but don't push
 
-4. **Install project tools**:
-   ```bash
-   cd /path/to/site
-   mise install  # Reads .tool-versions and installs Ruby + Node.js
-   ```
+**Maintenance:**
+- `rake upgrade` - Upgrade Ruby + Node dependencies
+- `rake upgrade:ruby` - Upgrade Ruby gems only
+- `rake upgrade:node` - Upgrade Node packages only
+- `rake inspect` - List all registered sites
+- `rake store` - Generate FastSpring store template zip
 
-5. **Install bundler and gems**:
-   ```bash
-   gem install bundler
-   bundle install
-   ```
+### Advanced Testing System Details
 
-**Why mise?**
-- **Polyglot**: Manages Ruby, Node.js, and 500+ other tools with one unified interface
-- **Fast**: Written in Rust for performance
-- **Simple**: rbenv-style philosophy - directory-based auto-switching
-- **Compatible**: Reads multiple version file formats (.ruby-version, .nvmrc, .tool-versions)
-- **Excellent IDE integration**: RubyMine, WebStorm, VS Code all work seamlessly
-- **Active development**: Modern tool with strong 2025+ momentum
-
-**How it works:**
-- Versions are defined in `.tool-versions` file
-- mise automatically switches versions when you `cd` into the project
-- No need for manual version switching or shims
-- Compatible with direnv for additional environment variables
-
-### Other Requirements
-- **nginx**: Required for proxy server (`rake proxy`)
-
-### Node.js Package Manager
-
-The project uses **npm** by default (ships with Node.js), but you can optionally use **yarn** or **bun** by setting the `NODE_PKG_MANAGER` environment variable.
-
-**Default (npm):**
-```bash
-rake init                    # Uses npm automatically
-rake upgrade:node            # Uses npm update
-```
-
-**Using yarn:**
-```bash
-# Install yarn first
-npm install -g yarn
-
-# Use yarn for this project
-export NODE_PKG_MANAGER=yarn
-rake init                    # Uses yarn install
-rake upgrade:node            # Uses yarn upgrade
-```
-
-**Using bun (fastest):**
-```bash
-# Install bun via mise
-mise use bun@latest
-
-# Use bun for this project
-export NODE_PKG_MANAGER=bun
-rake init                    # Uses bun install
-rake upgrade:node            # Uses bun update
-```
-
-**Why npm is the default:**
-- Already available (ships with Node.js, no installation needed)
-- Universally compatible
-- More than fast enough for this project's minimal dependencies (3 packages)
-- Simplifies onboarding
-
-**When to use alternatives:**
-- **bun**: If you want maximum speed (6-16x faster than npm)
-- **yarn**: If you prefer yarn's CLI or have it installed already
-
-## Common Development Commands
-
-### Initial Setup
-```bash
-rake init                    # First-time setup: installs gems, Node deps, and inits/updates all git submodules
-```
-
-### Development Server
-```bash
-# Terminal 1: Start nginx proxy server (requires sudo for port 80)
-rake proxy
-
-# Terminal 2: Start Jekyll development server with live reload
-rake serve what=www,totalfinder,blog    # Serve specific sites
-rake serve what=all                      # Serve all sites
-
-# Make sure /etc/hosts is configured first:
-rake hosts                   # Show required /etc/hosts entries
-```
-
-The development server uses Jekyll's native LiveReload feature for automatic browser refresh when files change. Each site gets a dedicated LiveReload port (35729+).
-
-### Testing Production Builds Locally
-```bash
-# Build sites for production first
-rake build what=www,blog     # Build specific sites
-
-# Serve the built static files via nginx proxy (no live reload)
-rake serve:build             # Default port 8080
-rake serve:build PORT=9000   # Custom port
-
-# Access sites at http://localhost:8080 (or custom port)
-```
-
-This is useful for testing production builds locally before deployment, including compression and cache busting.
-
-### Smoke Testing
-
-After building sites, you can run automated smoke tests to verify all sites load correctly without errors:
-
-```bash
-# Build sites first
-rake build what=all
-
-# Terminal 1: Start the build server (if not already running)
-rake serve:build             # Default port 8080
-rake serve:build PORT=9000   # Custom port
-
-# Terminal 2: Run smoke tests
-rake test:smoke              # Uses port 8080 by default
-PORT=9000 rake test:smoke    # Custom port
-
-# Or run without server already running (auto-starts and stops)
-rake test:smoke              # Starts server, tests, then stops
-```
-
-**What it tests:**
-- HTTP status codes (accepts 2xx-3xx, fails on 4xx-5xx)
-- JavaScript console errors (filters out non-critical warnings)
-- Page loads successfully without timeouts
-- Handles redirects gracefully (e.g., support → discuss.binaryage.com)
-
-**Features:**
-- Automatically detects all built sites from `.stage/build/` directory
+#### Smoke Testing (`rake test:smoke`)
 - Uses Playwright for headless browser testing
-- Auto-installs Playwright on first run
-- Can start/stop `rake serve:build` automatically if needed
-- Exits with status code 0 (all passed) or 1 (failures)
-- Provides detailed error output for failed tests
+- Auto-detects all built sites from `.stage/build/`
+- Tests HTTP status codes, JavaScript console errors, page load success
+- Auto-installs Playwright on first run (~210 MB Chromium)
+- Exit codes: 0 (all passed), 1 (failures)
+- Filters non-critical console warnings
 
-**Dependencies:**
-- Playwright (`@playwright/test`) - installed via `_node/package.json`
-- Chromium browser (~210 MB, auto-downloaded on first run)
+#### Snapshot System (`rake snapshot:*`)
+- Captures full build output to `.snapshots/<name>/`
+- Excludes volatile artifacts: `_cache/`, `.configs/`, `atom.xml`
+- Stores metadata: timestamp, git commit, description
+- Diff compares file trees excluding volatile directories
+- Exit codes: 0 (identical), 1 (differences), 2 (error)
+- Use for verifying refactoring doesn't change build output
 
-**Use cases:**
-- CI/CD pipeline integration
-- Pre-deployment verification
-- Regression testing after build system changes
-- Quick sanity check after major changes
-
-### Visual Screenshot Testing
-
-The screenshot testing system captures full-page screenshots of all sites and provides visual diff comparison with highlighted changes.
-
-**Create a screenshot set:**
-```bash
-# Build sites first
-rake build
-
-# Create baseline screenshot set
-rake screenshot:create name=baseline desc="Before CSS refactoring"
-
-# Screenshots saved to: .screenshots/baseline/
-```
-
-**Compare with baseline:**
-```bash
-# Make changes and rebuild
-rake build
-
-# Compare current build with baseline
-rake screenshot:diff name=baseline
-
-# Auto-open HTML report in browser
-rake screenshot:diff name=baseline open=1
-```
-
-**List screenshot sets:**
-```bash
-rake screenshot:list
-```
-
-**How it works:**
-- Uses Playwright to capture full-page PNG screenshots (viewport: 1920x1080)
-- Uses ODiff for fast visual comparison (6-7x faster than alternatives)
-- Generates interactive HTML report with side-by-side comparison
-- Highlights pixel differences in magenta
+#### Screenshot System (`rake screenshot:*`)
+- Captures full-page PNG screenshots (viewport: 1920x1080)
+- Uses ODiff for visual comparison (6-7x faster than pixelmatch)
+- Generates HTML report with side-by-side comparison
+- Magenta highlighting for pixel differences
 - Auto-starts/stops build server as needed
-- Stores metadata (git commit, timestamp, description)
-- Automatically excludes sites from SCREENSHOT_EXCLUDES config (e.g., redirects)
+- Storage: `.screenshots/` (~60-120 MB per set)
+- Excludes sites via SCREENSHOT_EXCLUDES config
+- Use for visual regression testing during CSS changes
 
-**HTML Report Features:**
-- Side-by-side view (Baseline | Current | Diff)
-- Jump navigation to changed sites
-- Percentage diff per site
-- Color-coded highlighting of changes
-- Git metadata display
+### Git Submodule Status Command
 
-**Use cases:**
-- Visual regression testing during CSS refactoring
-- Verifying build system changes don't affect output
-- Before/after comparison for major updates
-- Detecting unintended visual changes
-
-**Dependencies:**
-- Playwright (`@playwright/test`) - browser automation
-- ODiff (`odiff-bin`) - visual diff tool
-- Chromium browser (auto-downloaded on first run)
-
-**Storage:**
-- Screenshot sets stored in `.screenshots/` directory
-- ~60-120 MB per set (12 sites × 5-10 MB each)
-- Diff reports in `.screenshots/.diff-{name}/`
-
-**Configuration:**
-- Excluded sites: Configured in `_lib/tasks/config.rb` via `SCREENSHOT_EXCLUDES`
-- Default excludes: `['support']` (redirect-only site)
-- Add sites to exclude list to skip them entirely during capture/diff
-
-**Note:** Sites configured in SCREENSHOT_EXCLUDES are automatically skipped during both capture and comparison operations.
-
-### Building Sites
-```bash
-rake build                   # Build all sites for production
-rake build what=www,blog     # Build specific sites
-```
-
-### Git Submodule Management
-```bash
-rake status                  # Check status of all submodules (shows issues only)
-rake status verbose=1        # Check status with full details for all submodules
-rake pin                     # Pin all submodules to latest branch tips
-rake reset                   # DESTRUCTIVE: Reset workspace to remote state (destroys local changes)
-```
-
-**Status Command Details:**
-
-The `rake status` command provides a comprehensive overview of all git submodules and their `shared/` submodules:
+The `rake status` command provides comprehensive overview of all git submodules.
 
 **What it checks:**
-- Current branch (main submodules should be on `web`, shared should be on `master`)
-- Working directory cleanliness (uncommitted changes)
+- Current branch (main submodules: `web`, shared: `master`)
+- Working directory cleanliness
 - Ahead/behind status relative to remote
-- Shared submodule commit hashes and status
-
-**Output modes:**
-- **Default** (`rake status`): Shows only submodules with issues, plus ahead/behind info
-- **Verbose** (`rake status verbose=1`): Shows detailed status for all submodules
+- Shared submodule commit hashes
 
 **Visual indicators:**
 - ✓ (green) - Clean, no issues
-- ● (yellow) - Has issues (uncommitted changes, wrong branch, etc.)
+- ● (yellow) - Has issues (uncommitted changes, wrong branch)
 - ✗ (red) - Missing or critical error
-- ↑N (green) - N commits ahead of remote
-- ↓N (red) - N commits behind remote
-- ⚠ (yellow) - Uncommitted changes warning
-- ↔ (blue) - Remote status indicator
+- ↑N (green) - N commits ahead
+- ↓N (red) - N commits behind
+- ⚠ (yellow) - Uncommitted changes
+- ↔ (blue) - Remote status
 
-**Exit codes:**
-- 0 - All clean
-- 1 - Issues found (behind remote or shared issues)
-
-### Publishing
-```bash
-rake publish                 # Publish all dirty sites
-rake publish force=1         # Force publish all sites
-rake publish dont_push=1     # Build but don't push
-```
-
-### Dependency Management
-```bash
-rake upgrade                 # Upgrade both Ruby (bundler) and Node dependencies
-rake upgrade:ruby            # Upgrade Ruby dependencies only
-rake upgrade:node            # Upgrade Node dependencies only
-```
-
-### Other Utilities
-```bash
-rake clean                   # Clean staging directories
-rake inspect                 # List all registered sites
-rake store                   # Generate FastSpring store template zip
-```
-
-### Testing Build Changes
-
-When making significant changes to the build system, use the snapshot/diff system to verify that changes don't unexpectedly alter build output:
-
-```bash
-# 1. Create a baseline snapshot before making changes
-rake snapshot:create name=baseline desc="Before refactoring"
-
-# 2. Make your code changes
-
-# 3. Rebuild all sites
-rake build
-
-# 4. Compare current build with snapshot
-rake snapshot:diff name=baseline
-
-# 5. For detailed file-level differences
-rake snapshot:diff name=baseline verbose=1
-```
-
-**Snapshot Management:**
-
-```bash
-# Create a snapshot with description
-rake snapshot:create name=<name> desc="<description>"
-
-# List all snapshots
-rake snapshot:list
-
-# Compare snapshot with current build
-rake snapshot:diff name=<name>           # Summary view
-rake snapshot:diff name=<name> verbose=1 # Detailed file-level changes
-```
-
-**How it works:**
-- `snapshot:create` builds all sites and copies `.stage/build/` to `.snapshots/<name>/`
-- Volatile artifacts (`_cache/`, `.configs/`) are excluded to save space
-- Metadata is saved (timestamp, git commit hash, description)
-- `snapshot:diff` compares snapshots excluding volatile directories
-- Exit codes: 0 (identical), 1 (differences found), 2 (error)
-
-**Use cases:**
-- Verifying refactoring doesn't change output
-- Testing build system modifications
-- Ensuring reproducible builds
-- Comparing output before/after dependency upgrades
+**Exit codes:** 0 (all clean), 1 (issues found)
 
 ## Architecture Details
 
@@ -567,99 +314,11 @@ When making changes to a website (e.g., totalfinder-web):
 - Nginx proxy runs on port 80, individual Jekyll servers on ports 4101+
 - Each site is accessible at `http://{subdomain}.binaryage.org`
 
-## Troubleshooting
+## Advanced Troubleshooting & IDE Setup
 
-### mise issues
+See [README.md](README.md) for basic troubleshooting (mise, Ruby, bundle install, etc.).
 
-**Problem**: mise not activating Ruby/Node or showing wrong versions
-
-**Solution**:
-1. Check mise is installed: `mise --version`
-2. Check tools are installed: `mise list`
-3. Install tools if needed: `mise install`
-4. Check mise is activated in shell: `mise current`
-5. Verify: `ruby --version` (should show 3.4.7) and `node --version` (should show 22.21.1)
-
-**Problem**: mise shell integration not working
-
-**Solution**: Make sure mise is activated in your shell config:
-```bash
-# For fish shell
-echo '~/.local/bin/mise activate fish | source' >> ~/.config/fish/config.fish
-source ~/.config/fish/config.fish
-```
-
-Or if installed via Homebrew, check if it's automatically activated:
-```bash
-mise doctor  # Shows mise configuration and any issues
-```
-
-**Problem**: Tools not auto-switching when cd'ing into project
-
-**Solution**:
-1. Check `.tool-versions` file exists: `cat .tool-versions`
-2. Run `mise install` to ensure all tools are installed
-3. Exit and re-enter the directory: `cd .. && cd site`
-4. Check active versions: `mise current`
-
-### General Ruby issues
-
-**Problem**: `bundle install` fails with permission errors
-
-**Solution**: mise installs gems in user space. Never use `sudo`. If you still have issues:
-```bash
-gem install bundler
-bundle install
-```
-
-**Problem**: Wrong Ruby version active
-
-**Solution**:
-1. Check `.tool-versions` file exists and contains `ruby 3.4.7`
-2. Run `mise current` to see active versions
-3. Run `mise install` to ensure Ruby 3.4.7 is installed
-4. Exit and re-enter directory: `cd .. && cd site`
-5. Check Ruby version: `ruby --version`
-
-**Problem**: Jekyll fails with "cannot load such file -- csv (LoadError)" or similar errors
-
-**Solution**: Ruby 3.0+ extracted several standard library gems from core. The Gemfile already includes the necessary stdlib gems (base64, bigdecimal, csv, logger). If you encounter similar errors for other gems, they may need to be added to the Gemfile.
-
-Common Ruby 3.x stdlib gems that may be needed:
-- `csv` - CSV file handling
-- `base64` - Base64 encoding/decoding
-- `bigdecimal` - Arbitrary precision decimal arithmetic
-- `logger` - Logging functionality
-- `mutex_m` - Mixin to extend objects with synchronization
-- `ostruct` - OpenStruct class
-
-### CSS Minification Issues
-
-**Problem**: Build shows warning "Lightning CSS binary not found" or CSS is not minified
-
-**Solution**: The build system uses `lightningcss-cli` (npm package) for CSS minification. Make sure it's installed:
-
-```bash
-# Option 1: Run rake init (recommended for new setup)
-rake init
-
-# Option 2: Just install node dependencies
-cd _node
-npm install
-
-# Option 3: Install globally (not recommended, but works)
-npm install -g lightningcss-cli
-```
-
-**Verification**: Check that lightningcss-cli is available:
-```bash
-ls -la _node/node_modules/.bin/lightningcss
-# Should show a symlink to ../lightningcss-cli/lightningcss
-```
-
-**How it works**: The build system uses the local `_node/node_modules/.bin/lightningcss` binary for CSS compression. If the binary is not found, a warning is shown and uncompressed CSS is used as a fallback.
-
-## RubyMine IDE Setup
+### RubyMine IDE Setup
 
 ### Setting up Ruby SDK from mise
 
