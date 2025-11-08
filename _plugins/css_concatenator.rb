@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
-# A Jekyll plugin to concatenate CSS files via @import statements
-# Replaces the Stylus converter for simple CSS concatenation
+# A Jekyll plugin to process CSS files via lightningcss
+# Replaces the Stylus converter for CSS transformation and bundling
+#
+# Features:
+# - Transforms CSS nesting to flat CSS for browser compatibility
+# - Processes @import statements
+# - Optional minification (controlled by site.dev config)
 
 require 'pathname'
+require 'tempfile'
+require 'open3'
 
 module Jekyll
   class CssConcatenator < Converter
@@ -12,7 +19,7 @@ module Jekyll
 
     def initialize(config)
       super
-      @site_source = nil
+      @config = config
     end
 
     def matches(ext)
@@ -25,36 +32,49 @@ module Jekyll
 
     def convert(content)
       # Jekyll runs with CWD set to the website directory (www, blog, etc.)
-      # CSS files are in shared/css/ relative to the website root
-      base_dir = 'shared/css'
+      # Remove YAML front matter and create temp file in shared/css/ for @import resolution
+      css_content = content.lines.reject { |line| line.strip == '---' }.join
 
-      result = []
+      # Create temp file in shared/css/ directory so lightningcss can resolve @import
+      source_file = Tempfile.new(['site', '.css'], 'shared/css')
+      result_file = Tempfile.new(['result', '.css'])
 
-      content.each_line do |line|
-        # Skip YAML front matter
-        next if line.strip == '---'
+      begin
+        source_file.write(css_content)
+        source_file.close
 
-        # Process @import statements
-        if line =~ /@import\s+["']([^"']+)["']/
-          import_file = $1
-          import_path = File.join(base_dir, import_file)
+        # Get path to lightningcss binary
+        root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+        lightningcss_bin = File.join(root, '_node/node_modules/.bin/lightningcss')
 
-          if File.exist?(import_path)
-            imported_content = File.read(import_path)
-            result << imported_content
-          else
-            warn "CSS Concatenator: Could not find #{import_path}"
-          end
-        elsif line =~ /^\/\//
-          # Skip comments
-          next
-        else
-          # Keep other lines (comments, etc.)
-          result << line unless line.strip.empty?
+        unless File.exist?(lightningcss_bin)
+          raise "Lightning CSS binary not found at: #{lightningcss_bin}\n" \
+                "Run 'rake init' to install dependencies."
         end
-      end
 
-      result.join("\n")
+        # Build lightningcss command
+        # --bundle: resolves @import statements (relative to source file)
+        # --targets: browser compatibility (transforms nesting)
+        # --minify: only in production (when dev mode is false)
+        minify_flag = @config['dev'] ? '' : '--minify'
+
+        cmd = "#{lightningcss_bin} #{minify_flag} --bundle --targets '>= 0.25%' #{source_file.path} -o #{result_file.path}"
+
+        # Execute lightningcss
+        _stdout, stderr, status = Open3.capture3(cmd)
+
+        unless status.success?
+          error_msg = "CSS Concatenator (lightningcss) failed.\n"
+          error_msg += "Command: #{cmd}\n"
+          error_msg += "Error output:\n#{stderr}" unless stderr.empty?
+          raise error_msg
+        end
+
+        File.read(result_file.path)
+      ensure
+        source_file&.unlink
+        result_file&.unlink
+      end
     rescue => e
       puts "CSS Concatenator Exception: #{e.message}"
       puts e.backtrace

@@ -53,7 +53,7 @@ def prepare_hosts_template(sites)
   io.string
 end
 
-def prepare_proxy_config(sites, _mode: :serve, proxy_port: 80)
+def prepare_proxy_config(sites, mode: :serve, proxy_port: 80)
   # header
   config = <<~CONFIG_SNIPPET
     daemon off;
