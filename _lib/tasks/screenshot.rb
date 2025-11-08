@@ -286,6 +286,22 @@ def format_size(bytes)
   format('%.1f %s', bytes.to_f / (1024**exp), units[exp])
 end
 
+def format_friendly_time(utc_time_string)
+  require 'time'
+  return 'unknown' if utc_time_string.nil? || utc_time_string == 'unknown'
+
+  begin
+    # Parse UTC time and convert to local time
+    utc_time = Time.parse(utc_time_string)
+    local_time = utc_time.getlocal
+
+    # Format: "Nov 8, 2025 at 2:54 PM"
+    local_time.strftime('%b %-d, %Y at %-I:%M %p')
+  rescue StandardError
+    utc_time_string
+  end
+end
+
 # Rake tasks
 
 namespace :screenshot do
@@ -498,9 +514,9 @@ namespace :screenshot do
 
   desc 'List all screenshot sets'
   task :list do
-    sets = list_screenshots
+    require 'time'
 
-    if sets.empty?
+    if !File.directory?(SCREENSHOTS_DIR) || list_screenshots.empty?
       puts 'No screenshot sets found.'
       puts "Create one with: #{'rake screenshot:create name=baseline'.gray}"
       return
@@ -508,13 +524,34 @@ namespace :screenshot do
 
     puts "#{'Available screenshot sets:'.cyan}\n\n"
 
-    sets.each do |name|
-      path = screenshot_path(name)
-      metadata = load_screenshot_metadata(path)
+    # Build list with metadata and sort by date (newest first)
+    screenshots = Dir.glob(File.join(SCREENSHOTS_DIR, '*'))
+                     .select { |f| File.directory?(f) }
+                     .map { |f| File.basename(f) }
+                     .reject { |name| name.start_with?('_') || name.start_with?('.') }
+                     .map do |name|
+                       path = screenshot_path(name)
+                       metadata = load_screenshot_metadata(path)
+                       created = metadata ? metadata['Created'] : nil
+                       # Parse date for sorting
+                       timestamp = if created && created != 'unknown'
+                                    Time.parse(created) rescue Time.at(0)
+                                  else
+                                    Time.at(0) # Unknown dates go to the end
+                                  end
+                       { name: name, path: path, metadata: metadata, timestamp: timestamp }
+                     end
+                     .sort_by { |s| -s[:timestamp].to_i } # Newest first (negative for descending)
+
+    screenshots.each do |screenshot|
+      name = screenshot[:name]
+      path = screenshot[:path]
+      metadata = screenshot[:metadata]
       size = get_directory_size(path)
 
-      if metadata
-        puts "  #{'○'.gray} #{name.bold} - #{format_size(size).green} - #{metadata['Created']}"
+      if metadata && metadata['Created']
+        friendly_time = format_friendly_time(metadata['Created'])
+        puts "  #{'○'.gray} #{name.bold} - #{format_size(size).green} - #{friendly_time}"
       else
         puts "  #{'○'.gray} #{name.bold} - #{format_size(size).green}"
       end
