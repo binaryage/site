@@ -27,13 +27,9 @@ desc 'run dev server'
 task :serve do
   all_names = sites_subdomains(SITES).join(',')
   what = ENV['what']
-  if what.to_s.strip.empty?
-    error_msg = 'specify coma separated list of sites to serve, or `rake serve what=all`, '\
-                "full list:\n`rake serve what=#{all_names}`"
-    die error_msg
-  end
 
-  what = all_names if what == 'all'
+  # Default to all sites if 'what' is not specified
+  what = all_names if what.to_s.strip.empty? || what == 'all'
   names = clean_names(what.split(','))
 
   puts "note: #{'make sure you have'.green} #{'/etc/hosts'.yellow} #{'properly configured, see'.green} #{'rake hosts'.blue}"

@@ -122,8 +122,8 @@ See [README.md](README.md) for common usage. This section provides additional te
 
 **Development:**
 - `rake proxy` - Start nginx proxy (requires sudo for port 80)
-- `rake serve what=www,blog` - Start Jekyll dev server with LiveReload (port 35729+)
-- `rake serve what=all` - Serve all sites
+- `rake serve` - Start Jekyll dev server with LiveReload for all sites (default, port 35729+)
+- `rake serve what=www,blog` - Start Jekyll dev server for specific sites only
 - `rake serve:build` - Serve production builds (port 8080)
 
 **Building:**

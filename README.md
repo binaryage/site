@@ -32,8 +32,8 @@ rake init         # Initialize submodules, install dependencies
 rake proxy
 
 # Terminal 2: Start Jekyll development server with live reload
-rake serve what=www,blog    # Serve specific sites
-rake serve what=all          # Serve all sites
+rake serve                   # Serve all sites (default)
+rake serve what=www,blog     # Serve only specific sites
 ```
 
 Make sure `/etc/hosts` is configured first: `rake hosts`
