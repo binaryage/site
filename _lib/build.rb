@@ -26,11 +26,6 @@ def prepare_jekyll_config(site, opts)
   config['target_url'] = "https://#{site.subdomain}.#{domain}"
   config['enforce_ssl'] = "#{site.subdomain}.#{domain}"
   config['dev'] = dev_mode
-  config['stylus'] = {
-    'compress' => !dev_mode,
-    'debug' => dev_mode,
-    'path' => './shared/css/site.styl'
-  }
   config['combinejs'] = [{
     'path' => './shared/js/code.list',
     'minify' => !dev_mode

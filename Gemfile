@@ -14,7 +14,6 @@ gem 'colored2'
 # terser (modern ES6+ minifier) is used for JS
 # lightningcss-cli (npm package) is used for CSS (installed via _node/package.json)
 gem 'jekyll'
-gem 'stylus'
 gem 'terser'
 gem 'tilt'
 gem 'webrick'
