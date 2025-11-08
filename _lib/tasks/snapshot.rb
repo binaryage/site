@@ -57,6 +57,22 @@ def load_snapshot_metadata(path)
   }
 end
 
+def format_friendly_time(utc_time_string)
+  require 'time'
+  return 'unknown' if utc_time_string.nil? || utc_time_string == 'unknown'
+
+  begin
+    # Parse UTC time and convert to local time
+    utc_time = Time.parse(utc_time_string)
+    local_time = utc_time.getlocal
+
+    # Format: "Nov 8, 2025 at 2:54 PM"
+    local_time.strftime('%b %-d, %Y at %-I:%M %p')
+  rescue StandardError
+    utc_time_string
+  end
+end
+
 def human_size(bytes)
   units = ['B', 'KB', 'MB', 'GB', 'TB']
   return "0 B" if bytes.zero?
@@ -353,7 +369,7 @@ namespace :snapshot do
           name = File.basename(snap[:path])
           size = directory_size(snap[:path])
           metadata = load_snapshot_metadata(snap[:path])
-          created = metadata[:created] || 'unknown'
+          created = format_friendly_time(metadata[:created])
 
           puts "  #{'○'.gray} #{name} - #{human_size(size)} - #{created}"
         end
