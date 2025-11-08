@@ -14,9 +14,11 @@ async function captureScreenshot(browser, site, port, outputDir) {
   const page = await context.newPage();
 
   try {
+    // Use 'domcontentloaded' instead of 'networkidle' for more reliable capture
+    // External resources (fonts, analytics) can cause networkidle timeouts
     await page.goto(url, {
       timeout: DEFAULT_TIMEOUT,
-      waitUntil: 'networkidle'
+      waitUntil: 'domcontentloaded'
     });
 
     // Disable animations for consistency
@@ -24,8 +26,9 @@ async function captureScreenshot(browser, site, port, outputDir) {
       content: '*, *::before, *::after { animation: none !important; transition: none !important; }'
     });
 
-    // Small delay to let any remaining JS settle
-    await page.waitForTimeout(500);
+    // Longer delay to let external resources and JS settle
+    // This ensures fonts are loaded and page is fully rendered
+    await page.waitForTimeout(2000);
 
     // Take full-page screenshot
     const filename = `${site.subdomain}.png`;
