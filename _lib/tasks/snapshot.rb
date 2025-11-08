@@ -327,19 +327,32 @@ namespace :snapshot do
 
   desc 'list all available snapshots'
   task :list do
+    require 'time'
+
     puts "#{'Available snapshots:'.bold}"
     if File.directory?(SNAPSHOTS_DIR)
       snapshots = Dir.glob(File.join(SNAPSHOTS_DIR, '*'))
                      .select { |f| File.directory?(f) }
-                     .sort
+                     .map do |snap_path|
+                       metadata = load_snapshot_metadata(snap_path)
+                       created = metadata[:created]
+                       # Parse date for sorting (format: "YYYY-MM-DD HH:MM:SS UTC")
+                       timestamp = if created && created != 'unknown'
+                                    Time.parse(created) rescue Time.at(0)
+                                  else
+                                    Time.at(0) # Unknown dates go to the end
+                                  end
+                       { path: snap_path, timestamp: timestamp }
+                     end
+                     .sort_by { |s| -s[:timestamp].to_i } # Newest first (negative for descending)
 
       if snapshots.empty?
         puts '  (none)'.gray
       else
-        snapshots.each do |snap_path|
-          name = File.basename(snap_path)
-          size = directory_size(snap_path)
-          metadata = load_snapshot_metadata(snap_path)
+        snapshots.each do |snap|
+          name = File.basename(snap[:path])
+          size = directory_size(snap[:path])
+          metadata = load_snapshot_metadata(snap[:path])
           created = metadata[:created] || 'unknown'
 
           puts "  #{'○'.gray} #{name} - #{human_size(size)} - #{created}"
