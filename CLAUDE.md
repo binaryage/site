@@ -222,7 +222,7 @@ rake serve what=all                      # Serve all sites
 rake hosts                   # Show required /etc/hosts entries
 ```
 
-The development server uses browser-sync for live reloading and CSS watching.
+The development server uses Jekyll's native LiveReload feature for automatic browser refresh when files change. Each site gets a dedicated LiveReload port (35729+).
 
 ### Testing Production Builds Locally
 ```bash
@@ -455,7 +455,7 @@ There are **two levels** of submodules in this project, each handled differently
 - `_lib/utils.rb` - Utility functions
 - `_lib/store.rb` - FastSpring store template generation
 - `Gemfile` - Ruby dependencies (Jekyll, Stylus, CoffeeScript, compression tools)
-- `_node/package.json` - Node dependencies (browser-sync, Playwright for testing)
+- `_node/package.json` - Node dependencies (lightningcss-cli for CSS minification, Playwright for testing)
 - `_node/smoke-test.mjs` - Playwright-based smoke test script
 
 ## Working with Submodules

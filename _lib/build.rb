@@ -105,8 +105,9 @@ def build_sites(sites, opts, names)
   end
 end
 
-def serve_site(site, base_dir)
+def serve_site(site, base_dir, index)
   port = site.port
+  livereload_port = 35729 + index  # Base LiveReload port + site index
   Dir.chdir site.dir do
     opts = { dev_mode: true,
              stage: base_dir }
@@ -119,8 +120,10 @@ def serve_site(site, base_dir)
             'jekyll serve ' \
             '--incremental ' \
             '--drafts ' \
+            '--livereload ' \
+            "--livereload-port #{livereload_port} " \
             '--trace ' \
-            "--port 1#{port} " \
+            "--port #{port} " \
             '-b / ' \
             "--config \"#{config_path}\" " \
             "--destination \"#{work_dir}\""
@@ -128,29 +131,14 @@ def serve_site(site, base_dir)
       sys(cmd, true, { 'NODE_NO_WARNINGS' => '1' })
     end
     sleep(0.2)
-    fork do
-      trap('INT') { exit 12 }
-      # see https://browsersync.io/docs/command-line
-      node_dir = File.join(Dir.pwd, '..', '_node')
-      # we have to switch to _node dir with package.json and node_modules, node/browser-sync expectes it for loading plugins
-      Dir.chdir node_dir do
-        verbosity = '--logLevel info' # '--logLevel debug'
-        submisivity = '--no-ui --no-online --no-open'
-        plugins = " --plugins \"bs-html-injector?files[]=#{work_dir}/**/*.html&prefix=#{work_dir}\""
-        locations = "--port #{port} --proxy http://localhost:1#{port} --files \"#{work_dir}/**/*.css\""
-        cmd = "node_modules/.bin/browser-sync start #{verbosity} #{submisivity} #{plugins} #{locations}"
-        sys(cmd)
-      end
-    end
-    sleep(0.2)
   end
 end
 
 def serve_sites(sites, base_dir, names)
-  names.each do |name|
+  names.each_with_index do |name, index|
     site = lookup_site(sites, name)
     if site
-      serve_site(site, base_dir)
+      serve_site(site, base_dir, index)
     else
       puts "unable to lookup site name '#{name}', valid names: '#{sites_subdomains(sites).join(',')}'"
     end
