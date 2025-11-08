@@ -34,6 +34,17 @@ namespace :init do
   task :repo do
     init_workspace(SITES)
   end
+
+  desc 'install dependencies for production builds (used by hookgun)'
+  task :deps do
+    # Install Ruby gems
+    sys('bundle install')
+
+    # Install Node.js dependencies
+    Dir.chdir NODE_DIR do
+      sys("#{NODE_PKG_MANAGER} install")
+    end
+  end
 end
 
 desc 'init workspace - needs special care'
