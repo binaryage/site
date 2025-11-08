@@ -25,6 +25,7 @@ BUILD_DIR = File.join(STAGE_DIR, 'build')
 STORE_DIR = File.join(STAGE_DIR, 'store')
 SNAPSHOTS_DIR = File.join(ROOT, '.snapshots')
 SNAPSHOT_EXCLUDES = ['_cache', '.configs', 'atom.xml']
+SCREENSHOTS_DIR = File.join(ROOT, '.screenshots')
 
 # Dynamically detect all git submodules at root level
 DIRS = `git config --file .gitmodules --get-regexp path`

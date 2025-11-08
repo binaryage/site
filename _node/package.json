@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
-    "lightningcss-cli": "^1.30.2"
+    "lightningcss-cli": "^1.30.2",
+    "odiff-bin": "^3.0.0"
   }
 }

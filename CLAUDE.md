@@ -282,6 +282,71 @@ rake test:smoke              # Starts server, tests, then stops
 - Regression testing after build system changes
 - Quick sanity check after major changes
 
+### Visual Screenshot Testing
+
+The screenshot testing system captures full-page screenshots of all sites and provides visual diff comparison with highlighted changes.
+
+**Create a screenshot set:**
+```bash
+# Build sites first
+rake build
+
+# Create baseline screenshot set
+rake screenshot:create name=baseline desc="Before CSS refactoring"
+
+# Screenshots saved to: .screenshots/baseline/
+```
+
+**Compare with baseline:**
+```bash
+# Make changes and rebuild
+rake build
+
+# Compare current build with baseline
+rake screenshot:diff name=baseline
+
+# Auto-open HTML report in browser
+rake screenshot:diff name=baseline open=1
+```
+
+**List screenshot sets:**
+```bash
+rake screenshot:list
+```
+
+**How it works:**
+- Uses Playwright to capture full-page PNG screenshots (viewport: 1920x1080)
+- Uses ODiff for fast visual comparison (6-7x faster than alternatives)
+- Generates interactive HTML report with side-by-side comparison
+- Highlights pixel differences in magenta
+- Auto-starts/stops build server as needed
+- Stores metadata (git commit, timestamp, description)
+
+**HTML Report Features:**
+- Side-by-side view (Baseline | Current | Diff)
+- Jump navigation to changed sites
+- Percentage diff per site
+- Color-coded highlighting of changes
+- Git metadata display
+
+**Use cases:**
+- Visual regression testing during CSS refactoring
+- Verifying build system changes don't affect output
+- Before/after comparison for major updates
+- Detecting unintended visual changes
+
+**Dependencies:**
+- Playwright (`@playwright/test`) - browser automation
+- ODiff (`odiff-bin`) - visual diff tool
+- Chromium browser (auto-downloaded on first run)
+
+**Storage:**
+- Screenshot sets stored in `.screenshots/` directory
+- ~60-120 MB per set (12 sites × 5-10 MB each)
+- Diff reports in `.screenshots/.diff-{name}/`
+
+**Note:** Some sites may timeout during capture (e.g., redirects). This is expected and doesn't fail the entire process.
+
 ### Building Sites
 ```bash
 rake build                   # Build all sites for production
@@ -455,8 +520,10 @@ There are **two levels** of submodules in this project, each handled differently
 - `_lib/utils.rb` - Utility functions
 - `_lib/store.rb` - FastSpring store template generation
 - `Gemfile` - Ruby dependencies (Jekyll, Stylus, CoffeeScript, compression tools)
-- `_node/package.json` - Node dependencies (lightningcss-cli for CSS minification, Playwright for testing)
+- `_node/package.json` - Node dependencies (lightningcss-cli for CSS minification, Playwright for testing, ODiff for visual diffs)
 - `_node/smoke-test.mjs` - Playwright-based smoke test script
+- `_node/screenshot-capture.mjs` - Screenshot capture script for visual testing
+- `_node/screenshot-diff.mjs` - Visual diff comparison script using ODiff
 
 ## Working with Submodules
 

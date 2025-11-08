@@ -1,5 +1,6 @@
 .stage/
 .snapshots/
+.screenshots/
 store-template.zip
 .idea
 .sass-cache
