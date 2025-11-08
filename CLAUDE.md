@@ -321,6 +321,7 @@ rake screenshot:list
 - Highlights pixel differences in magenta
 - Auto-starts/stops build server as needed
 - Stores metadata (git commit, timestamp, description)
+- Automatically excludes sites from SCREENSHOT_EXCLUDES config (e.g., redirects)
 
 **HTML Report Features:**
 - Side-by-side view (Baseline | Current | Diff)
@@ -345,7 +346,12 @@ rake screenshot:list
 - ~60-120 MB per set (12 sites × 5-10 MB each)
 - Diff reports in `.screenshots/.diff-{name}/`
 
-**Note:** Some sites may timeout during capture (e.g., redirects). This is expected and doesn't fail the entire process.
+**Configuration:**
+- Excluded sites: Configured in `_lib/tasks/config.rb` via `SCREENSHOT_EXCLUDES`
+- Default excludes: `['support']` (redirect-only site)
+- Add sites to exclude list to skip them entirely during capture/diff
+
+**Note:** Sites configured in SCREENSHOT_EXCLUDES are automatically skipped during both capture and comparison operations.
 
 ### Building Sites
 ```bash

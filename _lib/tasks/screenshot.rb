@@ -325,6 +325,13 @@ namespace :screenshot do
     build_sites = create_build_sites(SITES, BUILD_BASE_PORT, LOCAL_DOMAIN)
     build_sites = build_sites.select { |site| built_sites.include?(site.name) }
 
+    # Filter out excluded sites
+    build_sites = build_sites.reject { |site| SCREENSHOT_EXCLUDES.include?(site.name) }
+
+    if SCREENSHOT_EXCLUDES.any?
+      puts "#{'Excluded sites:'.gray} #{SCREENSHOT_EXCLUDES.join(', ').gray}\n\n"
+    end
+
     # Ensure server is running
     server_pid = ensure_build_server_running(port)
 
@@ -407,6 +414,13 @@ namespace :screenshot do
 
     build_sites = create_build_sites(SITES, BUILD_BASE_PORT, LOCAL_DOMAIN)
     build_sites = build_sites.select { |site| built_sites.include?(site.name) }
+
+    # Filter out excluded sites
+    build_sites = build_sites.reject { |site| SCREENSHOT_EXCLUDES.include?(site.name) }
+
+    if SCREENSHOT_EXCLUDES.any?
+      puts "#{'Excluded sites:'.gray} #{SCREENSHOT_EXCLUDES.join(', ').gray}\n\n"
+    end
 
     # Ensure server is running
     server_pid = ensure_build_server_running(port)
