@@ -35,8 +35,8 @@ async function compareSite(site, baselineDir, currentDir, diffDir) {
       site: site.name,
       subdomain: site.subdomain,
       matched: result.match,
-      diffCount: result.match ? 0 : parseInt(result.reason) || 0,
-      diffPercentage: 0, // Will be calculated later if needed
+      diffCount: result.match ? 0 : (result.diffCount || 0),
+      diffPercentage: result.match ? 0 : (result.diffPercentage || 0),
       baselinePath: baselineCopyPath,
       currentPath: currentCopyPath,
       diffPath: result.match ? null : diffPath
