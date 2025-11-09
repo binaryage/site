@@ -35,11 +35,16 @@ def prepare_jekyll_config(site, opts)
     'path' => './shared/js/changelog.list',
     'minify' => !dev_mode
   }]
+  # Convert absolute paths to relative paths for Jekyll (relative to site.dir)
+  # Jekyll interprets absolute paths incorrectly when they contain the source path
+  html_press_cache = File.join(stage, '_cache')
+  jekyll_cache_dir = File.join(stage, '_cache', 'jekyll', site.name)
+
   config['html_press'] = {
     'compress' => !dev_mode,
-    'cache' => File.join(stage, '_cache')
+    'cache' => Pathname.new(html_press_cache).relative_path_from(Pathname.new(site.dir)).to_s
   }
-  config['cache_dir'] = File.join(stage, '_cache', 'jekyll', site.name)
+  config['cache_dir'] = Pathname.new(jekyll_cache_dir).relative_path_from(Pathname.new(site.dir)).to_s
   config['busterizer'] = {
     'css' => busters && !dev_mode,
     'html' => busters && !dev_mode

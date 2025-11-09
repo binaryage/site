@@ -16,7 +16,12 @@ class SimpleLogger
 end
 
 def relative_cache_file_path(full_path)
-  Pathname.new(full_path).relative_path_from(Pathname.new(File.join(Dir.pwd, '..'))).to_s
+  pathname = Pathname.new(full_path)
+  # If path is already relative, return as-is
+  return full_path if pathname.relative?
+
+  # Otherwise compute relative path from parent directory
+  pathname.relative_path_from(Pathname.new(File.join(Dir.pwd, '..'))).to_s
 end
 
 def do_html_press?(site)
