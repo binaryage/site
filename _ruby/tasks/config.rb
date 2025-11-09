@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative '../colored2'
-require_relative '../utils'
-require_relative '../site'
-require_relative '../workspace'
-require_relative '../build'
-require_relative '../store'
+require_relative '../lib/colored2'
+require_relative '../lib/utils'
+require_relative '../lib/site'
+require_relative '../lib/workspace'
+require_relative '../lib/build'
+require_relative '../lib/store'
 
 BASE_PORT = 4101
 BUILD_BASE_PORT = 8000 # base port for serving built static sites

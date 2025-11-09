@@ -3,7 +3,6 @@
 .screenshots/
 store-template.zip
 .idea
-.sass-cache
 .rubocop_todo.yml
 *.iml
 .claude/

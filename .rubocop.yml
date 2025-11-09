@@ -10,8 +10,7 @@ AllCops:
     - '**/Gemfile'
     - '**/Rakefile'
     - '**/rakefile'
-    - '_lib/*.rb'
-    - '_plugins/*.rb'
+    - '_ruby/**/*.rb'
   Exclude:
     - '_node/**/*'
     - 'firequery/rakefile'

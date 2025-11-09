@@ -44,7 +44,7 @@ module Jekyll
         source_file.close
 
         # Get path to lightningcss binary
-        root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+        root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
         lightningcss_bin = File.join(root, '_node/node_modules/.bin/lightningcss')
 
         unless File.exist?(lightningcss_bin)

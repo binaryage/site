@@ -10,9 +10,9 @@ gem 'logger'
 gem 'stringio'
 
 gem 'colored2'
-# html_press dependencies (html_press is now vendored in _lib/html_press.rb)
+# html_press dependencies (html_press is now vendored in _ruby/lib/html_press.rb)
 # terser (modern ES6+ minifier) is used for JS minification
-# CSS concatenation via _plugins/css_concatenator.rb (processes @import in site.styl)
+# CSS concatenation via _ruby/jekyll-plugins/css_concatenator.rb (processes @import in site.styl)
 # lightningcss-cli (npm package) is used for CSS minification (installed via _node/package.json)
 gem 'jekyll'
 gem 'terser'

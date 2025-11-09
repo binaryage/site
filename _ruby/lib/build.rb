@@ -24,7 +24,7 @@ def prepare_jekyll_config(site, opts)
   config['plugins'] << 'jekyll-redirect-from' # see https://help.github.com/articles/redirects-on-github-pages/
   config['layouts_dir'] = 'shared/layouts'
   config['includes_dir'] = 'shared/includes'
-  config['plugins_dir'] = '../_plugins'
+  config['plugins_dir'] = '../_ruby/jekyll-plugins'
   config['target_url'] = "https://#{site.subdomain}.#{domain}"
   config['enforce_ssl'] = "#{site.subdomain}.#{domain}"
   config['dev'] = dev_mode
@@ -68,7 +68,8 @@ end
 
 def bundle_exec
   bundle_path = `which bundle`.strip
-  debugger_prefix + "\"#{bundle_path}\" exec "
+  gemfile_path = File.join(ROOT, '_ruby/Gemfile')
+  debugger_prefix + "\"#{bundle_path}\" exec --gemfile=\"#{gemfile_path}\" "
 end
 
 def build_site(site, opts)

@@ -214,14 +214,14 @@ The `rake status` command provides comprehensive overview of all git submodules.
 
 ## Architecture Details
 
-### Site Structure (_lib/site.rb)
+### Site Structure (_ruby/lib/site.rb)
 - Each site has: directory path, port (base 4101+index), name, subdomain, and domain
 - Subdomain is extracted by stripping `-web` suffix from directory name (e.g., `totalfinder-web` → `totalfinder`)
-- Sites are defined in `_lib/tasks.rake` in the `DIRS` array
+- Sites are defined in `_ruby/tasks.rake` in the `DIRS` array
 
-### Build System (_lib/build.rb)
+### Build System (_ruby/lib/build.rb)
 - Uses Jekyll as the static site generator
-- Custom Jekyll plugins in `_plugins/`:
+- Custom Jekyll plugins in `_ruby/jekyll-plugins/`:
   - `stylus_converter.rb` - Stylus CSS preprocessing
   - `js_combinator.rb` - JavaScript concatenation from .list files
   - `compressor.rb` - Asset compression
@@ -232,7 +232,7 @@ The `rake status` command provides comprehensive overview of all git submodules.
 ### Jekyll Configuration
 - Layouts: `shared/layouts/`
 - Includes: `shared/includes/`
-- Plugins: `../_plugins/` (relative to submodule)
+- Plugins: `../_ruby/jekyll-plugins/` (relative to submodule)
 - CSS: Stylus files in `shared/css/`, main file: `site.styl`
 - JavaScript: CoffeeScript files in `shared/js/`, concatenated via `.list` files (e.g., `code.list`, `changelog.list`)
 
@@ -267,15 +267,15 @@ There are **two levels** of submodules in this project, each handled differently
 
 ## Configuration Files
 
-- `rakefile` - Main entry point, imports `_lib/tasks.rake`
-- `_lib/tasks.rake` - All rake task definitions and site configuration
-- `_lib/tasks/*.rb` - Organized rake task files (config, build, server, test, workspace, etc.)
-- `_lib/build.rb` - Jekyll build logic and configuration generation
-- `_lib/workspace.rb` - Git submodule management functions
-- `_lib/site.rb` - Site class definition
-- `_lib/utils.rb` - Utility functions
-- `_lib/store.rb` - FastSpring store template generation
-- `Gemfile` - Ruby dependencies (Jekyll, Stylus, CoffeeScript, compression tools)
+- `rakefile` - Main entry point, imports `_ruby/tasks.rake`
+- `_ruby/tasks.rake` - All rake task definitions and site configuration
+- `_ruby/tasks/*.rb` - Organized rake task files (config, build, server, test, workspace, etc.)
+- `_ruby/lib/build.rb` - Jekyll build logic and configuration generation
+- `_ruby/lib/workspace.rb` - Git submodule management functions
+- `_ruby/lib/site.rb` - Site class definition
+- `_ruby/lib/utils.rb` - Utility functions
+- `_ruby/lib/store.rb` - FastSpring store template generation
+- `_ruby/Gemfile` - Ruby dependencies (Jekyll, Stylus, CoffeeScript, compression tools)
 - `_node/package.json` - Node dependencies (lightningcss-cli for CSS minification, Playwright for testing, ODiff for visual diffs)
 - `_node/smoke-test.mjs` - Playwright-based smoke test script
 - `_node/screenshot-capture.mjs` - Screenshot capture script for visual testing
@@ -362,7 +362,7 @@ git push origin web
 
 **Technical details:**
 - Hook location: `.git/modules/<site>/hooks/pre-push`
-- Template: `_lib/hooks/pre-push.template`
+- Template: `_ruby/lib/hooks/pre-push.template`
 - Only checks `web` branch (deployment branch)
 - Respects standard git `--no-verify` bypass flag
 

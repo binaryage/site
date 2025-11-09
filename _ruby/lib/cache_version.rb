@@ -13,19 +13,19 @@ module CacheVersion
     files_to_hash = []
 
     # Collect all plugin files
-    plugins_dir = File.join(root_dir, '_plugins')
+    plugins_dir = File.join(root_dir, '_ruby/jekyll-plugins')
     if Dir.exist?(plugins_dir)
       files_to_hash += Dir.glob(File.join(plugins_dir, '**', '*.rb')).sort
     end
 
     # Collect all lib files
-    lib_dir = File.join(root_dir, '_lib')
+    lib_dir = File.join(root_dir, '_ruby/lib')
     if Dir.exist?(lib_dir)
       files_to_hash += Dir.glob(File.join(lib_dir, '**', '*.rb')).sort
     end
 
     # Add dependency lock files
-    gemfile_lock = File.join(root_dir, 'Gemfile.lock')
+    gemfile_lock = File.join(root_dir, '_ruby/Gemfile.lock')
     files_to_hash << gemfile_lock if File.exist?(gemfile_lock)
 
     package_lock = File.join(root_dir, '_node', 'package-lock.json')
