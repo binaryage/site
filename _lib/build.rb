@@ -5,6 +5,7 @@ require 'pathname'
 require 'yaml'
 
 require_relative 'utils'
+require_relative 'cache_version'
 
 # noinspection RubyStringKeysInHashInspection
 def prepare_jekyll_config(site, opts)
@@ -90,6 +91,10 @@ def build_site(site, opts)
 end
 
 def build_sites(sites, opts, names)
+  # Check and invalidate cache if plugins/dependencies changed
+  cache_dir = File.join(opts[:stage], '_cache')
+  CacheVersion.check_and_invalidate_if_needed(cache_dir)
+
   names.each do |name|
     site = lookup_site(sites, name)
     if site
@@ -130,6 +135,10 @@ def serve_site(site, base_dir, index)
 end
 
 def serve_sites(sites, base_dir, names)
+  # Check and invalidate cache if plugins/dependencies changed
+  cache_dir = File.join(base_dir, '_cache')
+  CacheVersion.check_and_invalidate_if_needed(cache_dir)
+
   names.each_with_index do |name, index|
     site = lookup_site(sites, name)
     if site

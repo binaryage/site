@@ -11,6 +11,19 @@ task :clean do
   sys("rm -rf \"#{STAGE_DIR}\"")
 end
 
+desc 'force invalidate and clean all caches (build, serve, jekyll)'
+task 'clean:cache' do
+  require_relative '../cache_version'
+  deleted = CacheVersion.invalidate_all_caches
+  if deleted.empty?
+    puts "ℹ️  No cache directories found"
+  else
+    dir_word = deleted.length == 1 ? 'directory' : 'directories'
+    puts "✅ Cleaned #{deleted.length} cache #{dir_word}"
+    deleted.each { |dir| puts "   🗑️  #{dir.sub(ROOT + '/', '')}" }
+  end
+end
+
 desc 'reset workspace to match remote changes - this will destroy your local changes!!!'
 task reset: [:clean] do
   reset_workspace(SITES)
