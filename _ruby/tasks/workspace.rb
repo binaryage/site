@@ -29,7 +29,7 @@ task reset: [:clean] do
   reset_workspace(SITES)
 end
 
-desc 'pin submodules to point to latest branch tips'
+desc 'Pin submodules to branch tips (use after git fetch or submodule update to fix detached HEAD)'
 task :pin do
   puts "note: #{'to get remote changes'.green} you have to do #{'git fetch'.blue} first"
   pin_workspace(SITES)

@@ -212,6 +212,49 @@ The `rake status` command provides comprehensive overview of all git submodules.
 
 **Exit codes:** 0 (all clean), 1 (issues found)
 
+### Pinning Submodules to Branch Tips (`rake pin`)
+
+Git submodules naturally end up in "detached HEAD" state after various operations. The `rake pin` task fixes this by checking out the correct tracking branch in each submodule.
+
+**When submodules become detached:**
+- After `git pull` in the root repository
+- After `git submodule update`
+- After pulling/fetching changes in individual submodules
+- After cloning the repository
+
+**What `rake pin` does:**
+- Checks out `web` branch in all site submodules
+- Checks out `master` branch in all shared submodules
+- Non-destructive - preserves uncommitted changes (will fail if conflicts exist)
+
+**Typical workflow:**
+
+```bash
+# Scenario 1: After pulling changes in the root repo
+git pull                    # Updates submodule pointers → detached HEAD
+rake pin                    # Moves submodules back to branch tips
+
+# Scenario 2: Getting latest changes
+cd www
+git fetch origin            # Get latest commits
+cd ..
+rake pin                    # Checkout latest origin/web
+
+# Scenario 3: After git submodule update
+git submodule update        # Updates to specific commits → detached HEAD
+rake pin                    # Return to branch tips
+```
+
+**Important distinctions:**
+
+| Task | Purpose | Destructive? | When to use |
+|------|---------|--------------|-------------|
+| `rake pin` | Checkout tracking branches | No | Fix detached HEAD, get to latest branch tip |
+| `rake reset` | Hard reset to remote state | Yes | Discard all local changes |
+| `rake shared:sync` | Sync shared commits across sites | No | After updating shared repository |
+
+**Note:** The pre-push hook and hookgun serve different purposes - they don't replace `rake pin`. The hook prevents bad pushes, hookgun updates remote pointers, but only `rake pin` manages local branch state.
+
 ## Architecture Details
 
 ### Site Structure (_ruby/lib/site.rb)

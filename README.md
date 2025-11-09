@@ -57,6 +57,7 @@ rake test:smoke             # Run automated smoke tests
 
 ```bash
 rake status                 # Check git submodule status
+rake pin                    # Fix detached HEAD - checkout branch tips after git pull/submodule update
 rake shared:sync            # Sync shared resources across all sites
 rake screenshot:create name=X  # Create screenshot baseline
 rake screenshot:diff name=X    # Compare screenshots
