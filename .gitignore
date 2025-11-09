@@ -5,6 +5,6 @@ store-template.zip
 .idea
 .rubocop_todo.yml
 *.iml
-.claude/
+.claude/settings.local.json
 .shared-autosync-enabled
 _adhoc/
