@@ -63,7 +63,8 @@ namespace :shared do
         # Fetch from source and checkout master branch at the commit
         # Using -B flag to create or reset master branch to the commit
         # This keeps HEAD pointing to the branch (not detached)
-        system("git fetch '#{source_path}' HEAD >/dev/null 2>&1") &&
+        # Also sync remote tracking ref to match source's origin/master state
+        system("git fetch '#{source_path}' refs/remotes/origin/master:refs/remotes/origin/master >/dev/null 2>&1") &&
         system("git checkout -B master #{source_commit} >/dev/null 2>&1")
       end
 
