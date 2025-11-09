@@ -59,14 +59,32 @@ while read local_ref local_sha remote_ref remote_sha; do
 
     # Fetch latest from origin/master to ensure we have up-to-date refs
     echo "${BLUE}📡 Fetching origin/master...${NC}"
-    if ! git fetch origin master 2>&1; then
-      echo "${YELLOW}⚠️  Warning: Failed to fetch origin/master${NC}"
-      echo "Continuing with cached refs..."
+    if ! git fetch origin master >/dev/null 2>&1; then
+      echo "${RED}❌ ERROR: Failed to fetch origin/master from shared submodule${NC}"
+      echo "Cannot verify if shared commits are pushed."
+      echo ""
+      echo "Try these steps:"
+      echo "  1. Check your network connection"
+      echo "  2. Verify shared submodule remote: ${GREEN}cd shared && git remote -v${NC}"
+      echo "  3. Manually fetch: ${GREEN}cd shared && git fetch origin${NC}"
+      echo ""
+      echo "Or bypass this check (not recommended):"
+      echo "  ${YELLOW}git push --no-verify origin web${NC}"
+      echo ""
+      exit 1
     fi
 
-    # Check for unpushed commits
+    # Verify origin/master ref exists
+    if ! git rev-parse origin/master >/dev/null 2>&1; then
+      echo "${RED}❌ ERROR: origin/master ref not found in shared submodule${NC}"
+      echo "The shared repository may not be properly initialized."
+      echo ""
+      exit 1
+    fi
+
+    # Check for unpushed commits using git rev-list (more reliable than grep)
+    unpushed_count=$(git rev-list origin/master..HEAD 2>/dev/null | wc -l | tr -d ' ')
     unpushed_commits=$(git log origin/master..HEAD --oneline 2>/dev/null)
-    unpushed_count=$(echo "$unpushed_commits" | grep -c . || echo 0)
 
     if [ "$unpushed_count" -gt 0 ]; then
       echo ""
