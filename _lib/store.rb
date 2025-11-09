@@ -5,11 +5,8 @@ require_relative 'build'
 
 def prune_shared(dir)
   img_dir = File.join(dir, 'img')
-  img2_dir = File.join(dir, 'img2')
   css_dir = File.join(dir, 'css')
   js_dir = File.join(dir, 'js')
-  sys("rm -rf \"#{img2_dir}/overlay\"*")
-  sys("rm -rf \"#{img2_dir}/asset\"*")
   sys("rm -rf \"#{img_dir}/overlay\"")
   sys("rm -rf \"#{img_dir}/scrollable\"")
   sys("rm -rf \"#{img_dir}/tabs\"")
