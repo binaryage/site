@@ -147,6 +147,7 @@ task :status do
   total_submodules = SITES.length
   clean_count = 0
   dirty_count = 0
+  shared_pointer_only_count = 0
   ahead_count = 0
   behind_count = 0
   wrong_branch_count = 0
@@ -198,9 +199,18 @@ task :status do
       # Check working directory status
       status_output = `git status --porcelain 2>/dev/null`.strip
       is_dirty = !status_output.empty?
+
+      # Detect if only shared submodule pointer changed (normal after rake shared:sync)
+      status_lines = status_output.lines
+      is_only_shared_pointer = (status_lines.length == 1 && status_lines[0].strip == 'M shared')
+
       if is_dirty
-        has_issues = true
-        dirty_count += 1
+        if is_only_shared_pointer
+          shared_pointer_only_count += 1
+        else
+          has_issues = true
+          dirty_count += 1
+        end
       end
 
       # Check ahead/behind status
@@ -261,7 +271,11 @@ task :status do
 
         # Show details if verbose or if there are issues
         if verbose || has_issues
-          puts "  #{'⚠'.yellow}  Working directory has uncommitted changes" if is_dirty
+          if is_only_shared_pointer
+            puts "  #{'↻'.blue}  Shared submodule pointer updated"
+          elsif is_dirty
+            puts "  #{'⚠'.yellow}  Working directory has uncommitted changes"
+          end
         end
 
         # Always show ahead/behind if present (even in non-verbose mode)
@@ -293,7 +307,14 @@ task :status do
         # Format: ⚠ ✓ sitename        [web] ↑2     ● shared/ [master @ hash] ⚠ ↑1
 
         # Warning column for site (first column)
-        site_warning = is_dirty ? '⚠'.yellow : ' '
+        # Use different indicator for "only shared pointer" vs "other changes"
+        site_warning = if is_only_shared_pointer
+                         '↻'.blue
+                       elsif is_dirty
+                         '⚠'.yellow
+                       else
+                         ' '
+                       end
 
         # Site part with symbols (only ahead/behind, no ⚠)
         site_symbols_str = site_symbols.empty? ? '' : " #{site_symbols.join('')}"
@@ -335,6 +356,7 @@ task :status do
     puts "Total submodules:              #{total_submodules.to_s.bold}"
     puts "Clean:                         #{clean_count.to_s.green}"
     puts "Sites uncommitted changes:     #{dirty_count.to_s.yellow}" if dirty_count > 0
+    puts "Sites shared pointer only:     #{shared_pointer_only_count.to_s.blue}" if shared_pointer_only_count > 0
     puts "Sites ahead of remote:         #{ahead_count.to_s.green}" if ahead_count > 0
     puts "Sites behind remote:           #{behind_count.to_s.red}" if behind_count > 0
     puts "Sites wrong branch:            #{wrong_branch_count.to_s.yellow}" if wrong_branch_count > 0
@@ -349,6 +371,9 @@ task :status do
     # Sites info
     if dirty_count > 0
       parts << "#{dirty_count} uncommitted".yellow
+    end
+    if shared_pointer_only_count > 0
+      parts << "#{shared_pointer_only_count} shared pointer".blue
     end
     if ahead_count > 0
       parts << "#{ahead_count} ahead".green
