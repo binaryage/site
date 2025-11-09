@@ -60,12 +60,11 @@ namespace :shared do
 
       # Perform sync
       success = Dir.chdir(target_dir) do
-        # Fetch from source
+        # Fetch from source and checkout master branch at the commit
+        # Using -B flag to create or reset master branch to the commit
+        # This keeps HEAD pointing to the branch (not detached)
         system("git fetch '#{source_path}' HEAD >/dev/null 2>&1") &&
-        # Update HEAD ref
-        system("git update-ref HEAD #{source_commit}") &&
-        # Reset working tree
-        system("git reset --hard HEAD >/dev/null 2>&1")
+        system("git checkout -B master #{source_commit} >/dev/null 2>&1")
       end
 
       if success
