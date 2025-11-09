@@ -1,6 +1,6 @@
 ---
 description: Intelligently commit changes in site submodule(s)
-argument-hint: site-name(s) or "all" (e.g., www, blog, totalfinder, "www blog", or all)
+argument-hint: '[site-name(s)] (optional - shows interactive picker if omitted)'
 ---
 
 You are executing the /commit-site command to commit changes in one or more site submodules.
@@ -17,7 +17,64 @@ You are executing the /commit-site command to commit changes in one or more site
 
 Follow these steps carefully:
 
-## Step 0: Parse Sites
+## Step 0: Interactive Site Selection (if no arguments provided)
+
+**IF `$ARGUMENTS` is empty or contains only whitespace:**
+
+You need to detect which sites have uncommitted changes and offer an interactive selection.
+
+1. **Get all available sites:**
+   ```bash
+   grep "path = " .gitmodules | awk '{print $3}'
+   ```
+
+2. **Check each site for changes:**
+   For each site, run `git status --short` to check if it has uncommitted changes.
+   Create a list of sites with changes, along with a count of changed files.
+
+   Example check:
+   ```bash
+   cd www && git status --short | wc -l
+   ```
+
+   Store sites where the count is > 0 (has changes).
+
+3. **Handle different scenarios:**
+
+   - **0 sites with changes:**
+     Output: "✓ No changes to commit in any site" and exit successfully.
+
+   - **1 site with changes:**
+     Automatically use that site (no need to ask). Set it as `$ARGUMENTS` and proceed to Step 1.
+     Output: "Auto-selecting <site-name> (only site with changes)"
+
+   - **2-4 sites with changes:**
+     Use `AskUserQuestion` tool to let the user select which site to commit:
+     - Question: "Which site would you like to commit?"
+     - Header: "Site"
+     - multiSelect: false
+     - Options: List each site with changed file count in description
+       Example: label="www", description="Main site (3 files changed)"
+
+     After user selects, use the selected site as `$ARGUMENTS` and proceed to Step 1.
+
+   - **5+ sites with changes:**
+     Use `AskUserQuestion` tool with the first 4 sites (sorted by most changes):
+     - Question: "Which site would you like to commit?"
+     - Header: "Site"
+     - multiSelect: false
+     - Options: Top 4 sites by change count + "Other" (automatically added)
+
+     If user selects "Other", ask them to type the site name.
+     After selection, use the selected site as `$ARGUMENTS` and proceed to Step 1.
+
+**IF `$ARGUMENTS` has a value:**
+
+Skip this step and proceed directly to Step 1 (backward compatibility with existing usage).
+
+---
+
+## Step 1: Parse Sites
 
 Split the arguments into individual site names. The user may provide one or more sites separated by spaces.
 
@@ -46,7 +103,7 @@ For example:
 
 Create a list of sites to process.
 
-## Step 1: Get Available Sites
+## Step 2: Get Available Sites
 
 Before processing, read `.gitmodules` to get the list of available site submodules dynamically:
 
@@ -56,13 +113,13 @@ grep "path = " .gitmodules | awk '{print $3}'
 
 This will list all submodule directories. Store this list for reference.
 
-## Step 2: Process Each Site
+## Step 3: Process Each Site
 
-For each site in the user-provided list, follow steps 3-5 below. Keep track of which sites were processed and what actions were taken.
+For each site in the user-provided list, follow steps 4-6 below. Keep track of which sites were processed and what actions were taken.
 
 ---
 
-## Step 3: Validate Site
+## Step 4: Validate Site
 
 For the current site being processed, normalize and validate the site name:
 
@@ -95,7 +152,7 @@ Then move to the next site. Do NOT exit completely - continue processing remaini
 
 **Use `ACTUAL_SITE` for all subsequent operations** (not the original input name).
 
-## Step 4: Check Git Status
+## Step 5: Check Git Status
 
 Navigate to the current site directory (using the normalized `ACTUAL_SITE` name) and check status:
 
@@ -109,7 +166,7 @@ If there's no output (clean working copy), inform the user:
 
 Then move to the next site.
 
-## Step 5: Determine What's Modified
+## Step 6: Determine What's Modified
 
 Analyze what files are modified. You need to distinguish between:
 - **Shared submodule pointer only**: Only line showing ` M shared` in git status
@@ -227,7 +284,7 @@ If shared was NOT in the staged files, you're done with this site. Move to the n
 
 ---
 
-## Step 6: Final Summary
+## Step 7: Final Summary
 
 After processing all sites, provide a comprehensive summary of all actions taken.
 
