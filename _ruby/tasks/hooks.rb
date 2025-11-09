@@ -3,7 +3,7 @@
 namespace :hooks do
   desc 'Install git hooks to all submodules'
   task :install do
-    template_path = File.join(ROOT, '_ruby/lib/hooks/pre-push.template')
+    template_path = File.join(ROOT, '_ruby/tasks/hooks/pre-push.template')
 
     unless File.exist?(template_path)
       die "Hook template not found: #{template_path}"
@@ -87,7 +87,7 @@ namespace :hooks do
 
   desc 'Show git hook installation status for all submodules'
   task :status do
-    template_path = File.join(ROOT, '_ruby/lib/hooks/pre-push.template')
+    template_path = File.join(ROOT, '_ruby/tasks/hooks/pre-push.template')
 
     puts "Git hook status:"
     puts
