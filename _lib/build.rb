@@ -38,6 +38,7 @@ def prepare_jekyll_config(site, opts)
     'compress' => !dev_mode,
     'cache' => File.join(stage, '_cache')
   }
+  config['cache_dir'] = File.join(stage, '_cache', 'jekyll', site.name)
   config['busterizer'] = {
     'css' => busters && !dev_mode,
     'html' => busters && !dev_mode
