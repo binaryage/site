@@ -128,7 +128,20 @@ rake status                  # Check all submodules (shows issues only)
 rake status verbose=1        # Full details for all submodules
 rake pin                     # Pin all submodules to latest branch tips
 rake shared:sync            # Sync shared commits across all sites
+rake hooks:install          # Install pre-push hooks (auto-installed during rake init)
+rake hooks:status           # Check hook installation status
 ```
+
+### Pre-Push Safety Hook
+
+The repository includes a pre-push git hook that prevents accidentally pushing website changes with unpushed shared submodule commits. The hook:
+- Automatically installed during `rake init`
+- Only checks when pushing to `web` branch
+- Auto-fetches to verify shared commits are on GitHub
+- Shows clear error messages with guidance
+- Can be bypassed with `git push --no-verify` if needed
+
+See [CLAUDE.md](CLAUDE.md#git-hooks-for-shared-submodule-safety) for detailed documentation.
 
 ## Deployment
 

@@ -138,6 +138,9 @@ See [README.md](README.md) for common usage. This section provides additional te
 - `rake reset` - DESTRUCTIVE: Reset workspace to remote state
 - `rake shared:sync` - Sync shared commits across all sites
 - `rake shared:sync from=blog` - Sync from specific site
+- `rake hooks:install` - Install pre-push hooks to all submodules
+- `rake hooks:uninstall` - Remove pre-push hooks from all submodules
+- `rake hooks:status` - Show git hook installation status
 
 **Testing:**
 - `rake test:smoke` - Run automated smoke tests (Playwright)
@@ -306,6 +309,62 @@ When making changes to a website (e.g., totalfinder-web):
 - Example: After updating shared: `git add shared && git commit -m "Update shared"`
 
 **Tip**: Use `git submodule foreach` for batch operations across all submodules.
+
+### Git Hooks for Shared Submodule Safety
+
+To prevent accidentally pushing website changes that depend on unpushed shared submodule commits, the repository includes a pre-push git hook.
+
+**What it does:**
+- Automatically checks when pushing to `web` branch
+- Verifies that shared submodule commits are pushed to GitHub before allowing website push
+- Performs auto-fetch of `origin/master` in shared/ to ensure refs are up-to-date
+- Shows clear error messages with guidance when blocking a push
+- Can be bypassed with `git push --no-verify` if needed (not recommended)
+
+**Installation:**
+
+The hook is automatically installed when you run:
+```bash
+rake init
+```
+
+**Manual management:**
+
+```bash
+rake hooks:install    # Install hooks to all submodules
+rake hooks:uninstall  # Remove hooks from all submodules
+rake hooks:status     # Show installation status
+```
+
+**Example workflow with the hook:**
+
+```bash
+# 1. Make changes in shared
+cd www/shared
+git commit -m "Update layout"
+
+# 2. Try to push website changes (will be blocked)
+cd ..
+git add shared
+git commit -m "Update shared submodule"
+git push origin web
+# ❌ ERROR: Cannot push - shared submodule has unpushed commits
+
+# 3. Push shared first
+cd shared
+git push origin master
+
+# 4. Now push website changes (will succeed)
+cd ..
+git push origin web
+# ✓ Shared submodule is up to date
+```
+
+**Technical details:**
+- Hook location: `.git/modules/<site>/hooks/pre-push`
+- Template: `_lib/hooks/pre-push.template`
+- Only checks `web` branch (deployment branch)
+- Respects standard git `--no-verify` bypass flag
 
 ## Local Development Domains
 

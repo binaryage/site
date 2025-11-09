@@ -48,4 +48,4 @@ namespace :init do
 end
 
 desc 'init workspace - needs special care'
-task init: ['init:gem', 'init:node', 'init:lightningcss', 'init:repo']
+task init: ['init:gem', 'init:node', 'init:lightningcss', 'init:repo', 'hooks:install']
