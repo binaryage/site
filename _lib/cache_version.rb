@@ -115,9 +115,21 @@ module CacheVersion
     stored_hash = read_stored_cache_version(cache_dir)
 
     if stored_hash.nil?
-      logger.call "ℹ️  No cache version found - initializing"
-      write_cache_version(cache_dir, current_hash)
-      return { valid: false, reason: :no_version, deleted: [] }
+      logger.call "⚠️  No cache version found - invalidating existing cache"
+
+      deleted = invalidate_all_caches
+
+      deleted.each do |dir|
+        logger.call "   🗑️  Deleted: #{dir.sub(root_dir + '/', '')}"
+      end
+
+      # Write new cache version to all cache directories after cleaning
+      [File.join(root_dir, '.stage', 'build', '_cache'),
+       File.join(root_dir, '.stage', 'serve', '_cache')].each do |dir|
+        write_cache_version(dir, current_hash)
+      end
+
+      return { valid: false, reason: :no_version, deleted: deleted }
     end
 
     if current_hash == stored_hash
