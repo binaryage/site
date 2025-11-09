@@ -6,6 +6,7 @@ require 'yaml'
 
 require_relative 'utils'
 require_relative 'cache_version'
+require_relative 'build_lock'
 
 # noinspection RubyStringKeysInHashInspection
 def prepare_jekyll_config(site, opts)
@@ -92,17 +93,25 @@ def build_site(site, opts)
 end
 
 def build_sites(sites, opts, names)
-  # Check and invalidate cache if plugins/dependencies changed
-  cache_dir = File.join(opts[:stage], '_cache')
-  CacheVersion.check_and_invalidate_if_needed(cache_dir)
+  # Acquire lock for this stage to prevent concurrent builds
+  lock = BuildLock.new(opts[:stage])
+  lock.acquire!
 
-  names.each do |name|
-    site = lookup_site(sites, name)
-    if site
-      build_site(site, opts)
-    else
-      puts "unable to lookup site name '#{name}', valid names: '#{sites_subdomains(sites).join(',')}'"
+  begin
+    # Check and invalidate cache if plugins/dependencies changed
+    cache_dir = File.join(opts[:stage], '_cache')
+    CacheVersion.check_and_invalidate_if_needed(cache_dir)
+
+    names.each do |name|
+      site = lookup_site(sites, name)
+      if site
+        build_site(site, opts)
+      else
+        puts "unable to lookup site name '#{name}', valid names: '#{sites_subdomains(sites).join(',')}'"
+      end
     end
+  ensure
+    lock.release
   end
 end
 
@@ -136,26 +145,34 @@ def serve_site(site, base_dir, index)
 end
 
 def serve_sites(sites, base_dir, names)
-  # Check and invalidate cache if plugins/dependencies changed
-  cache_dir = File.join(base_dir, '_cache')
-  CacheVersion.check_and_invalidate_if_needed(cache_dir)
+  # Acquire lock for this stage to prevent concurrent serves
+  lock = BuildLock.new(base_dir)
+  lock.acquire!
 
-  names.each_with_index do |name, index|
-    site = lookup_site(sites, name)
-    if site
-      serve_site(site, base_dir, index)
-    else
-      puts "unable to lookup site name '#{name}', valid names: '#{sites_subdomains(sites).join(',')}'"
+  begin
+    # Check and invalidate cache if plugins/dependencies changed
+    cache_dir = File.join(base_dir, '_cache')
+    CacheVersion.check_and_invalidate_if_needed(cache_dir)
+
+    names.each_with_index do |name, index|
+      site = lookup_site(sites, name)
+      if site
+        serve_site(site, base_dir, index)
+      else
+        puts "unable to lookup site name '#{name}', valid names: '#{sites_subdomains(sites).join(',')}'"
+      end
     end
-  end
 
-  # wait for signal and instantly kill all offsprings
-  # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
-  trap('INT') { exit 10 }
-  at_exit do
-    # if process exits on its own we want to kill whole group
-    Process.kill('INT', -Process.getpgrp)
-  end
+    # wait for signal and instantly kill all offsprings
+    # http://autonomousmachine.com/posts/2011/6/2/cleaning-up-processes-in-ruby
+    trap('INT') { exit 10 }
+    at_exit do
+      # if process exits on its own we want to kill whole group
+      Process.kill('INT', -Process.getpgrp)
+    end
 
-  Process.waitall
+    Process.waitall
+  ensure
+    lock.release
+  end
 end
