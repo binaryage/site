@@ -57,6 +57,10 @@ while read local_ref local_sha remote_ref remote_sha; do
     # Change to shared directory
     cd shared || exit 1
 
+    # Unset GIT_DIR and GIT_WORK_TREE so git commands use the shared repo
+    unset GIT_DIR
+    unset GIT_WORK_TREE
+
     # Fetch latest from origin/master to ensure we have up-to-date refs
     echo "${BLUE}📡 Fetching origin/master...${NC}"
     if ! git fetch origin master >/dev/null 2>&1; then
