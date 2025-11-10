@@ -10,8 +10,8 @@ require_relative 'reshaper'
 require_relative 'pruner'
 require_relative 'cname_generator'
 
-require_relative 'inline_styles'
-require_relative 'firstcontentblock'
+require_relative 'tags/inline_styles'
+require_relative 'tags/firstcontentblock'
 
 # -- liquid tags ------------------------------------------------------------------------------------------------------------
 
