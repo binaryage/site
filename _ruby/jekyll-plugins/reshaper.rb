@@ -65,8 +65,8 @@ def remove_unwanted_content!(site)
 
   # remove some unwanted static files
   site.static_files.delete_if do |file|
-    # stylus files should be generated into site.css
     # readme files are for github
-    file.path =~ %r{shared/includes} || file.path =~ /\.styl$/ || file.path =~ /readme\./
+    # Note: .bundle.css files are removed by css_concatenator hook after processing
+    file.path =~ %r{shared/includes} || file.path =~ /readme\./
   end
 end
