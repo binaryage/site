@@ -5,11 +5,9 @@ namespace :hooks do
   task :install do
     template_path = File.join(ROOT, '_ruby/tasks/hooks/pre-push.template')
 
-    unless File.exist?(template_path)
-      die "Hook template not found: #{template_path}"
-    end
+    die "Hook template not found: #{template_path}" unless File.exist?(template_path)
 
-    puts "Installing pre-push hooks to all submodules..."
+    puts 'Installing pre-push hooks to all submodules...'
     puts
 
     installed = 0
@@ -40,10 +38,8 @@ namespace :hooks do
     end
 
     puts
-    if installed > 0
-      puts "#{'✨'.green} Installed hooks to #{installed} site(s)"
-    end
-    if failed > 0
+    puts "#{'✨'.green} Installed hooks to #{installed} site(s)" if installed.positive?
+    if failed.positive?
       puts "#{'⚠️ '.red} Failed to install #{failed} hook(s)"
       exit 1
     end
@@ -51,7 +47,7 @@ namespace :hooks do
 
   desc 'Uninstall git hooks from all submodules'
   task :uninstall do
-    puts "Uninstalling pre-push hooks from all submodules..."
+    puts 'Uninstalling pre-push hooks from all submodules...'
     puts
 
     removed = 0
@@ -77,19 +73,15 @@ namespace :hooks do
     end
 
     puts
-    if removed > 0
-      puts "#{'✨'.green} Removed hooks from #{removed} site(s)"
-    end
-    if not_found == SITES.size
-      puts "#{'ℹ️ '.blue} No hooks were installed"
-    end
+    puts "#{'✨'.green} Removed hooks from #{removed} site(s)" if removed.positive?
+    puts "#{'ℹ️ '.blue} No hooks were installed" if not_found == SITES.size
   end
 
   desc 'Show git hook installation status for all submodules'
   task :status do
     template_path = File.join(ROOT, '_ruby/tasks/hooks/pre-push.template')
 
-    puts "Git hook status:"
+    puts 'Git hook status:'
     puts
 
     installed = 0
@@ -121,15 +113,15 @@ namespace :hooks do
     end
 
     puts
-    puts "Summary:"
+    puts 'Summary:'
     puts "  ✅ Installed: #{installed}"
-    puts "  ⚠️  Outdated:  #{outdated}" if outdated > 0
-    puts "  ○  Missing:   #{missing}" if missing > 0
+    puts "  ⚠️  Outdated:  #{outdated}" if outdated.positive?
+    puts "  ○  Missing:   #{missing}" if missing.positive?
 
-    if outdated > 0
+    if outdated.positive?
       puts
       puts "#{'💡'.yellow} Run #{'rake hooks:install'.green} to update outdated hooks"
-    elsif missing > 0
+    elsif missing.positive?
       puts
       puts "#{'💡'.blue} Run #{'rake hooks:install'.green} to install hooks"
     end

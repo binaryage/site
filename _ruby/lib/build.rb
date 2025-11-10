@@ -123,7 +123,7 @@ end
 
 def serve_site(site, base_dir, index)
   port = site.port
-  livereload_port = 35729 + index  # Base LiveReload port + site index
+  livereload_port = 35_729 + index # Base LiveReload port + site index
   Dir.chdir site.dir do
     opts = { dev_mode: true,
              stage: base_dir }

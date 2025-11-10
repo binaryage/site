@@ -18,7 +18,7 @@ task :proxy do
     exit 10
   end
   config_path = File.join(STAGE_DIR, '.proxy.config')
-  FileUtils.mkdir_p(STAGE_DIR) unless File.exist? STAGE_DIR
+  FileUtils.mkdir_p(STAGE_DIR)
   File.write(config_path, prepare_proxy_config(SITES, mode: :serve, proxy_port: MAIN_PORT))
   sys("sudo nginx -c \"#{config_path}\"")
 end
@@ -26,7 +26,7 @@ end
 desc 'run dev server'
 task :serve do
   all_names = sites_subdomains(SITES).join(',')
-  what = ENV['what']
+  what = ENV.fetch('what', nil)
 
   # Default to all sites if 'what' is not specified
   what = all_names if what.to_s.strip.empty? || what == 'all'
@@ -40,18 +40,14 @@ namespace :serve do
   desc 'serve pre-built sites from .stage/build/ via nginx proxy (for testing production builds locally)'
   task :build do
     # Check if build directory exists
-    unless File.directory?(BUILD_DIR)
-      die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first."
-    end
+    die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first." unless File.directory?(BUILD_DIR)
 
     # Auto-detect built sites
     built_sites = Dir.glob(File.join(BUILD_DIR, '*'))
                      .select { |f| File.directory?(f) }
                      .map { |f| File.basename(f) }
 
-    if built_sites.empty?
-      die "No built sites found in #{BUILD_DIR}. Run 'rake build what=www,blog' first."
-    end
+    die "No built sites found in #{BUILD_DIR}. Run 'rake build what=www,blog' first." if built_sites.empty?
 
     puts "Found built sites: #{built_sites.join(', ').yellow}"
 
@@ -65,16 +61,14 @@ namespace :serve do
     # Filter to only include actually built sites
     build_sites = build_sites.select { |site| built_sites.include?(site.name) }
 
-    if build_sites.empty?
-      die "No matching sites found. Built sites: #{built_sites.join(', ')}"
-    end
+    die "No matching sites found. Built sites: #{built_sites.join(', ')}" if build_sites.empty?
 
     puts "\n#{'Starting servers for:'.green}"
     build_sites.each do |site|
       puts "  • #{site.subdomain.yellow} on port #{site.port.to_s.blue}"
     end
     puts "\n#{'Proxy will be available at:'.green} #{"http://localhost:#{proxy_port}".blue}"
-    puts "#{'Access sites at:'.green}"
+    puts 'Access sites at:'.green
     build_sites.each do |site|
       puts "  • #{"http://#{site.subdomain}.#{LOCAL_DOMAIN}:#{proxy_port}".blue}"
     end
@@ -85,14 +79,14 @@ namespace :serve do
 
     # Generate nginx config
     config_path = File.join(STAGE_DIR, '.proxy-build.config')
-    FileUtils.mkdir_p(STAGE_DIR) unless File.exist?(STAGE_DIR)
+    FileUtils.mkdir_p(STAGE_DIR)
     File.write(config_path, prepare_proxy_config(build_sites, mode: :build, proxy_port: proxy_port))
 
     # Trap INT signal to cleanup
     trap('INT') do
       puts "\n\n#{'Stopping servers...'.yellow}"
       stop_python_servers(pids)
-      puts "#{'All servers stopped.'.green}"
+      puts 'All servers stopped.'.green
       exit 0
     end
 

@@ -7,9 +7,7 @@ namespace :test do
   desc 'Run smoke tests on all built sites'
   task :smoke do
     # Check if build directory exists
-    unless File.directory?(BUILD_DIR)
-      die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first."
-    end
+    die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first." unless File.directory?(BUILD_DIR)
 
     # Auto-detect built sites (same as serve:build)
     # Exclude volatile directories like _cache and .configs
@@ -18,9 +16,7 @@ namespace :test do
                      .map { |f| File.basename(f) }
                      .reject { |name| name.start_with?('_') || name.start_with?('.') }
 
-    if built_sites.empty?
-      die "No built sites found in #{BUILD_DIR}. Run 'rake build what=www,blog' first."
-    end
+    die "No built sites found in #{BUILD_DIR}. Run 'rake build what=www,blog' first." if built_sites.empty?
 
     puts "Found built sites: #{built_sites.join(', ').yellow}\n\n"
 
@@ -33,9 +29,7 @@ namespace :test do
     # Filter to only include actually built sites
     build_sites = build_sites.select { |site| built_sites.include?(site.name) }
 
-    if build_sites.empty?
-      die "No matching sites found. Built sites: #{built_sites.join(', ')}"
-    end
+    die "No matching sites found. Built sites: #{built_sites.join(', ')}" if build_sites.empty?
 
     # Check if serve:build is already running
     server_running = check_server_running(proxy_port)
@@ -52,15 +46,14 @@ end
 
 def check_server_running(port)
   # Try to connect to localhost:port
-  begin
-    uri = URI("http://localhost:#{port}")
-    Net::HTTP.start(uri.host, uri.port, open_timeout: 1, read_timeout: 1) do |http|
-      response = http.head('/')
-      return true
-    end
-  rescue StandardError
-    return false
+
+  uri = URI("http://localhost:#{port}")
+  Net::HTTP.start(uri.host, uri.port, open_timeout: 1, read_timeout: 1) do |http|
+    http.head('/')
+    return true
   end
+rescue StandardError
+  false
 end
 
 def run_smoke_tests(sites, port)
@@ -70,9 +63,7 @@ def run_smoke_tests(sites, port)
   # Run Playwright smoke test
   node_script = File.join(NODE_DIR, 'smoke-test.mjs')
 
-  unless File.exist?(node_script)
-    die "Smoke test script not found: #{node_script}"
-  end
+  die "Smoke test script not found: #{node_script}" unless File.exist?(node_script)
 
   # Check if Playwright is installed
   playwright_bin = File.join(NODE_DIR, 'node_modules', '@playwright', 'test')
@@ -133,6 +124,6 @@ def run_with_server(sites, port)
     puts "\n#{'Stopping server...'.yellow}"
     Process.kill('INT', pid)
     Process.wait(pid)
-    puts "#{'Server stopped'.green}"
+    puts 'Server stopped'.green
   end
 end

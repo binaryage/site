@@ -2,9 +2,9 @@
 
 # Helper methods for snapshot functionality
 def validate_snapshot_name(name)
-  unless name =~ /^[a-zA-Z0-9_-]+$/
-    die 'Snapshot name must contain only letters, numbers, dashes, and underscores'
-  end
+  return if name =~ /^[a-zA-Z0-9_-]+$/
+
+  die 'Snapshot name must contain only letters, numbers, dashes, and underscores'
 end
 
 def snapshot_path(name)
@@ -17,10 +17,10 @@ end
 
 def confirm?(message)
   print "#{message} (y/N): "
-  STDIN.gets.chomp.downcase == 'y'
+  $stdin.gets.chomp.downcase == 'y'
 end
 
-def get_git_metadata
+def git_metadata
   {
     commit: `git rev-parse --short HEAD 2>/dev/null`.strip,
     branch: `git rev-parse --abbrev-ref HEAD 2>/dev/null`.strip
@@ -74,13 +74,13 @@ def format_friendly_time(utc_time_string)
 end
 
 def human_size(bytes)
-  units = ['B', 'KB', 'MB', 'GB', 'TB']
-  return "0 B" if bytes.zero?
+  units = %w[B KB MB GB TB]
+  return '0 B' if bytes.zero?
 
   exp = (Math.log(bytes) / Math.log(1024)).to_i
   exp = [exp, units.length - 1].min
   size = bytes / (1024.0**exp)
-  "%.1f %s" % [size, units[exp]]
+  format('%<size>.1f %<unit>s', size: size, unit: units[exp])
 end
 
 def directory_size(dir)
@@ -126,7 +126,9 @@ def diff_directories(dir1, dir2, excludes)
     end
 
     # Compare directories using system diff command
-    if system("diff -rq --exclude='_cache' --exclude='.configs' --exclude='atom.xml' '#{snapshot_site}' '#{current_site}' >/dev/null 2>&1")
+    diff_cmd = "diff -rq --exclude='_cache' --exclude='.configs' --exclude='atom.xml' " \
+               "'#{snapshot_site}' '#{current_site}' >/dev/null 2>&1"
+    if system(diff_cmd)
       result[:unchanged] << site
     else
       result[:changed] << site
@@ -143,7 +145,9 @@ def diff_directories(dir1, dir2, excludes)
 end
 
 def show_verbose_diff(snapshot_site, current_site)
-  output = `diff -rq --exclude='_cache' --exclude='.configs' --exclude='atom.xml' '#{snapshot_site}' '#{current_site}' 2>/dev/null`
+  diff_cmd = "diff -rq --exclude='_cache' --exclude='.configs' --exclude='atom.xml' " \
+             "'#{snapshot_site}' '#{current_site}' 2>/dev/null"
+  output = `#{diff_cmd}`
   output.lines.each do |line|
     puts "     #{line.strip}"
   end
@@ -152,13 +156,11 @@ end
 namespace :snapshot do
   desc 'create a snapshot of the current build output (name=<name> desc=<description>)'
   task :create do
-    name = ENV['name']
-    unless name
-      die "Snapshot name is required. Usage: rake snapshot:create name=<name> desc=<description>"
-    end
+    name = ENV.fetch('name', nil)
+    die 'Snapshot name is required. Usage: rake snapshot:create name=<name> desc=<description>' unless name
 
     validate_snapshot_name(name)
-    description = ENV['desc'] || ENV['description']
+    description = ENV['desc'] || ENV.fetch('description', nil)
 
     # Check if snapshot already exists
     if snapshot_exists?(name)
@@ -181,7 +183,7 @@ namespace :snapshot do
     puts "  #{'Running: rake build'.gray}"
     build_log = '/tmp/snapshot-build.log'
     unless system("rake build > #{build_log} 2>&1")
-      puts "#{'✗ Build failed!'.red}"
+      puts '✗ Build failed!'.red
       puts "  #{'See log:'.gray} #{build_log}"
       puts `tail -n 20 #{build_log}`
       exit 1
@@ -189,9 +191,7 @@ namespace :snapshot do
     puts "#{'✓'.green} Build completed successfully\n\n"
 
     # Check if build directory exists
-    unless File.directory?(BUILD_DIR)
-      die "Build directory not found: #{BUILD_DIR}"
-    end
+    die "Build directory not found: #{BUILD_DIR}" unless File.directory?(BUILD_DIR)
 
     # Step 2: Create snapshot
     puts "#{'→'.blue} Creating snapshot..."
@@ -200,27 +200,27 @@ namespace :snapshot do
     puts "#{'✓'.green} Snapshot created\n\n"
 
     # Step 3: Save metadata
-    git_meta = get_git_metadata
+    git_meta = git_metadata
     timestamp = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
 
     save_snapshot_metadata(snapshot_path(name), {
-      name: name,
-      timestamp: timestamp,
-      branch: git_meta[:branch],
-      commit: git_meta[:commit],
-      description: description
-    })
+                             name: name,
+                             timestamp: timestamp,
+                             branch: git_meta[:branch],
+                             commit: git_meta[:commit],
+                             description: description
+                           })
 
     puts "#{'→'.blue} Snapshot metadata saved\n\n"
 
     # Step 4: Display summary
     size = directory_size(snapshot_path(name))
     site_count = Dir.glob(File.join(snapshot_path(name), '*'))
-                   .select { |f| File.directory?(f) && !File.basename(f).start_with?('.') }
-                   .reject { |f| SNAPSHOT_EXCLUDES.include?(File.basename(f)) }
-                   .count
+                    .select { |f| File.directory?(f) && !File.basename(f).start_with?('.') }
+                    .reject { |f| SNAPSHOT_EXCLUDES.include?(File.basename(f)) }
+                    .count
 
-    puts "#{'=== Snapshot Summary ==='.cyan.bold}"
+    puts '=== Snapshot Summary ==='.cyan.bold
     puts "Name:         #{name.bold}"
     puts "Location:     #{snapshot_path(name).gray}"
     puts "Size:         #{human_size(size).green}"
@@ -238,10 +238,8 @@ namespace :snapshot do
 
   desc 'compare current build with a snapshot (name=<name> verbose=1 for details)'
   task :diff do
-    name = ENV['name']
-    unless name
-      die "Snapshot name is required. Usage: rake snapshot:diff name=<name> verbose=1"
-    end
+    name = ENV.fetch('name', nil)
+    die 'Snapshot name is required. Usage: rake snapshot:diff name=<name> verbose=1' unless name
 
     verbose = ENV['verbose'] == '1'
 
@@ -260,9 +258,7 @@ namespace :snapshot do
     end
 
     # Validate current build exists
-    unless File.directory?(BUILD_DIR)
-      die "Current build not found: #{BUILD_DIR}\nRun 'rake build' first"
-    end
+    die "Current build not found: #{BUILD_DIR}\nRun 'rake build' first" unless File.directory?(BUILD_DIR)
 
     # Display snapshot metadata
     metadata = load_snapshot_metadata(snapshot_path(name))
@@ -306,7 +302,7 @@ namespace :snapshot do
 
     # Print summary
     total_sites = all_sites.count
-    puts "#{'=== Summary ==='.cyan.bold}"
+    puts '=== Summary ==='.cyan.bold
     puts "Total sites:     #{total_sites.to_s.bold}"
     puts "Unchanged:       #{diff[:unchanged].count.to_s.green}"
     puts "Changed:         #{diff[:changed].count.to_s.yellow}" if diff[:changed].any?
@@ -316,16 +312,16 @@ namespace :snapshot do
 
     # Show instructions for detailed diff
     if diff[:changed].any? || diff[:new].any? || diff[:missing].any?
-      puts "#{'For detailed file-level differences:'.bold}"
-      unless verbose
-        puts "  #{"rake snapshot:diff name=#{name} verbose=1".gray}"
-      end
-      puts "  #{"diff -ru --exclude='_cache' --exclude='.configs' --exclude='atom.xml' #{snapshot_path(name)}/ #{BUILD_DIR}/".gray}"
+      puts 'For detailed file-level differences:'.bold
+      puts "  #{"rake snapshot:diff name=#{name} verbose=1".gray}" unless verbose
+      diff_example = "diff -ru --exclude='_cache' --exclude='.configs' --exclude='atom.xml' " \
+                     "#{snapshot_path(name)}/ #{BUILD_DIR}/"
+      puts "  #{diff_example.gray}"
       puts
 
       # List changed sites
       if diff[:changed].any?
-        puts "#{'Changed sites:'.bold}"
+        puts 'Changed sites:'.bold
         diff[:changed].each do |site|
           puts "  - #{site}"
           puts "    #{"diff -ru #{snapshot_path(name)}/#{site}/ #{BUILD_DIR}/#{site}/".gray}"
@@ -333,10 +329,10 @@ namespace :snapshot do
         puts
       end
 
-      puts "#{'⚠ Build output differs from snapshot'.yellow}"
+      puts '⚠ Build output differs from snapshot'.yellow
       exit 1
     else
-      puts "#{'✓ Build output matches snapshot exactly'.green}"
+      puts '✓ Build output matches snapshot exactly'.green
       exit 0
     end
   end
@@ -345,22 +341,26 @@ namespace :snapshot do
   task :list do
     require 'time'
 
-    puts "#{'Available snapshots:'.bold}"
+    puts 'Available snapshots:'.bold
     if File.directory?(SNAPSHOTS_DIR)
-      snapshots = Dir.glob(File.join(SNAPSHOTS_DIR, '*'))
-                     .select { |f| File.directory?(f) }
-                     .map do |snap_path|
-                       metadata = load_snapshot_metadata(snap_path)
-                       created = metadata[:created]
-                       # Parse date for sorting (format: "YYYY-MM-DD HH:MM:SS UTC")
-                       timestamp = if created && created != 'unknown'
-                                    Time.parse(created) rescue Time.at(0)
-                                  else
-                                    Time.at(0) # Unknown dates go to the end
-                                  end
-                       { path: snap_path, timestamp: timestamp }
-                     end
-                     .sort_by { |s| -s[:timestamp].to_i } # Newest first (negative for descending)
+      snapshot_list = Dir.glob(File.join(SNAPSHOTS_DIR, '*'))
+                         .select { |f| File.directory?(f) }
+                         .map do |snap_path|
+                           metadata = load_snapshot_metadata(snap_path)
+                           created = metadata[:created]
+                           # Parse date for sorting (format: "YYYY-MM-DD HH:MM:SS UTC")
+                           timestamp = if created && created != 'unknown'
+                                         begin
+                                           Time.parse(created)
+                                         rescue StandardError
+                                           Time.at(0)
+                                         end
+                                       else
+                                         Time.at(0) # Unknown dates go to the end
+                                       end
+                           { path: snap_path, timestamp: timestamp }
+                         end
+      snapshots = snapshot_list.sort_by { |s| -s[:timestamp].to_i } # Newest first (negative for descending)
 
       if snapshots.empty?
         puts '  (none)'.gray

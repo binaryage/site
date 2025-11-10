@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'digest'
 require 'fileutils'
 
@@ -14,15 +16,11 @@ module CacheVersion
 
     # Collect all plugin files
     plugins_dir = File.join(root_dir, '_ruby/jekyll-plugins')
-    if Dir.exist?(plugins_dir)
-      files_to_hash += Dir.glob(File.join(plugins_dir, '**', '*.rb')).sort
-    end
+    files_to_hash += Dir.glob(File.join(plugins_dir, '**', '*.rb')) if Dir.exist?(plugins_dir)
 
     # Collect all lib files
     lib_dir = File.join(root_dir, '_ruby/lib')
-    if Dir.exist?(lib_dir)
-      files_to_hash += Dir.glob(File.join(lib_dir, '**', '*.rb')).sort
-    end
+    files_to_hash += Dir.glob(File.join(lib_dir, '**', '*.rb')) if Dir.exist?(lib_dir)
 
     # Add dependency lock files
     gemfile_lock = File.join(root_dir, '_ruby/Gemfile.lock')
@@ -54,7 +52,7 @@ module CacheVersion
 
   # Write cache version to cache directory
   def self.write_cache_version(cache_dir, hash)
-    FileUtils.mkdir_p(cache_dir) unless Dir.exist?(cache_dir)
+    FileUtils.mkdir_p(cache_dir)
     version_file = File.join(cache_dir, CACHE_VERSION_FILE)
     File.write(version_file, hash)
   end
@@ -76,7 +74,7 @@ module CacheVersion
   # Parameters:
   #   custom_cache_dir - Optional path to additional cache directory (e.g., from custom stage path)
   # Returns: Array of deleted directories
-  def self.invalidate_all_caches(custom_cache_dir = nil)
+  def self.invalidate_all_caches(custom_cache_dir=nil)
     root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '../..'))
     deleted = []
 
@@ -123,12 +121,12 @@ module CacheVersion
     stored_hash = read_stored_cache_version(cache_dir)
 
     if stored_hash.nil?
-      logger.call "⚠️  No cache version found - invalidating existing cache"
+      logger.call '⚠️  No cache version found - invalidating existing cache'
 
       deleted = invalidate_all_caches(cache_dir)
 
       deleted.each do |dir|
-        logger.call "   🗑️  Deleted: #{dir.sub(root_dir + '/', '')}"
+        logger.call "   🗑️  Deleted: #{dir.sub("#{root_dir}/", '')}"
       end
 
       # Write new cache version to all cache directories after cleaning
@@ -147,14 +145,14 @@ module CacheVersion
     end
 
     # Cache is invalid - need to clean
-    logger.call "⚠️  Cache invalidated - plugins/dependencies changed"
+    logger.call '⚠️  Cache invalidated - plugins/dependencies changed'
     logger.call "   Old version: #{stored_hash[0..7]}"
     logger.call "   New version: #{current_hash[0..7]}"
 
     deleted = invalidate_all_caches(cache_dir)
 
     deleted.each do |dir|
-      logger.call "   🗑️  Deleted: #{dir.sub(root_dir + '/', '')}"
+      logger.call "   🗑️  Deleted: #{dir.sub("#{root_dir}/", '')}"
     end
 
     # Write new version to all cache directories

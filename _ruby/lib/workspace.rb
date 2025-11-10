@@ -34,7 +34,9 @@ def prepare_hosts_template(sites)
   io.string
 end
 
+# rubocop:disable Lint/UnusedMethodArgument
 def prepare_proxy_config(sites, mode: :serve, proxy_port: 80)
+  # rubocop:enable Lint/UnusedMethodArgument
   # header
   config = <<~CONFIG_SNIPPET
     daemon off;

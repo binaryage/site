@@ -67,13 +67,9 @@ namespace :remotes do
     end
 
     puts
-    if updated > 0
-      puts "#{'✨'.green} Updated #{updated} site(s) to SSH"
-    end
-    if already_ssh > 0
-      puts "#{'✓'.green} #{already_ssh} site(s) already using SSH"
-    end
-    if failed > 0
+    puts "#{'✨'.green} Updated #{updated} site(s) to SSH" if updated.positive?
+    puts "#{'✓'.green} #{already_ssh} site(s) already using SSH" if already_ssh.positive?
+    if failed.positive?
       puts "#{'⚠️'.red} Failed to update #{failed} site(s)"
       exit 1
     end
@@ -84,16 +80,12 @@ namespace :remotes do
     puts "#{'=== Remote URLs ==='.cyan.bold}\n\n"
 
     SITES.each do |site|
-      unless File.directory?(site.dir)
-        next
-      end
+      next unless File.directory?(site.dir)
 
       is_git = Dir.chdir(site.dir) do
         system('git rev-parse --git-dir >/dev/null 2>&1')
       end
-      unless is_git
-        next
-      end
+      next unless is_git
 
       url = Dir.chdir(site.dir) do
         `git remote get-url origin 2>/dev/null`.strip

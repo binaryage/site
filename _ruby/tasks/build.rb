@@ -2,7 +2,7 @@
 
 desc 'build site'
 task :build do
-  what = (ENV['what'] || sites_subdomains(SITES).join(','))
+  what = ENV['what'] || sites_subdomains(SITES).join(',')
   names = clean_names(what.split(','))
 
   # TODO: we could bring in more stuff from env
@@ -59,8 +59,8 @@ task :inspect do
   max_subdomain_len = SITES.map { |s| s.subdomain.length }.max
 
   # Header
-  puts sprintf("%-#{max_name_len}s  %-#{max_subdomain_len}s  PORT   DEV URL                           STATUS",
-               'NAME', 'SUBDOMAIN')
+  puts format("%-#{max_name_len}s  %-#{max_subdomain_len}s  PORT   DEV URL                           STATUS",
+              'NAME', 'SUBDOMAIN')
 
   # Sites
   SITES.each do |site|
@@ -79,11 +79,11 @@ task :inspect do
     end
 
     # Check if built
-    if site_is_built?(site, BUILD_DIR)
-      status_parts << 'built'.blue
-    else
-      status_parts << 'not built'.gray
-    end
+    status_parts << if site_is_built?(site, BUILD_DIR)
+                      'built'.blue
+                    else
+                      'not built'.gray
+                    end
 
     # Check shared submodule
     unless site_has_shared?(site)
@@ -93,16 +93,16 @@ task :inspect do
 
     # Format URL (truncate if too long)
     dev_url = "http://#{site.domain}"
-    dev_url = dev_url[0..31] + '...' if dev_url.length > 34
+    dev_url = "#{dev_url[0..31]}..." if dev_url.length > 34
 
     # Print row
-    puts sprintf("%-#{max_name_len}s  %-#{max_subdomain_len}s  %4d   %-34s %s %s",
-                 site.name,
-                 site.subdomain,
-                 site.port,
-                 dev_url,
-                 icon,
-                 status_parts.join(', '))
+    puts format("%-#{max_name_len}s  %-#{max_subdomain_len}s  %4d   %-34s %s %s",
+                site.name,
+                site.subdomain,
+                site.port,
+                dev_url,
+                icon,
+                status_parts.join(', '))
   end
 
   # Summary
@@ -117,14 +117,15 @@ task :inspect do
 
   puts "Total sites: #{total.to_s.bold}"
 
-  if built > 0
+  if built.positive?
     built_names = built_sites.map(&:name).join(', ')
     puts "Built: #{built.to_s.blue} (#{built_names})"
   else
     puts "Built: #{'0'.blue}"
   end
 
-  puts "Clean: #{clean.to_s.green} | Dirty: #{dirty.to_s.yellow}" + (dirty > 0 ? " (#{dirty_sites.map(&:name).join(', ')})" : '')
+  dirty_info = dirty.positive? ? " (#{dirty_sites.map(&:name).join(', ')})" : ''
+  puts "Clean: #{clean.to_s.green} | Dirty: #{dirty.to_s.yellow}#{dirty_info}"
 
   if verbose
     # Additional info in verbose mode

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'English'
 require 'json'
 require 'net/http'
 require 'fileutils'
@@ -54,22 +55,20 @@ def load_screenshot_metadata(path)
   metadata
 end
 
-def get_git_metadata
+def git_metadata
   branch = `git rev-parse --abbrev-ref HEAD`.strip
   commit = `git rev-parse --short HEAD`.strip
   { branch: branch, commit: commit }
 end
 
 def check_server_running(port)
-  begin
-    uri = URI("http://localhost:#{port}")
-    Net::HTTP.start(uri.host, uri.port, open_timeout: 1, read_timeout: 1) do |http|
-      response = http.head('/')
-      return true
-    end
-  rescue StandardError
-    return false
+  uri = URI("http://localhost:#{port}")
+  Net::HTTP.start(uri.host, uri.port, open_timeout: 1, read_timeout: 1) do |http|
+    http.head('/')
+    return true
   end
+rescue StandardError
+  false
 end
 
 def ensure_build_server_running(port)
@@ -102,15 +101,13 @@ def capture_screenshots(sites, output_dir, port)
   # Run screenshot capture script
   node_script = File.join(NODE_DIR, 'screenshot-capture.mjs')
 
-  unless File.exist?(node_script)
-    die "Screenshot capture script not found: #{node_script}"
-  end
+  die "Screenshot capture script not found: #{node_script}" unless File.exist?(node_script)
 
   system("cd #{NODE_DIR} && node screenshot-capture.mjs '#{sites_json}' '#{output_dir}' #{port}")
 
   # Don't fail on screenshot errors - some sites may timeout (e.g. redirects)
   # Just warn if there were failures
-  puts "#{'⚠ Some screenshots may have failed (check output above)'.yellow}\n" unless $?.success?
+  puts "#{'⚠ Some screenshots may have failed (check output above)'.yellow}\n" unless $CHILD_STATUS.success?
 end
 
 def compare_screenshots(sites, baseline_dir, current_dir, diff_dir)
@@ -118,13 +115,11 @@ def compare_screenshots(sites, baseline_dir, current_dir, diff_dir)
 
   node_script = File.join(NODE_DIR, 'screenshot-diff.mjs')
 
-  unless File.exist?(node_script)
-    die "Screenshot diff script not found: #{node_script}"
-  end
+  die "Screenshot diff script not found: #{node_script}" unless File.exist?(node_script)
 
   # Returns exit code: 0 if no changes, 1 if changes detected
   system("cd #{NODE_DIR} && node screenshot-diff.mjs '#{sites_json}' '#{baseline_dir}' '#{current_dir}' '#{diff_dir}'")
-  $?.exitstatus
+  $CHILD_STATUS.exitstatus
 end
 
 def generate_html_report(diff_dir, baseline_name, baseline_metadata, current_metadata)
@@ -200,15 +195,15 @@ def generate_html_report(diff_dir, baseline_name, baseline_metadata, current_met
           <p><strong>Total sites:</strong> #{results.length}</p>
           <p><strong>Unchanged:</strong> #{unchanged_sites.length}</p>
           <p><strong>Changed:</strong> #{changed_sites.length}</p>
-          #{changed_sites.any? ? "<p><strong>Changed sites:</strong> #{changed_sites.map { |s| s['site'] }.join(', ')}</p>" : ''}
+          #{"<p><strong>Changed sites:</strong> #{changed_sites.map { |s| s['site'] }.join(', ')}</p>" if changed_sites.any?}
         </div>
 
         #{if changed_sites.any?
-          "<div class=\"jump-nav\">
+            "<div class=\"jump-nav\">
             <strong>Jump to changed sites:</strong>
-            #{changed_sites.map { |s| "<a href=\"##{s['subdomain']}\">#{s['site']}</a>" }.join('')}
+            #{changed_sites.map { |s| "<a href=\"##{s['subdomain']}\">#{s['site']}</a>" }.join}
           </div>"
-        end}
+          end}
 
         <div class="sites">
   HTML
@@ -218,11 +213,9 @@ def generate_html_report(diff_dir, baseline_name, baseline_metadata, current_met
       html << "          <div class=\"site\">\n"
       html << "            <h3 class=\"error\">#{result['site']} (ERROR)</h3>\n"
       html << "            <p>Error: #{result['error']}</p>\n"
-      html << "          </div>\n"
     elsif result['matched']
       html << "          <div class=\"site unchanged\" id=\"#{result['subdomain']}\">\n"
       html << "            <h3 class=\"unchanged\">✓ #{result['site']} (UNCHANGED)</h3>\n"
-      html << "          </div>\n"
     else
       diff_count = result['diffCount'].to_s.reverse.scan(/\d{1,3}/).join(',').reverse
       html << "          <div class=\"site\" id=\"#{result['subdomain']}\">\n"
@@ -244,8 +237,8 @@ def generate_html_report(diff_dir, baseline_name, baseline_metadata, current_met
       html << "                <img src=\"#{result['subdomain']}-diff.png\" alt=\"Diff\">\n"
       html << "              </div>\n"
       html << "            </div>\n"
-      html << "          </div>\n"
     end
+    html << "          </div>\n"
   end
 
   html << <<~HTML_END
@@ -278,12 +271,12 @@ def get_directory_size(path)
 end
 
 def format_size(bytes)
-  units = ['B', 'KB', 'MB', 'GB']
+  units = %w[B KB MB GB]
   return '0 B' if bytes.zero?
 
   exp = (Math.log(bytes) / Math.log(1024)).to_i
   exp = [exp, units.length - 1].min
-  format('%.1f %s', bytes.to_f / (1024**exp), units[exp])
+  format('%<size>.1f %<unit>s', size: bytes.to_f / (1024**exp), unit: units[exp])
 end
 
 def format_friendly_time(utc_time_string)
@@ -307,7 +300,7 @@ end
 namespace :screenshot do
   desc 'Create a screenshot set (name=X desc="...")'
   task :create do
-    name = ENV['name']
+    name = ENV.fetch('name', nil)
     description = ENV['desc'] || 'Screenshot set'
 
     die 'Please provide a name: rake screenshot:create name=baseline desc="..."' unless name
@@ -319,9 +312,7 @@ namespace :screenshot do
     end
 
     # Check if build directory exists
-    unless File.directory?(BUILD_DIR)
-      die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first."
-    end
+    die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first." unless File.directory?(BUILD_DIR)
 
     # Detect built sites
     built_sites = Dir.glob(File.join(BUILD_DIR, '*'))
@@ -329,9 +320,7 @@ namespace :screenshot do
                      .map { |f| File.basename(f) }
                      .reject { |name| name.start_with?('_') || name.start_with?('.') }
 
-    if built_sites.empty?
-      die "No built sites found in #{BUILD_DIR}. Run 'rake build' first."
-    end
+    die "No built sites found in #{BUILD_DIR}. Run 'rake build' first." if built_sites.empty?
 
     puts "#{'=== Creating Screenshot Set:'.cyan} #{name.bold} #{'==='.cyan}\n\n"
 
@@ -344,9 +333,7 @@ namespace :screenshot do
     # Filter out excluded sites
     build_sites = build_sites.reject { |site| SCREENSHOT_EXCLUDES.include?(site.name) }
 
-    if SCREENSHOT_EXCLUDES.any?
-      puts "#{'Excluded sites:'.gray} #{SCREENSHOT_EXCLUDES.join(', ').gray}\n\n"
-    end
+    puts "#{'Excluded sites:'.gray} #{SCREENSHOT_EXCLUDES.join(', ').gray}\n\n" if SCREENSHOT_EXCLUDES.any?
 
     # Ensure server is running
     server_pid = ensure_build_server_running(port)
@@ -362,7 +349,7 @@ namespace :screenshot do
       puts
 
       # Save metadata
-      git_data = get_git_metadata
+      git_data = git_metadata
       metadata = {
         name: name,
         created: Time.now.utc.strftime('%Y-%m-%d %H:%M:%S UTC'),
@@ -379,7 +366,7 @@ namespace :screenshot do
 
       # Display summary
       size = get_directory_size(output_dir)
-      puts "#{'=== Screenshot Set Summary ==='.cyan}"
+      puts '=== Screenshot Set Summary ==='.cyan
       puts "#{'Name:'.bold.ljust(14)} #{name.bold}"
       puts "#{'Location:'.ljust(14)} #{output_dir.to_s.gray}"
       puts "#{'Size:'.ljust(14)} #{format_size(size).green}"
@@ -387,7 +374,7 @@ namespace :screenshot do
       puts "#{'Git commit:'.ljust(14)} #{git_data[:commit].gray} on #{git_data[:branch].gray}"
       puts "#{'Description:'.ljust(14)} #{description}"
       puts
-      puts "#{'✓ Screenshot set created successfully'.green}"
+      puts '✓ Screenshot set created successfully'.green
     ensure
       # Clean up server if we started it
       if server_pid
@@ -399,7 +386,7 @@ namespace :screenshot do
 
   desc 'Compare screenshots with baseline (name=X open=1)'
   task :diff do
-    name = ENV['name']
+    name = ENV.fetch('name', nil)
 
     die 'Please provide a name: rake screenshot:diff name=baseline' unless name
 
@@ -411,9 +398,7 @@ namespace :screenshot do
     end
 
     # Check if build directory exists
-    unless File.directory?(BUILD_DIR)
-      die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first."
-    end
+    die "Build directory #{BUILD_DIR} does not exist. Run 'rake build' first." unless File.directory?(BUILD_DIR)
 
     puts "#{'=== Comparing Screenshots:'.cyan} #{name.bold} #{'==='.cyan}\n\n"
 
@@ -434,9 +419,7 @@ namespace :screenshot do
     # Filter out excluded sites
     build_sites = build_sites.reject { |site| SCREENSHOT_EXCLUDES.include?(site.name) }
 
-    if SCREENSHOT_EXCLUDES.any?
-      puts "#{'Excluded sites:'.gray} #{SCREENSHOT_EXCLUDES.join(', ').gray}\n\n"
-    end
+    puts "#{'Excluded sites:'.gray} #{SCREENSHOT_EXCLUDES.join(', ').gray}\n\n" if SCREENSHOT_EXCLUDES.any?
 
     # Ensure server is running
     server_pid = ensure_build_server_running(port)
@@ -456,11 +439,11 @@ namespace :screenshot do
       FileUtils.mkdir_p(diff_dir)
 
       puts "#{'→'.blue} Comparing with baseline...\n"
-      exit_code = compare_screenshots(build_sites, baseline_dir, current_dir, diff_dir)
+      compare_screenshots(build_sites, baseline_dir, current_dir, diff_dir)
       puts
 
       # Generate HTML report
-      git_data = get_git_metadata
+      git_data = git_metadata
       current_metadata = {
         commit: git_data[:commit],
         branch: git_data[:branch],
@@ -477,27 +460,27 @@ namespace :screenshot do
         changed = results.count { |r| !r['error'] && !r['matched'] }
         changed_sites = results.select { |r| !r['error'] && !r['matched'] }.map { |r| r['site'] }
 
-        puts "#{'=== Diff Summary ==='.cyan}"
+        puts '=== Diff Summary ==='.cyan
         puts "#{'Total sites:'.ljust(14)} #{results.length.to_s.bold}"
         puts "#{'Unchanged:'.ljust(14)} #{unchanged.to_s.green}"
-        puts "#{'Changed:'.ljust(14)} #{changed.to_s.yellow}#{changed > 0 ? " (#{changed_sites.join(', ')})" : ''}"
+        puts "#{'Changed:'.ljust(14)} #{changed.to_s.yellow}#{" (#{changed_sites.join(', ')})" if changed.positive?}"
         puts
         puts "#{'Report saved to:'.ljust(14)} #{report_path.to_s.gray}"
 
         # Optionally open report in browser
         if ENV['open'] == '1'
-          puts "#{'Opening report...'.yellow}"
+          puts 'Opening report...'.yellow
           system("open '#{report_path}'")
         else
           puts "#{'Open with:'.ljust(14)} #{"open #{report_path}".gray}"
         end
         puts
 
-        if changed > 0
-          puts "#{'⚠ Changes detected'.yellow}"
+        if changed.positive?
+          puts '⚠ Changes detected'.yellow
           exit(1)
         else
-          puts "#{'✓ No changes detected'.green}"
+          puts '✓ No changes detected'.green
         end
       end
     ensure
@@ -508,7 +491,11 @@ namespace :screenshot do
       end
 
       # Clean up temp directory
-      FileUtils.rm_rf(File.dirname(current_dir)) rescue nil
+      begin
+        FileUtils.rm_rf(File.dirname(current_dir))
+      rescue
+        nil
+      end
     end
   end
 
@@ -525,23 +512,27 @@ namespace :screenshot do
     puts "#{'Available screenshot sets:'.cyan}\n\n"
 
     # Build list with metadata and sort by date (newest first)
-    screenshots = Dir.glob(File.join(SCREENSHOTS_DIR, '*'))
-                     .select { |f| File.directory?(f) }
-                     .map { |f| File.basename(f) }
-                     .reject { |name| name.start_with?('_') || name.start_with?('.') }
-                     .map do |name|
-                       path = screenshot_path(name)
-                       metadata = load_screenshot_metadata(path)
-                       created = metadata ? metadata['Created'] : nil
-                       # Parse date for sorting
-                       timestamp = if created && created != 'unknown'
-                                    Time.parse(created) rescue Time.at(0)
-                                  else
-                                    Time.at(0) # Unknown dates go to the end
-                                  end
-                       { name: name, path: path, metadata: metadata, timestamp: timestamp }
-                     end
-                     .sort_by { |s| -s[:timestamp].to_i } # Newest first (negative for descending)
+    screenshot_list = Dir.glob(File.join(SCREENSHOTS_DIR, '*'))
+                         .select { |f| File.directory?(f) }
+                         .map { |f| File.basename(f) }
+                         .reject { |name| name.start_with?('_') || name.start_with?('.') }
+                         .map do |name|
+                           path = screenshot_path(name)
+                           metadata = load_screenshot_metadata(path)
+                           created = metadata ? metadata['Created'] : nil
+                           # Parse date for sorting
+                           timestamp = if created && created != 'unknown'
+                                         begin
+                                           Time.parse(created)
+                                         rescue StandardError
+                                           Time.at(0)
+                                         end
+                                       else
+                                         Time.at(0) # Unknown dates go to the end
+                                       end
+                           { name: name, path: path, metadata: metadata, timestamp: timestamp }
+                         end
+    screenshots = screenshot_list.sort_by { |s| -s[:timestamp].to_i } # Newest first (negative for descending)
 
     screenshots.each do |screenshot|
       name = screenshot[:name]

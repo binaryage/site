@@ -12,7 +12,7 @@ namespace :init do
   desc 'install gem dependencies'
   task :gem do
     unless Gem::Version.new(`gem --version`) >= Gem::Version.new(MIN_GEM_VERSION)
-      error_msg = "install rubygems (>=v#{MIN_GEM_VERSION}, no sudo, consider rvm) "\
+      error_msg = "install rubygems (>=v#{MIN_GEM_VERSION}, no sudo, consider rvm) " \
                   '=> http://rubygems.org, http://beginrescueend.com'
       die error_msg
     end
@@ -23,9 +23,7 @@ namespace :init do
   task :lightningcss do
     lightningcss_bin = File.join(NODE_DIR, 'node_modules/.bin/lightningcss')
 
-    unless File.exist?(lightningcss_bin)
-      die "lightningcss-cli not found. Run 'rake init:node' first."
-    end
+    die "lightningcss-cli not found. Run 'rake init:node' first." unless File.exist?(lightningcss_bin)
 
     puts "✓ lightningcss-cli found at #{lightningcss_bin}".green
   end

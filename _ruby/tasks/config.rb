@@ -24,16 +24,16 @@ SERVE_DIR = File.join(STAGE_DIR, 'serve')
 BUILD_DIR = File.join(STAGE_DIR, 'build')
 STORE_DIR = File.join(STAGE_DIR, 'store')
 SNAPSHOTS_DIR = File.join(ROOT, '.snapshots')
-SNAPSHOT_EXCLUDES = ['_cache', '.configs', 'atom.xml']
+SNAPSHOT_EXCLUDES = ['_cache', '.configs', 'atom.xml'].freeze
 SCREENSHOTS_DIR = File.join(ROOT, '.screenshots')
-SCREENSHOT_EXCLUDES = ['support'] # Sites to exclude from screenshots (e.g., redirects)
+SCREENSHOT_EXCLUDES = ['support'].freeze # Sites to exclude from screenshots (e.g., redirects)
 
 # Dynamically detect all git submodules at root level
 DIRS = `git config --file .gitmodules --get-regexp path`
-         .lines
-         .map { |line| line.split[1] }
-         .compact
-         .freeze
+       .lines
+       .map { |line| line.split[1] }
+       .compact
+       .freeze
 
 SITES = DIRS.each_with_index.collect do |dir, index|
   Site.new(File.join(ROOT, dir), BASE_PORT + index, LOCAL_DOMAIN)

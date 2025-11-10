@@ -7,23 +7,17 @@ namespace :shared do
 
     # Find source site
     source_site = SITES.find { |s| s.name == source_name }
-    unless source_site
-      die "Source site '#{source_name}' not found"
-    end
+    die "Source site '#{source_name}' not found" unless source_site
 
     source_dir = File.join(source_site.dir, 'shared')
-    unless Dir.exist?(source_dir)
-      die "Source shared directory not found: #{source_dir}"
-    end
+    die "Source shared directory not found: #{source_dir}" unless Dir.exist?(source_dir)
 
     # Get source commit
     source_commit = Dir.chdir(source_dir) do
       `git rev-parse HEAD 2>/dev/null`.strip
     end
 
-    if source_commit.empty?
-      die "Could not get commit from #{source_name}/shared"
-    end
+    die "Could not get commit from #{source_name}/shared" if source_commit.empty?
 
     source_commit_short = source_commit[0..6]
     source_path = File.expand_path(source_dir)
@@ -65,7 +59,7 @@ namespace :shared do
         # This keeps HEAD pointing to the branch (not detached)
         # Also sync remote tracking ref to match source's origin/master state
         system("git fetch '#{source_path}' refs/remotes/origin/master:refs/remotes/origin/master >/dev/null 2>&1") &&
-        system("git checkout -B master #{source_commit} >/dev/null 2>&1")
+          system("git checkout -B master #{source_commit} >/dev/null 2>&1")
       end
 
       if success
@@ -82,13 +76,9 @@ namespace :shared do
     end
 
     puts
-    if synced > 0
-      puts "#{'✨'.green} Synced #{synced} site(s)"
-    end
-    if skipped > 0
-      puts "#{'⏭️ '.yellow} Skipped #{skipped} site(s) with uncommitted changes"
-    end
-    if failed > 0
+    puts "#{'✨'.green} Synced #{synced} site(s)" if synced.positive?
+    puts "#{'⏭️ '.yellow} Skipped #{skipped} site(s) with uncommitted changes" if skipped.positive?
+    if failed.positive?
       puts "#{'⚠️ '.red} Failed to sync #{failed} site(s)"
       exit 1
     end

@@ -47,7 +47,6 @@ module Jekyll
       result_file = Tempfile.new(['result', '.css'])
 
       begin
-
         # Get path to lightningcss binary
         root = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
         lightningcss_bin = File.join(root, '_node/node_modules/.bin/lightningcss')
@@ -80,7 +79,7 @@ module Jekyll
         FileUtils.cp(result_file.path, output_path)
 
         # Remove .bundle.css from destination if it was copied there
-        FileUtils.rm_f(bundle_dest_path) if File.exist?(bundle_dest_path)
+        FileUtils.rm_f(bundle_dest_path)
 
         puts "  CSS Bundle: #{relative_path} → #{output_relative_path}".colorize(:magenta)
       ensure

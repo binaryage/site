@@ -29,7 +29,7 @@ class BuildLock
   # Raises error if lock cannot be acquired (another build is running).
   def acquire!
     # Ensure stage directory exists
-    FileUtils.mkdir_p(@stage_dir) unless Dir.exist?(@stage_dir)
+    FileUtils.mkdir_p(@stage_dir)
 
     # Open lock file (create if doesn't exist)
     @lock_fd = File.open(@lock_file, File::CREAT | File::RDWR)
@@ -68,7 +68,7 @@ class BuildLock
       @lock_fd.close
 
       # Clean up lock file
-      File.unlink(@lock_file) if File.exist?(@lock_file)
+      FileUtils.rm_f(@lock_file)
     rescue StandardError => e
       # Swallow errors during cleanup (process might be exiting)
       warn "Warning: Failed to release lock: #{e.message}"
@@ -86,7 +86,7 @@ class BuildLock
 
     content = File.read(@lock_file).strip
     pid = content.to_i
-    pid if pid > 0
+    pid if pid.positive?
   rescue StandardError
     nil
   end
