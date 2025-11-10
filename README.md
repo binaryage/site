@@ -135,7 +135,7 @@ This command intelligently handles both shared pointer updates and regular file 
 
 ## Architecture Overview
 
-### 12 Subdomain Sites (Git Submodules)
+### Subdomain Sites (Git Submodules)
 
 - **www** - Main binaryage.com site
 - **blog** - Blog subdomain
@@ -147,7 +147,7 @@ Each site is a separate git repository tracked as a submodule.
 
 ### Shared Resources Architecture
 
-⚠️ **CRITICAL CONCEPT**: All 12 `shared/` directories across all submodules point to the **SAME** git repository ([binaryage/shared](https://github.com/binaryage/shared)).
+⚠️ **CRITICAL CONCEPT**: All `shared/` directories across all submodules point to the **SAME** git repository ([binaryage/shared](https://github.com/binaryage/shared)).
 
 This means:
 - **Single source of truth**: One repository contains all shared layouts, CSS, and JavaScript

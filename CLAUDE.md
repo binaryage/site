@@ -50,7 +50,7 @@ BinaryAge Site is an umbrella project that manages multiple subdomain sites unde
 
 ### Git Submodules Architecture
 
-The repository contains 12 subdomain sites as git submodules:
+The repository contains multiple subdomain sites as git submodules:
 - **www** - Main binaryage.com site
 - **blog** - Blog subdomain
 - **support** - Support site
@@ -61,14 +61,14 @@ Each submodule has a `shared` subdirectory (also a git submodule) containing com
 
 ### CRITICAL: Shared Submodule Architecture
 
-**All 12 `shared/` directories across all submodules are clones of the SAME git repository.**
+**All `shared/` directories across all submodules are clones of the SAME git repository.**
 
 This is the most important architectural concept to understand:
 
 - **Single source of truth**: There is ONE shared repository (github.com/binaryage/shared) that contains layouts, includes, CSS, and JavaScript
 - **Make changes once**: When you need to modify shared resources (layouts, CSS, JS), you only need to edit them in ONE place
 - **Update submodule pointers**: After pushing changes to the shared repository, update the submodule pointer in each site that needs the changes
-- **DO NOT edit 12 times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
+- **DO NOT edit multiple times**: Never make the same change in multiple `shared/` directories - they all point to the same repo
 - **Recommended workflow**: Make shared changes via `www/shared`, then update pointers in other sites
 
 ### Manual Shared Synchronization
@@ -134,7 +134,7 @@ git commit -m "Update shared submodule"
 - ❌ **DON'T commit** root-level submodule pointers (www, blog, etc.) in the main `site` repo
 - The hookgun deployment system handles root-level pointers automatically
 
-**For AI agents**: This architecture means you should NEVER iterate through all 12 sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
+**For AI agents**: This architecture means you should NEVER iterate through all sites making identical changes to shared resources. Always work with the shared repository directly and then update submodule pointers.
 
 ## Detailed Rake Task Reference
 
