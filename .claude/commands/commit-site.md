@@ -25,7 +25,7 @@ You need to detect which sites have uncommitted changes and offer an interactive
 
 1. **Get all available sites:**
    ```bash
-   grep "path = " .gitmodules | awk '{print $3}'
+   git config --file .gitmodules --get-regexp path | awk '{print $2}'
    ```
 
 2. **Check each site for changes:**
@@ -82,7 +82,7 @@ Split the arguments into individual site names. The user may provide one or more
 
 ```bash
 if [[ "$ARGUMENTS" == "all" ]]; then
-  SITES=$(grep "path = " .gitmodules | awk '{print $3}')
+  SITES=$(git config --file .gitmodules --get-regexp path | awk '{print $2}')
 else
   SITES="$ARGUMENTS"
 fi
@@ -108,7 +108,7 @@ Create a list of sites to process.
 Before processing, read `.gitmodules` to get the list of available site submodules dynamically:
 
 ```bash
-grep "path = " .gitmodules | awk '{print $3}'
+git config --file .gitmodules --get-regexp path | awk '{print $2}'
 ```
 
 This will list all submodule directories. Store this list for reference.
