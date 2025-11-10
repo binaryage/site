@@ -10,6 +10,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - The `_adhoc/` directory is gitignored and safe for experimentation
 - Example: `_adhoc/worktree-test/`, `_adhoc/proof-of-concept/`, etc.
 
+**mise Environment Activation:**
+- Always execute Ruby/Rake commands through mise's activated environment
+- **Recommended setup**: Enable automatic mise activation via shell integration or direnv (see README.md "Automated mise Activation" section)
+- **Without activation**: Use `mise exec -- bundle exec rake status` explicitly
+- **Why**: macOS's system Bundler is too old and will raise "You must use Bundler 2" otherwise
+- Shell activation eliminates the need for `mise exec --` prefix on every command
+
 ---
 
 ## Essential Information
@@ -368,6 +375,8 @@ totalfinder-web    totalfinder    4103   totalfinder.binaryage.com
 4. Static files pushed to `gh-pages` branch
 5. GitHub Pages deploys automatically
 6. **Root-level submodule pointer AUTOMATICALLY updated in this `site` repo by hookgun**
+
+`hookgun` lives in BinaryAge's deployment infrastructure (outside this repository). When you need to troubleshoot or update it, contact maintainers rather than searching inside `site/`.
 
 **IMPORTANT - Understanding Submodule Pointer Updates:**
 

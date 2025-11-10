@@ -23,6 +23,61 @@ mise install      # Install Ruby & Node.js versions
 rake init         # Initialize submodules, install dependencies
 ```
 
+### Automated mise Activation (Recommended)
+
+For the best developer experience, enable automatic mise activation so Ruby and Node.js are available without manual intervention:
+
+**Option 1: Shell Integration (Recommended)**
+
+Add mise activation to your shell profile:
+
+```bash
+# For Zsh (add to ~/.zshrc)
+eval "$(mise activate zsh)"
+
+# For Bash (add to ~/.bashrc or ~/.bash_profile)
+eval "$(mise activate bash)"
+
+# For Fish (add to ~/.config/fish/config.fish)
+mise activate fish | source
+```
+
+After adding this, restart your shell or run `source ~/.zshrc` (or your shell's config file).
+
+**Option 2: direnv Integration**
+
+If you prefer direnv, mise can integrate with it:
+
+```bash
+# 1. Install direnv (if not already installed)
+brew install direnv
+
+# 2. Add direnv hook to your shell
+# For Zsh (add to ~/.zshrc)
+eval "$(direnv hook zsh)"
+
+# For Bash (add to ~/.bashrc)
+eval "$(direnv hook bash)"
+
+# 3. Create .envrc in the project (already exists)
+# mise will automatically work with direnv via .mise.toml
+
+# 4. Allow direnv for this directory
+direnv allow
+```
+
+**Verification:**
+
+After setup, verify automatic activation works:
+
+```bash
+cd /path/to/site
+ruby --version    # Should show 3.4.7 automatically
+node --version    # Should show 22.21.1 automatically
+```
+
+Without activation, you'd need to manually run `mise exec -- command` for every command.
+
 ## Essential Commands
 
 ### Development Server
@@ -169,18 +224,40 @@ Standard deployment flow:
 3. The `hookgun` hook automatically builds and deploys to GitHub Pages
 4. Root-level submodule pointer automatically updated
 
+`hookgun` is maintained outside this repository (BinaryAge's deployment infrastructure). If you need to audit or adjust it, coordinate with the infrastructure team—the scripts are not stored in `site/`.
+
 **Important**: When modifying shared resources, always push shared changes **before** pushing website changes.
 
 ## Basic Troubleshooting
 
 ### mise Issues
 
+**If commands fail with Ruby/Node version errors:**
+
+First, verify mise is working:
+
 ```bash
 mise --version              # Verify mise is installed
 mise install                # Install Ruby & Node.js
 mise current                # Check active versions
-ruby --version              # Should show 3.4.7
-node --version              # Should show 22.21.1
+```
+
+**Recommended**: Set up automated mise activation (see "Automated mise Activation" section above) to avoid needing `mise exec --` prefixes.
+
+**Without activation**, you must explicitly use mise:
+
+```bash
+mise exec -- ruby --version              # Should show 3.4.7
+mise exec -- node --version              # Should show 22.21.1
+mise exec -- bundle exec rake build      # Correct way to run rake tasks
+```
+
+**With activation** (shell integration or direnv), commands work directly:
+
+```bash
+ruby --version              # Should show 3.4.7 automatically
+node --version              # Should show 22.21.1 automatically
+rake build                  # Just works
 ```
 
 ### Bundle Install Fails
@@ -191,6 +268,8 @@ bundle install
 ```
 
 Never use `sudo` - mise installs gems in user space.
+
+> **Tip:** macOS ships Bundler 1.x by default. Run all Ruby commands through mise (e.g. `mise exec -- bundle exec rake -T`) so Bundler 2 from your managed toolchain is used and you avoid the "You must use Bundler 2" error.
 
 ### nginx Proxy Fails
 
