@@ -3,6 +3,7 @@
 .screenshots/
 store-template.zip
 .idea
+.code
 .rubocop_todo.yml
 *.iml
 .claude/settings.local.json
