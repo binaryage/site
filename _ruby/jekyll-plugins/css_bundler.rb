@@ -14,7 +14,7 @@ require 'open3'
 require 'fileutils'
 
 module Jekyll
-  module CssConcatenator
+  module CssBundler
     # Hook runs after site is written to destination
     Jekyll::Hooks.register :site, :post_write do |site|
       process_css_bundles(site)
@@ -69,7 +69,7 @@ module Jekyll
         _stdout, stderr, status = Open3.capture3(cmd)
 
         unless status.success?
-          error_msg = "CSS Concatenator (lightningcss) failed for #{relative_path}\n"
+          error_msg = "CSS Bundler (lightningcss) failed for #{relative_path}\n"
           error_msg += "Command: #{cmd}\n"
           error_msg += "Error output:\n#{stderr}" unless stderr.empty?
           raise error_msg
@@ -87,7 +87,7 @@ module Jekyll
         result_file&.unlink
       end
     rescue => e
-      puts "CSS Concatenator Exception: #{e.message}"
+      puts "CSS Bundler Exception: #{e.message}"
       puts e.backtrace
       raise e
     end

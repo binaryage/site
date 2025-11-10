@@ -343,7 +343,7 @@ totalfinder-web    totalfinder    4103   totalfinder.binaryage.com
 ### Build System (_ruby/lib/build.rb)
 - Uses Jekyll as the static site generator
 - Custom Jekyll plugins in `_ruby/jekyll-plugins/`:
-  - `css_concatenator.rb` - CSS bundling via Jekyll Hook + Lightning CSS processing
+  - `css_bundler.rb` - CSS bundling via Jekyll Hook + Lightning CSS processing
   - `js_combinator.rb` - JavaScript concatenation from .list files
   - `compressor.rb` - Asset compression
   - `pruner.rb`, `reshaper.rb`, `inline_styles.rb`, etc.
