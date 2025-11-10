@@ -24,15 +24,50 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Site count can change over time as sites are added/removed/archived
   - Use generic language: "multiple sites", "all sites", "each site"
   - Let dynamic discovery determine the actual count at runtime
-- **Always discover dynamically** using one of these methods:
-  1. **Preferred: `git submodule foreach`** - Iterates over all submodules automatically
-     - Example: `git submodule foreach 'echo "Processing $name..."'`
-     - Works for both bash scripts and documentation examples
-  2. **Alternative: Parse `.gitmodules`** - Extract submodule paths programmatically
-     - Example: `git config --file .gitmodules --get-regexp path | awk '{print $2}'`
-- **Why**: The root repository contains only site submodules (no other types)
-- **Why**: Dynamic discovery ensures code/docs stay in sync when sites are added/removed
-- **Why**: Eliminates maintenance burden of updating hardcoded lists and counts
+- **Always discover dynamically** - see detailed comparison below
+
+**Why we parse `.gitmodules` instead of `git submodule foreach`:**
+
+This codebase uses `git config --file .gitmodules` for getting submodule lists, NOT `git submodule foreach`. This is intentional and optimal for our use case:
+
+**Use `git config --file .gitmodules` for:**
+- ✅ **Getting list of all submodules** (including uninitialized)
+- ✅ **Configuration and setup** (`rake init`, `SITES` array initialization)
+- ✅ **Validation** (checking if site name exists)
+- ✅ **Performance-critical operations** (22x faster: 6ms vs 132ms)
+- ✅ **Ruby integration** (clean functional processing)
+- ✅ **Deterministic ordering** (file order, critical for port assignments)
+
+```ruby
+# Correct approach used in _ruby/tasks/config.rb:
+DIRS = `git config --file .gitmodules --get-regexp path`
+         .lines.map { |line| line.split[1] }
+# Works with uninitialized submodules, fast, deterministic order
+```
+
+**Use `git submodule foreach` for:**
+- ✅ **Running commands INSIDE each submodule directory**
+- ✅ **Batch operations on initialized submodules**
+- ✅ **Accessing runtime state** (current branch, commit)
+- ✅ **Shell-based iteration workflows**
+
+```bash
+# Good use case for foreach:
+git submodule foreach 'git status'
+git submodule foreach 'git checkout web'
+git submodule foreach 'bundle install'
+```
+
+**Key differences:**
+- `git config` works with **uninitialized** submodules (critical for `rake init`)
+- `git submodule foreach` only iterates **initialized** submodules
+- `git config` is **22x faster** (important for operations that run frequently)
+- Order matters: `git config` preserves file order (needed for port assignments)
+
+**Why this matters:**
+- The root repository contains only site submodules (no other types)
+- Dynamic discovery ensures code/docs stay in sync when sites are added/removed
+- Using the right tool for each job eliminates maintenance burden
 
 ---
 
