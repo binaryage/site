@@ -8,7 +8,7 @@ module CacheVersion
   # Returns: String (64-char hex hash)
   def self.calculate_cache_version_hash
     # Get ROOT constant from config (or use current directory as fallback)
-    root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '../..'))
 
     files_to_hash = []
 
@@ -75,7 +75,7 @@ module CacheVersion
   # Invalidate and delete all cache directories
   # Returns: Array of deleted directories
   def self.invalidate_all_caches
-    root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '../..'))
     deleted = []
 
     # Clean build cache
@@ -110,7 +110,7 @@ module CacheVersion
   # Check cache validity and invalidate if needed
   # Returns: Hash with status info
   def self.check_and_invalidate_if_needed(cache_dir, logger: method(:puts))
-    root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '../..'))
     current_hash = calculate_cache_version_hash
     stored_hash = read_stored_cache_version(cache_dir)
 

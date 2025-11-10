@@ -164,7 +164,9 @@ module HtmlPress
   # @api private
   def self.compress_with_lightningcss(css_text)
     # Get path to lightningcss binary from _node/node_modules
-    root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    # Use ROOT constant if available (should always be available when run via rake)
+    # Fallback to path calculation for standalone usage
+    root = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '../..'))
     lightningcss_bin = File.join(root, '_node/node_modules/.bin/lightningcss')
 
     unless File.exist?(lightningcss_bin)

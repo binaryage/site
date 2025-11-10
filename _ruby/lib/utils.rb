@@ -2,7 +2,7 @@
 
 require 'colored2'
 
-BASE_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+BASE_DIR = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
 
 def die(msg, status=1)
   puts msg.red
