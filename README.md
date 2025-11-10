@@ -59,9 +59,24 @@ rake test:smoke             # Run automated smoke tests
 rake status                 # Check git submodule status
 rake pin                    # Fix detached HEAD - checkout branch tips after git pull/submodule update
 rake shared:sync            # Sync shared resources across all sites
+rake remotes:list           # Show git remote URLs for all sites
+rake remotes:ssh            # Convert all remotes to SSH format
 rake screenshot:create name=X  # Create screenshot baseline
 rake screenshot:diff name=X    # Compare screenshots
 ```
+
+### Slash Commands
+
+Use the `/commit-site` command for intelligent submodule commits:
+
+```bash
+/commit-site                # Interactive picker - auto-detects sites with changes
+/commit-site www            # Commit changes in specific site
+/commit-site www blog       # Commit multiple sites
+/commit-site all            # Commit all sites with changes
+```
+
+This command intelligently handles both shared pointer updates and regular file changes, generating appropriate commit messages automatically. See [CLAUDE.md](CLAUDE.md#using-the-commit-site-slash-command) for details.
 
 ## Architecture Overview
 
@@ -129,6 +144,8 @@ rake status                  # Check all submodules (shows issues only)
 rake status verbose=1        # Full details for all submodules
 rake pin                     # Pin all submodules to latest branch tips
 rake shared:sync            # Sync shared commits across all sites
+rake remotes:list           # Show remote URLs for all sites
+rake remotes:ssh            # Convert all remotes to SSH format
 rake hooks:install          # Install pre-push hooks (auto-installed during rake init)
 rake hooks:status           # Check hook installation status
 ```

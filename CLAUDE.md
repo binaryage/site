@@ -61,6 +61,8 @@ rake shared:sync from=blog  # Sync from specific site's shared directory
 - Fetches the HEAD commit from source shared directory
 - Uses local filesystem paths (no network required)
 - Updates all other shared directories to the same commit
+- **Syncs remote tracking branch state** - keeps `origin/master` refs in sync across all shared directories
+- Keeps HEAD pointing to `master` branch (not detached)
 - Skips directories with uncommitted changes
 - Fast and reliable (~1 second for all 11 sites)
 - **Does NOT push** - all remote pushes are manual and controlled by you
@@ -141,6 +143,8 @@ See [README.md](README.md) for common usage. This section provides additional te
 - `rake hooks:install` - Install pre-push hooks to all submodules
 - `rake hooks:uninstall` - Remove pre-push hooks from all submodules
 - `rake hooks:status` - Show git hook installation status
+- `rake remotes:list` - Show current remote URLs for all sites
+- `rake remotes:ssh` - Fix remote URLs to use SSH format
 
 **Testing:**
 - `rake test:smoke` - Run automated smoke tests (Playwright)
@@ -160,7 +164,8 @@ See [README.md](README.md) for common usage. This section provides additional te
 - `rake upgrade` - Upgrade Ruby + Node dependencies
 - `rake upgrade:ruby` - Upgrade Ruby gems only
 - `rake upgrade:node` - Upgrade Node packages only
-- `rake inspect` - List all registered sites
+- `rake inspect` - List all registered sites with details
+- `rake inspect verbose=1` - Show additional configuration details
 - `rake store` - Generate FastSpring store template zip
 
 ### Advanced Testing System Details
@@ -207,7 +212,8 @@ The `rake status` command provides comprehensive overview of all git submodules.
 - ✗ (red) - Missing or critical error
 - ↑N (green) - N commits ahead
 - ↓N (red) - N commits behind
-- ⚠ (yellow) - Uncommitted changes
+- ⚠ (yellow) - Uncommitted changes (non-shared files)
+- ↻ (blue) - Only shared submodule pointer updated (normal after `rake shared:sync`)
 - ↔ (blue) - Remote status
 
 **Exit codes:** 0 (all clean), 1 (issues found)
@@ -254,6 +260,78 @@ rake pin                    # Return to branch tips
 | `rake shared:sync` | Sync shared commits across sites | No | After updating shared repository |
 
 **Note:** The pre-push hook and hookgun serve different purposes - they don't replace `rake pin`. The hook prevents bad pushes, hookgun updates remote pointers, but only `rake pin` manages local branch state.
+
+### Managing Git Remote URLs (`rake remotes:*`)
+
+These tasks help manage and verify git remote URLs across all submodules.
+
+#### Listing Remote URLs (`rake remotes:list`)
+
+Shows the current remote URL for each site's `origin` remote:
+
+```bash
+rake remotes:list
+```
+
+**Output format:**
+- Green URL with "(SSH)" indicator - Using SSH format (recommended)
+- Yellow URL with "(HTTPS)" indicator - Using HTTPS format
+- Red "no origin remote" - No origin configured
+
+**Example output:**
+```
+  www: git@github.com:binaryage/www.git (SSH)
+  blog: https://github.com/binaryage/blog.git (HTTPS)
+  totalfinder-web: git@github.com:binaryage/totalfinder-web.git (SSH)
+```
+
+#### Fixing URLs to SSH (`rake remotes:ssh`)
+
+Automatically converts all submodule remote URLs from HTTPS to SSH format:
+
+```bash
+rake remotes:ssh
+```
+
+**What it does:**
+- Scans all site submodules
+- Identifies HTTPS URLs (github.com)
+- Converts to SSH format: `git@github.com:binaryage/REPO.git`
+- Preserves repository names from existing URLs
+- Skips sites already using SSH
+
+**Use case:** After cloning with HTTPS URLs, quickly convert all submodules to SSH for easier authenticated pushes.
+
+**Exit codes:** 0 (success), 1 (failures occurred)
+
+### Inspecting Registered Sites (`rake inspect`)
+
+Displays a comprehensive table of all registered sites with their configuration.
+
+```bash
+rake inspect              # Standard table view
+rake inspect verbose=1    # Include additional details
+```
+
+**Information shown:**
+- Site directory name
+- Subdomain (extracted from directory name)
+- Port number (for Jekyll development server)
+- Full domain (subdomain + binaryage.com/org)
+
+**Example output:**
+```
+=== Registered Sites (12) ===
+
+Site               Subdomain      Port   Domain
+─────────────────────────────────────────────────────────────
+www                www            4101   www.binaryage.com
+blog               blog           4102   blog.binaryage.com
+totalfinder-web    totalfinder    4103   totalfinder.binaryage.com
+...
+```
+
+**Use case:** Verify site configuration, check port assignments, or understand subdomain mapping.
 
 ## Architecture Details
 
@@ -338,6 +416,66 @@ When making changes to a website (e.g., totalfinder-web):
    - Then: `cd ..`, `git add shared`, commit the pointer update
 5. Push changes to the website's `web` branch
 6. The `hookgun` hook will automatically build and update the root-level pointer
+
+### Using the /commit-site Slash Command
+
+The `/commit-site` command provides an intelligent, automated way to commit changes in site submodules. It handles both shared submodule pointer updates and regular file changes with appropriate commit messages.
+
+**Usage:**
+
+```bash
+/commit-site                    # Interactive picker - shows only sites with changes
+/commit-site www                # Commit changes in www
+/commit-site www blog           # Commit changes in multiple sites
+/commit-site totalfinder        # Works with or without -web suffix
+/commit-site all                # Commit changes in all sites
+```
+
+**What it does:**
+
+1. **Interactive site selection** (when called without arguments):
+   - Detects which sites have uncommitted changes
+   - Shows interactive picker with change counts
+   - Auto-selects if only one site has changes
+
+2. **Smart change detection**:
+   - Distinguishes between shared submodule pointer updates and other file changes
+   - Creates appropriate commit messages for each type
+
+3. **Shared pointer updates** (when only `shared` is modified):
+   - Analyzes commits in shared submodule
+   - Generates concise summary (5-10 words)
+   - Includes full commit log in commit message body
+
+4. **Regular file changes**:
+   - Auto-stages all changes
+   - Generates descriptive commit message based on diff
+   - Handles shared pointer separately if also modified
+
+5. **Flexible naming**:
+   - Accepts both `totalfinder` and `totalfinder-web`
+   - Works with all site names from `.gitmodules`
+
+**Example workflow:**
+
+```bash
+# After running rake shared:sync, multiple sites have shared pointer updates
+/commit-site
+# → Shows: "www (shared pointer)", "blog (shared pointer)", "totalfinder-web (shared pointer)"
+# → Select which sites to commit
+# → Each gets a commit like: "Updated shared (layout improvements)"
+
+# Or commit specific sites directly
+/commit-site www blog
+# → Commits both sites automatically
+```
+
+**Important notes:**
+- All commits include Claude Code footer automatically
+- Does NOT push to remote - pushing is always manual
+- Validates site names against `.gitmodules`
+- Processes multiple sites independently
+- Shows summary of all actions taken
 
 ### Understanding the Two Levels of Submodules
 
