@@ -73,10 +73,18 @@ module CacheVersion
   end
 
   # Invalidate and delete all cache directories
+  # Parameters:
+  #   custom_cache_dir - Optional path to additional cache directory (e.g., from custom stage path)
   # Returns: Array of deleted directories
-  def self.invalidate_all_caches
+  def self.invalidate_all_caches(custom_cache_dir = nil)
     root_dir = defined?(ROOT) ? ROOT : File.expand_path(File.join(File.dirname(__FILE__), '../..'))
     deleted = []
+
+    # Clean custom cache directory (e.g., from hookgun with custom stage path)
+    if custom_cache_dir && Dir.exist?(custom_cache_dir)
+      FileUtils.rm_rf(custom_cache_dir)
+      deleted << custom_cache_dir
+    end
 
     # Clean build cache
     build_cache = File.join(root_dir, '.stage', 'build', '_cache')
@@ -117,7 +125,7 @@ module CacheVersion
     if stored_hash.nil?
       logger.call "⚠️  No cache version found - invalidating existing cache"
 
-      deleted = invalidate_all_caches
+      deleted = invalidate_all_caches(cache_dir)
 
       deleted.each do |dir|
         logger.call "   🗑️  Deleted: #{dir.sub(root_dir + '/', '')}"
@@ -125,7 +133,8 @@ module CacheVersion
 
       # Write new cache version to all cache directories after cleaning
       [File.join(root_dir, '.stage', 'build', '_cache'),
-       File.join(root_dir, '.stage', 'serve', '_cache')].each do |dir|
+       File.join(root_dir, '.stage', 'serve', '_cache'),
+       cache_dir].uniq.each do |dir|
         write_cache_version(dir, current_hash)
       end
 
@@ -142,7 +151,7 @@ module CacheVersion
     logger.call "   Old version: #{stored_hash[0..7]}"
     logger.call "   New version: #{current_hash[0..7]}"
 
-    deleted = invalidate_all_caches
+    deleted = invalidate_all_caches(cache_dir)
 
     deleted.each do |dir|
       logger.call "   🗑️  Deleted: #{dir.sub(root_dir + '/', '')}"
@@ -150,7 +159,8 @@ module CacheVersion
 
     # Write new version to all cache directories
     [File.join(root_dir, '.stage', 'build', '_cache'),
-     File.join(root_dir, '.stage', 'serve', '_cache')].each do |dir|
+     File.join(root_dir, '.stage', 'serve', '_cache'),
+     cache_dir].uniq.each do |dir|
       write_cache_version(dir, current_hash)
     end
 
