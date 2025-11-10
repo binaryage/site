@@ -285,6 +285,58 @@ lsof -i :80                 # Check nginx port
 lsof -i :4101               # Check Jekyll ports
 ```
 
+### Manual Workspace Reset
+
+⚠️ **WARNING: This is a DESTRUCTIVE operation that will permanently delete all local changes!**
+
+In rare cases where you need to completely reset your workspace to match remote state (e.g., corrupted git state), use manual git commands instead of an automated task for safety:
+
+**Reset a single site:**
+
+```bash
+cd www                           # Navigate to the site
+git checkout -f web              # Force checkout web branch
+git reset --hard origin/web      # Hard reset to remote state
+git clean -f -f -d              # Remove untracked files
+git pull origin web              # Pull latest changes
+
+# Also reset the shared submodule if needed:
+cd shared
+git checkout -f master
+git reset --hard origin/master
+git clean -f -f -d
+git pull origin master
+```
+
+**Reset all sites** (if you're absolutely sure):
+
+```bash
+# Reset all site submodules using git submodule foreach
+git submodule foreach '
+  echo "Resetting $(basename $PWD)..." &&
+  git checkout -f web &&
+  git reset --hard origin/web &&
+  git clean -f -f -d &&
+  git pull origin web &&
+  if [ -d shared ]; then
+    cd shared &&
+    git checkout -f master &&
+    git reset --hard origin/master &&
+    git clean -f -f -d &&
+    git pull origin master
+  fi
+'
+```
+
+**Less destructive alternatives:**
+
+Before resorting to a full reset, consider these safer options:
+
+- `rake pin` - Fix detached HEAD without losing changes
+- `git reset --hard origin/web` - Reset just one site
+- `git stash` - Save changes temporarily before resetting
+- Manual `git checkout` - Discard changes to specific files only
+
 ## Testing
 
 ### Smoke Tests

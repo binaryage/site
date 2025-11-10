@@ -144,7 +144,6 @@ See [README.md](README.md) for common usage. This section provides additional te
 - `rake status` - Check submodule status (issues only)
 - `rake status verbose=1` - Full status for all submodules
 - `rake pin` - Pin all submodules to latest branch tips
-- `rake reset` - DESTRUCTIVE: Reset workspace to remote state
 - `rake shared:sync` - Sync shared commits across all sites
 - `rake shared:sync from=blog` - Sync from specific site
 - `rake hooks:install` - Install pre-push hooks to all submodules
@@ -263,7 +262,6 @@ rake pin                    # Return to branch tips
 | Task | Purpose | Destructive? | When to use |
 |------|---------|--------------|-------------|
 | `rake pin` | Checkout tracking branches | No | Fix detached HEAD, get to latest branch tip |
-| `rake reset` | Hard reset to remote state | Yes | Discard all local changes |
 | `rake shared:sync` | Sync shared commits across sites | No | After updating shared repository |
 
 **Note:** The pre-push hook and hookgun serve different purposes - they don't replace `rake pin`. The hook prevents bad pushes, hookgun updates remote pointers, but only `rake pin` manages local branch state.

@@ -22,25 +22,6 @@ def init_workspace(sites)
   pin_workspace(sites)
 end
 
-def reset_workspace(sites)
-  sites.each do |slave|
-    Dir.chdir(slave.dir) do
-      sys('git checkout -f web')
-      sys('git reset --hard HEAD^') # be resilient to amends
-      sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-      sys('git pull origin web')
-      if Dir.exist? 'shared'
-        Dir.chdir('shared') do
-          sys('git checkout -f master')
-          sys('git reset --hard HEAD^') # be resilient to amends
-          sys('git clean -f -f -d') # http://stackoverflow.com/questions/9314365/git-clean-is-not-removing-a-submodule-added-to-a-branch-when-switching-branches
-          sys('git pull origin master')
-        end
-      end
-    end
-  end
-end
-
 def prepare_hosts_template(sites)
   io = StringIO.new
   io.puts 'add this section into your /etc/hosts:'
