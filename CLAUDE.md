@@ -17,6 +17,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Why**: macOS's system Bundler is too old and will raise "You must use Bundler 2" otherwise
 - Shell activation eliminates the need for `mise exec --` prefix on every command
 
+**Working with Site Submodules - NEVER use hardcoded lists:**
+- **DO NOT hardcode** site names in scripts, documentation, or code examples
+- **DO NOT use** lists like `www blog totalfinder-web totalspaces-web ...`
+- **DO NOT hardcode** site counts like "12 sites" or "all 12 submodules"
+  - Site count can change over time as sites are added/removed/archived
+  - Use generic language: "multiple sites", "all sites", "each site"
+  - Let dynamic discovery determine the actual count at runtime
+- **Always discover dynamically** using one of these methods:
+  1. **Preferred: `git submodule foreach`** - Iterates over all submodules automatically
+     - Example: `git submodule foreach 'echo "Processing $name..."'`
+     - Works for both bash scripts and documentation examples
+  2. **Alternative: Parse `.gitmodules`** - Extract submodule paths programmatically
+     - Example: `git config --file .gitmodules --get-regexp path | awk '{print $2}'`
+- **Why**: The root repository contains only site submodules (no other types)
+- **Why**: Dynamic discovery ensures code/docs stay in sync when sites are added/removed
+- **Why**: Eliminates maintenance burden of updating hardcoded lists and counts
+
 ---
 
 ## Essential Information
