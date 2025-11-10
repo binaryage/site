@@ -102,7 +102,7 @@ This means:
 **Shared repository contains:**
 - `layouts/` - Jekyll layout files
 - `includes/` - Includes for layouts
-- `css/` - Shared CSS (Stylus preprocessing)
+- `css/` - Shared CSS (plain CSS with modern features, bundled via Lightning CSS)
 - `js/` - Shared JavaScript (concatenated and minified)
 - `img/` - Shared images
 
@@ -253,8 +253,7 @@ For comprehensive documentation including:
 ## Technology Stack
 
 - **Jekyll** - Static site generator
-- **Stylus** - CSS preprocessing
-- **Lightning CSS** - CSS minification
+- **Lightning CSS** - CSS bundling, nesting transformation, and minification
 - **Terser** - JavaScript minification
 - **Playwright** - Browser automation & testing
 - **ODiff** - Visual diff for screenshots
