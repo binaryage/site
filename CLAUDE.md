@@ -33,7 +33,7 @@ The repository contains 12 subdomain sites as git submodules:
 - **Product sites**: totalfinder-web, totalspaces-web, asepsis-web, totalterminal-web, visor
 - **Tool sites**: firequery, firerainbow, firelogger, xrefresh
 
-Each submodule has a `shared` subdirectory (also a git submodule) containing common layouts, includes, CSS (Stylus), and JavaScript (CoffeeScript) resources.
+Each submodule has a `shared` subdirectory (also a git submodule) containing common layouts, includes, CSS (Stylus), and JavaScript (modern ES builds) resources.
 
 ### CRITICAL: Shared Submodule Architecture
 
@@ -343,7 +343,7 @@ totalfinder-web    totalfinder    4103   totalfinder.binaryage.com
 ### Build System (_ruby/lib/build.rb)
 - Uses Jekyll as the static site generator
 - Custom Jekyll plugins in `_ruby/jekyll-plugins/`:
-  - `stylus_converter.rb` - Stylus CSS preprocessing
+  - `css_concatenator.rb` - Stylus entrypoint bundling + Lightning CSS minification
   - `js_combinator.rb` - JavaScript concatenation from .list files
   - `compressor.rb` - Asset compression
   - `pruner.rb`, `reshaper.rb`, `inline_styles.rb`, etc.
@@ -355,7 +355,7 @@ totalfinder-web    totalfinder    4103   totalfinder.binaryage.com
 - Includes: `shared/includes/`
 - Plugins: `../_ruby/jekyll-plugins/` (relative to submodule)
 - CSS: Stylus files in `shared/css/`, main file: `site.styl`
-- JavaScript: CoffeeScript files in `shared/js/`, concatenated via `.list` files (e.g., `code.list`, `changelog.list`)
+- JavaScript: Plain `.js` sources in `shared/js/`, concatenated via `.list` files (e.g., `code.list`, `changelog.list`)
 
 ### Development vs Production
 - Dev mode (`dev: true`): Uses binaryage.org domain, no compression, debug enabled
@@ -396,7 +396,7 @@ There are **two levels** of submodules in this project, each handled differently
 - `_ruby/lib/site.rb` - Site class definition
 - `_ruby/lib/utils.rb` - Utility functions
 - `_ruby/lib/store.rb` - FastSpring store template generation
-- `_ruby/Gemfile` - Ruby dependencies (Jekyll, Stylus, CoffeeScript, compression tools)
+- `_ruby/Gemfile` - Ruby dependencies (Jekyll, Terser, Tilt, HTML helpers)
 - `_node/package.json` - Node dependencies (lightningcss-cli for CSS minification, Playwright for testing, ODiff for visual diffs)
 - `_node/smoke-test.mjs` - Playwright-based smoke test script
 - `_node/screenshot-capture.mjs` - Screenshot capture script for visual testing
@@ -543,7 +543,7 @@ git push origin web
 
 **Technical details:**
 - Hook location: `.git/modules/<site>/hooks/pre-push`
-- Template: `_ruby/lib/hooks/pre-push.template`
+- Template: `_ruby/tasks/hooks/pre-push.template`
 - Only checks `web` branch (deployment branch)
 - Respects standard git `--no-verify` bypass flag
 
